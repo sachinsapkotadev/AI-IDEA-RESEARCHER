@@ -1,8 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import Card from '../../components/Card.astro';
-import StatusBadge from '../../components/StatusBadge.astro';
 ---
 
 <DashboardLayout title="AI Agents — AI Idea Researcher">
@@ -15,55 +13,286 @@ import StatusBadge from '../../components/StatusBadge.astro';
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">AI Agents</h1>
-      <p class="mt-1 text-sm text-body">Monitor and manage your AI research agents.</p>
+      <p class="mt-1 text-sm text-body">Monitor the multi-agent research pipeline.</p>
     </div>
 
-    {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
-      <span class="font-medium">Agent monitoring will be available after the multi-agent backend is implemented.</span> The backend currently handles research without individual agent tracking.
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    {/* Research Run Selector */}
+    <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+      <h2 class="text-base font-semibold text-ink mb-3">Select Research Run</h2>
+      <p class="text-sm text-body mb-4">Choose a completed research run to view its agent pipeline status.</p>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+          <label for="research-select" class="block text-sm font-medium text-ink mb-1.5">Research Run</label>
+          <select id="research-select" class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link">
+            <option value="">Loading research runs...</option>
+          </select>
+        </div>
+        <button id="load-agents-btn" disabled class="inline-flex items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50 disabled:pointer-events-none">
+          Load Agents
+        </button>
+      </div>
     </div>
 
-    {/* Agent Grid — planned agents */}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {[
-        { name: 'Research Agent', type: 'Researcher', desc: 'Searches the web for relevant information on a given topic' },
-        { name: 'Market Analyst', type: 'Analyst', desc: 'Analyzes market size, trends, and competition dynamics' },
-        { name: 'Competitor Analyst', type: 'Analyst', desc: 'Deep-dives into existing solutions and their positioning' },
-        { name: 'Idea Generator', type: 'Generator', desc: 'Synthesizes research findings into actionable startup ideas' },
-        { name: 'Technical Analyst', type: 'Analyst', desc: 'Evaluates technical feasibility and implementation complexity' },
-        { name: 'Report Writer', type: 'Writer', desc: 'Generates structured research reports from collected data' },
-      ].map((agent) => (
-        <Card padding="md">
-          <div class="space-y-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <h3 class="text-sm font-semibold text-ink">{agent.name}</h3>
-                <p class="mt-0.5 text-xs text-mute">{agent.type}</p>
-              </div>
-              <StatusBadge status="coming-soon" label="Planned" />
+    {/* Loading State */}
+    <div id="loading-state" class="hidden rounded-md border border-hairline bg-canvas-elevated p-8">
+      <div class="animate-pulse space-y-4">
+        {Array.from({ length: 5 }).map(() => (
+          <div class="flex items-center gap-4 rounded-sm border border-hairline-soft p-4">
+            <div class="h-10 w-10 rounded-full bg-hairline-soft"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3 w-1/4 rounded bg-hairline-soft"></div>
+              <div class="h-2 w-1/3 rounded bg-hairline-soft"></div>
             </div>
-            <p class="text-xs text-body">{agent.desc}</p>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-hairline-soft pt-3">
-              <div>
-                <p class="text-xs text-mute">Model</p>
-                <p class="text-sm font-medium text-mute">—</p>
-              </div>
-              <div>
-                <p class="text-xs text-mute">Status</p>
-                <p class="text-sm font-medium text-mute">Not active</p>
-              </div>
-              <div>
-                <p class="text-xs text-mute">Last Run</p>
-                <p class="text-sm text-mute">Never</p>
-              </div>
-              <div>
-                <p class="text-xs text-mute">Tokens Used</p>
-                <p class="text-sm text-mute">—</p>
-              </div>
-            </div>
+            <div class="h-3 w-16 rounded bg-hairline-soft"></div>
           </div>
-        </Card>
-      ))}
+        ))}
+      </div>
     </div>
+
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">Unable to load agents</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <button onclick="window.location.reload()" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90">
+        Retry
+      </button>
+    </div>
+
+    {/* Empty State */}
+    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-hairline-soft text-mute">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">No agents to display</h3>
+      <p class="mt-2 max-w-sm text-sm text-body">Select a research run with a completed analysis pipeline to view agent execution details.</p>
+    </div>
+
+    {/* Pipeline Status */}
+    <div id="pipeline-status" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-ink">Pipeline Status</h2>
+        <span id="pipeline-badge" class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"></span>
+      </div>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div>
+          <p class="text-xs text-mute">Completed</p>
+          <p id="pipeline-completed" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+        <div>
+          <p class="text-xs text-mute">Total Agents</p>
+          <p id="pipeline-total" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+        <div>
+          <p class="text-xs text-mute">Current Agent</p>
+          <p id="pipeline-current" class="mt-1 text-sm font-medium text-ink">—</p>
+        </div>
+        <div>
+          <p class="text-xs text-mute">Duration</p>
+          <p id="pipeline-duration" class="mt-1 text-sm font-medium text-ink">—</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Agent Grid */}
+    <div id="agents-grid" class="hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const statusConfig: Record<string, { classes: string; label: string }> = {
+      completed: { classes: 'bg-success-soft text-green-800 border-green-200', label: 'Completed' },
+      running:   { classes: 'bg-link-soft text-blue-800 border-blue-200',     label: 'Running' },
+      pending:   { classes: 'bg-warning-soft text-amber-800 border-amber-200', label: 'Pending' },
+      failed:    { classes: 'bg-red-50 text-red-800 border-red-200',          label: 'Failed' },
+      idle:      { classes: 'bg-hairline-soft text-body border-hairline',      label: 'Idle' },
+    };
+
+    const pipelineStatusConfig: Record<string, { classes: string; label: string }> = {
+      completed: { classes: 'bg-success-soft text-green-800 border-green-200', label: 'Completed' },
+      running:   { classes: 'bg-link-soft text-blue-800 border-blue-200',     label: 'Running' },
+      failed:    { classes: 'bg-red-50 text-red-800 border-red-200',          label: 'Failed' },
+      idle:      { classes: 'bg-hairline-soft text-body border-hairline',      label: 'Idle' },
+    };
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const emptyEl = document.getElementById('empty-state')!;
+    const pipelineStatusEl = document.getElementById('pipeline-status')!;
+    const agentsGridEl = document.getElementById('agents-grid')!;
+    const backendStatusEl = document.getElementById('backend-status')!;
+    const researchSelect = document.getElementById('research-select') as HTMLSelectElement;
+    const loadAgentsBtn = document.getElementById('load-agents-btn') as HTMLButtonElement;
+
+    function showState(state: 'loading' | 'error' | 'empty' | 'grid') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      emptyEl.classList.toggle('hidden', state !== 'empty');
+      pipelineStatusEl.classList.toggle('hidden', state !== 'grid');
+      agentsGridEl.classList.toggle('hidden', state !== 'grid');
+    }
+
+    function showBackendStatus(connected: boolean) {
+      backendStatusEl.classList.remove('hidden');
+      if (connected) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server.';
+      }
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDuration(started?: string | null, completed?: string | null) {
+      if (!started || !completed) return '—';
+      const ms = new Date(completed).getTime() - new Date(started).getTime();
+      const seconds = Math.round(ms / 1000);
+      if (seconds < 60) return `${seconds}s`;
+      return `${Math.round(seconds / 60)}m ${seconds % 60}s`;
+    }
+
+    function formatTokens(tokens: number | null) {
+      if (!tokens) return '—';
+      if (tokens >= 1000) return `${(tokens / 1000).toFixed(1)}k`;
+      return String(tokens);
+    }
+
+    async function loadResearchRuns() {
+      try {
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = data.items || [];
+
+        researchSelect.innerHTML = '';
+        if (items.length === 0) {
+          researchSelect.innerHTML = '<option value="">No research runs found</option>';
+          return;
+        }
+
+        researchSelect.innerHTML = '<option value="">Select a research run...</option>' +
+          items.map((r: any) => `<option value="${r.id}">#${r.id} — ${r.title} (${r.status})</option>`).join('');
+
+        loadAgentsBtn.disabled = false;
+      } catch {
+        researchSelect.innerHTML = '<option value="">Unable to load research runs</option>';
+      }
+    }
+
+    async function loadAgents(researchId: number) {
+      showState('loading');
+
+      try {
+        // Load both pipeline status and agent runs
+        const [statusRes, agentsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/research/${researchId}/analysis-status`, { signal: AbortSignal.timeout(10000) }),
+          fetch(`${API_BASE}/api/research/${researchId}/agents`, { signal: AbortSignal.timeout(10000) }),
+        ]);
+
+        if (!statusRes.ok && !agentsRes.ok) throw new Error('Failed to load agent data');
+
+        const statusData = statusRes.ok ? await statusRes.json() : null;
+        const agentsData = agentsRes.ok ? await agentsRes.json() : null;
+        const agents = agentsData?.agents || [];
+
+        if (agents.length === 0 && !statusData) {
+          showState('empty');
+          return;
+        }
+
+        // Pipeline status
+        if (statusData) {
+          const pc = pipelineStatusConfig[statusData.status] || pipelineStatusConfig.idle;
+          const pipelineBadge = document.getElementById('pipeline-badge')!;
+          pipelineBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full" aria-hidden="true"></span> ${pc.label}`;
+          pipelineBadge.className = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${pc.classes}`;
+
+          document.getElementById('pipeline-completed')!.textContent = `${statusData.completed_agents || 0}`;
+          document.getElementById('pipeline-total')!.textContent = `${statusData.total_agents || 0}`;
+          document.getElementById('pipeline-current')!.textContent = statusData.current_agent || (statusData.status === 'completed' ? 'All done' : '—');
+          document.getElementById('pipeline-duration')!.textContent = formatDuration(statusData.started_at, statusData.completed_at);
+        }
+
+        // Agent cards
+        agentsGridEl.innerHTML = agents.map((agent: any) => {
+          const sc = statusConfig[agent.status] || statusConfig.idle;
+          const duration = formatDuration(agent.started_at, agent.completed_at);
+          const totalTokens = (agent.input_tokens || 0) + (agent.output_tokens || 0);
+
+          return `
+            <div class="rounded-md border border-hairline bg-canvas-elevated p-5 space-y-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="text-sm font-semibold text-ink">${agent.agent_name}</h3>
+                  <p class="mt-0.5 text-xs text-mute">${agent.model || 'Unknown model'}</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${sc.classes}">
+                  <span class="h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
+                  ${sc.label}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-hairline-soft pt-3">
+                <div>
+                  <p class="text-xs text-mute">Duration</p>
+                  <p class="text-sm font-medium text-ink">${duration}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-mute">Tokens</p>
+                  <p class="text-sm font-medium text-ink">${formatTokens(totalTokens)}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-mute">Started</p>
+                  <p class="text-sm text-mute">${agent.started_at ? formatDate(agent.started_at) : '—'}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-mute">Completed</p>
+                  <p class="text-sm text-mute">${agent.completed_at ? formatDate(agent.completed_at) : '—'}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        showState('grid');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : `Failed to load agents: ${msg}`;
+        showState('error');
+      }
+    }
+
+    loadAgentsBtn?.addEventListener('click', () => {
+      const id = parseInt(researchSelect.value, 10);
+      if (id && !isNaN(id)) loadAgents(id);
+    });
+
+    async function init() {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        showBackendStatus(res.ok);
+      } catch {
+        showBackendStatus(false);
+      }
+      await loadResearchRuns();
+    }
+
+    init();
+  </script>
 </DashboardLayout>

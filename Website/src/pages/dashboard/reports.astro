@@ -1,7 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import EmptyState from '../../components/EmptyState.astro';
 ---
 
 <DashboardLayout title="Reports — AI Idea Researcher">
@@ -14,35 +13,347 @@ import EmptyState from '../../components/EmptyState.astro';
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">Reports</h1>
-      <p class="mt-1 text-sm text-body">Generated research reports and analysis documents.</p>
+      <p class="mt-1 text-sm text-body">Generated research reports from completed research runs.</p>
     </div>
 
-    {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
-      <span class="font-medium">No reports available yet.</span> Reports will be generated automatically when research runs complete and the report backend is connected.
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    {/* Loading State */}
+    <div id="loading-state" class="rounded-md border border-hairline bg-canvas-elevated">
+      <div class="animate-pulse">
+        <div class="border-b border-hairline-soft px-4 py-3">
+          <div class="flex gap-4">
+            <div class="h-3 w-1/3 rounded bg-hairline-soft"></div>
+            <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+            <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+          </div>
+        </div>
+        {Array.from({ length: 3 }).map(() => (
+          <div class="border-b border-hairline-soft px-4 py-3 last:border-b-0">
+            <div class="flex gap-4">
+              <div class="h-3 w-2/5 rounded bg-hairline-soft"></div>
+              <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+              <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">Unable to load reports</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <button onclick="window.location.reload()" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90">
+        Retry
+      </button>
     </div>
 
     {/* Empty State */}
-    <EmptyState
-      icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-      title="No reports yet"
-      description="Reports will be generated from completed research runs when the report-generation backend is connected."
-    />
-
-    {/* Future features preview */}
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Auto-generation</p>
-        <p class="mt-1 text-xs text-faint">Reports created from research results</p>
+    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-hairline-soft text-mute">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
       </div>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">GitHub push</p>
-        <p class="mt-1 text-xs text-faint">Push reports to your repository</p>
-      </div>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">PDF export</p>
-        <p class="mt-1 text-xs text-faint">Download reports as PDF</p>
-      </div>
+      <h3 class="text-lg font-semibold text-ink">No reports yet</h3>
+      <p class="mt-2 max-w-sm text-sm text-body">Reports are generated from completed research runs. Complete a research run and generate a report to see it here.</p>
+      <a href="/dashboard/research" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+        Start Research
+      </a>
     </div>
+
+    {/* Reports Table */}
+    <div id="reports-table" class="hidden rounded-md border border-hairline bg-canvas-elevated overflow-x-auto">
+      <table class="w-full text-sm" aria-label="Research reports">
+        <thead>
+          <tr class="border-b border-hairline text-left">
+            <th scope="col" class="pb-3 pr-4 pl-4 font-medium text-mute">Topic</th>
+            <th scope="col" class="pb-3 pr-4 font-medium text-mute">Status</th>
+            <th scope="col" class="hidden pb-3 pr-4 font-medium text-mute sm:table-cell">Created</th>
+            <th scope="col" class="pb-3 pr-4 font-medium text-mute text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reports-tbody"></tbody>
+      </table>
+    </div>
+
+    {/* Report Viewer (hidden by default) */}
+    <div id="report-viewer" class="hidden rounded-md border border-hairline bg-canvas-elevated">
+      <div class="flex items-center justify-between border-b border-hairline px-6 py-4">
+        <div class="flex items-center gap-3">
+          <button id="back-to-list" class="inline-flex items-center gap-1.5 text-sm text-body no-underline hover:text-ink">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+          <h2 id="report-title" class="text-base font-semibold text-ink"></h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="copy-report-btn" class="inline-flex items-center gap-1.5 rounded-sm border border-hairline bg-canvas-elevated px-3 py-1.5 text-xs font-medium text-body transition-colors hover:bg-hairline-soft">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <div id="report-content" class="prose-container p-6"></div>
+    </div>
+
+    {/* Toast */}
+    <div id="toast" class="hidden fixed bottom-4 right-4 z-50 rounded-md border px-4 py-3 text-sm shadow-lg" role="status" aria-live="polite"></div>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const emptyEl = document.getElementById('empty-state')!;
+    const tableEl = document.getElementById('reports-table')!;
+    const tbodyEl = document.getElementById('reports-tbody')!;
+    const backendStatusEl = document.getElementById('backend-status')!;
+    const viewerEl = document.getElementById('report-viewer')!;
+    const reportContentEl = document.getElementById('report-content')!;
+    const reportTitleEl = document.getElementById('report-title')!;
+    const backToListBtn = document.getElementById('back-to-list')!;
+    const copyReportBtn = document.getElementById('copy-report-btn')!;
+
+    let currentReportContent = '';
+
+    function showState(state: 'loading' | 'error' | 'empty' | 'table') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      emptyEl.classList.toggle('hidden', state !== 'empty');
+      tableEl.classList.toggle('hidden', state !== 'table');
+      viewerEl.classList.add('hidden');
+    }
+
+    function showBackendStatus(connected: boolean) {
+      backendStatusEl.classList.remove('hidden');
+      if (connected) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server.';
+      }
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showToast(message: string, type: 'success' | 'error') {
+      const toast = document.getElementById('toast')!;
+      toast.className = `fixed bottom-4 right-4 z-50 rounded-md border px-4 py-3 text-sm shadow-lg ${type === 'success' ? 'border-green-200 bg-success-soft text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`;
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    async function loadReports() {
+      showState('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const items = data.items || [];
+
+        // Show completed research runs (reports are per-research-run)
+        const completed = items.filter((r: any) => r.status === 'completed');
+
+        if (completed.length === 0) {
+          showState('empty');
+          return;
+        }
+
+        tbodyEl.innerHTML = completed.map((r: any) => `
+          <tr class="border-b border-hairline-soft last:border-0 hover:bg-hairline-soft/50">
+            <td class="py-3 pr-4 pl-4">
+              <span class="font-medium text-ink">${escapeHtml(r.topic)}</span>
+            </td>
+            <td class="py-3 pr-4">
+              <span class="inline-flex items-center gap-1.5 rounded-full border bg-success-soft text-green-800 border-green-200 px-2.5 py-0.5 text-xs font-medium">
+                <span class="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true"></span>
+                Completed
+              </span>
+            </td>
+            <td class="hidden py-3 pr-4 text-mute sm:table-cell">${formatDate(r.created_at)}</td>
+            <td class="py-3 pr-4 text-right space-x-3">
+              <button class="view-report-btn text-sm text-link font-medium no-underline hover:underline" data-id="${r.id}" data-topic="${escapeHtml(r.topic)}">
+                View Report
+              </button>
+              <button class="generate-report-btn text-sm text-body font-medium no-underline hover:underline" data-id="${r.id}">
+                Generate
+              </button>
+            </td>
+          </tr>
+        `).join('');
+
+        showState('table');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : `Failed to load reports: ${msg}`;
+        showState('error');
+      }
+    }
+
+    async function viewReport(id: number, topic: string) {
+      reportTitleEl.textContent = topic;
+      reportContentEl.innerHTML = '<div class="flex justify-center py-8"><div class="h-6 w-6 animate-spin rounded-full border-2 border-hairline border-t-link"></div></div>';
+      tableEl.classList.add('hidden');
+      viewerEl.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${id}/report`, { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) {
+          if (res.status === 404) {
+            reportContentEl.innerHTML = '<p class="text-sm text-body py-8 text-center">No report has been generated for this research run yet. Click "Generate" to create one.</p>';
+            return;
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        currentReportContent = data.content || '';
+
+        if (!currentReportContent) {
+          reportContentEl.innerHTML = '<p class="text-sm text-body py-8 text-center">Report content is empty.</p>';
+          return;
+        }
+
+        // Render markdown safely (escape HTML, then convert basic markdown)
+        reportContentEl.innerHTML = renderMarkdown(currentReportContent);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to load report';
+        reportContentEl.innerHTML = `<p class="text-sm text-error py-8 text-center">${escapeHtml(msg)}</p>`;
+      }
+    }
+
+    function renderMarkdown(md: string): string {
+      // Simple safe markdown renderer
+      // Escapes HTML first, then converts basic markdown patterns
+      let html = escapeHtml(md);
+
+      // Headers
+      html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold text-ink mt-6 mb-3">$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-ink mt-8 mb-4">$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold text-ink mt-8 mb-4">$1</h1>');
+
+      // Bold and italic
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      // Code blocks
+      html = html.replace(/```[\s\S]*?```/g, (match) => {
+        const code = match.slice(3, -3);
+        return `<pre class="bg-ink text-canvas-elevated rounded-lg p-4 my-4 overflow-x-auto text-sm"><code>${code}</code></pre>`;
+      });
+
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code class="bg-hairline-soft px-1.5 py-0.5 rounded text-sm">$1</code>');
+
+      // Lists
+      html = html.replace(/^- (.+)$/gm, '<li class="ml-4 mb-1 text-sm text-body list-disc">$1</li>');
+      html = html.replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 mb-1 text-sm text-body list-decimal">$2</li>');
+
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-link no-underline hover:underline">$1</a>');
+
+      // Paragraphs (double newline)
+      html = html.replace(/\n\n/g, '</p><p class="text-sm text-body leading-relaxed mb-4">');
+
+      // Single newlines to <br>
+      html = html.replace(/\n/g, '<br>');
+
+      // Wrap in paragraph
+      html = `<p class="text-sm text-body leading-relaxed mb-4">${html}</p>`;
+
+      return html;
+    }
+
+    async function generateReport(id: number) {
+      showToast('Generating report...', 'success');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${id}/report`, {
+          method: 'POST',
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const msg = data.detail?.message || data.detail || `Request failed (${res.status})`;
+          throw new Error(msg);
+        }
+
+        showToast('Report generated successfully.', 'success');
+        // Reload the table
+        await loadReports();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to generate report';
+        showToast(msg, 'error');
+      }
+    }
+
+    // Event delegation
+    tbodyEl?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('view-report-btn')) {
+        const id = parseInt(target.getAttribute('data-id') || '0', 10);
+        const topic = target.getAttribute('data-topic') || '';
+        viewReport(id, topic);
+      }
+      if (target.classList.contains('generate-report-btn')) {
+        const id = parseInt(target.getAttribute('data-id') || '0', 10);
+        generateReport(id);
+      }
+    });
+
+    backToListBtn?.addEventListener('click', () => {
+      viewerEl.classList.add('hidden');
+      tableEl.classList.remove('hidden');
+    });
+
+    copyReportBtn?.addEventListener('click', async () => {
+      if (currentReportContent) {
+        try {
+          await navigator.clipboard.writeText(currentReportContent);
+          showToast('Report copied to clipboard.', 'success');
+        } catch {
+          showToast('Failed to copy.', 'error');
+        }
+      }
+    });
+
+    async function init() {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        showBackendStatus(res.ok);
+      } catch {
+        showBackendStatus(false);
+      }
+      await loadReports();
+    }
+
+    init();
+  </script>
 </DashboardLayout>

@@ -604,6 +604,7 @@ class TestAgentRunPersistence:
                 "source_references": [],
             }),
             usage=MagicMock(input_tokens=10, output_tokens=20),
+            key_slot="00",
         ))
 
         agent = MarketAnalyst(provider=mock_provider)
@@ -773,6 +774,7 @@ class TestTokenUsagePersistence:
                 "source_references": [],
             }),
             usage=MagicMock(input_tokens=1234, output_tokens=5678),
+            key_slot="00",
         ))
 
         agent = MarketAnalyst(provider=mock_provider)

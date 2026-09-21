@@ -1,8 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import Card from '../../components/Card.astro';
-import StatusBadge from '../../components/StatusBadge.astro';
 ---
 
 <DashboardLayout title="GitHub — AI Idea Researcher">
@@ -15,47 +13,321 @@ import StatusBadge from '../../components/StatusBadge.astro';
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">GitHub</h1>
-      <p class="mt-1 text-sm text-body">Manage your GitHub integration for pushing research reports.</p>
+      <p class="mt-1 text-sm text-body">Publish research reports to GitHub review branches.</p>
     </div>
 
-    {/* Status Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800" role="status">
-      <span class="font-medium">GitHub integration is not connected yet.</span> Connect a repository to enable automatic report syncing.
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    {/* Important Notice */}
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
+      <span class="font-medium">Research reports are published to review branches.</span> Main is not automatically merged. Human review is required before merging.
     </div>
 
     {/* Connection Status */}
-    <Card padding="md">
-      <div class="flex items-center gap-4">
-        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
-          <svg class="h-5 w-5 text-ink" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-3">
-            <h3 class="text-sm font-semibold text-ink">GitHub Connection</h3>
-            <StatusBadge status="not-connected" />
+    <div id="loading-state" class="rounded-md border border-hairline bg-canvas-elevated p-6">
+      <div class="animate-pulse space-y-4">
+        <div class="flex items-center gap-4">
+          <div class="h-10 w-10 rounded-full bg-hairline-soft"></div>
+          <div class="space-y-2">
+            <div class="h-3 w-1/4 rounded bg-hairline-soft"></div>
+            <div class="h-2 w-1/3 rounded bg-hairline-soft"></div>
           </div>
-          <p class="mt-1 text-xs text-body">
-            Connect a GitHub repository to push research reports.
-          </p>
         </div>
       </div>
-    </Card>
+    </div>
 
-    {/* Repository Info */}
-    <Card padding="md">
-      <h3 class="text-sm font-semibold text-ink mb-3">Repository</h3>
-      <p class="text-sm text-mute">No repository configured. Connect a GitHub repository to start syncing reports.</p>
-    </Card>
-
-    {/* Recent Commits */}
-    <section>
-      <h3 class="text-sm font-semibold text-ink mb-4">Recent Commits</h3>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-8 text-center">
-        <p class="text-sm text-mute">No commits yet.</p>
-        <p class="mt-1 text-xs text-faint">Commits will appear here once reports are pushed to GitHub.</p>
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </div>
-    </section>
+      <h3 class="text-lg font-semibold text-ink">Unable to load GitHub status</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <button onclick="window.location.reload()" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90">
+        Retry
+      </button>
+    </div>
+
+    {/* Content */}
+    <div id="content" class="hidden space-y-6">
+      {/* Connection Card */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <div class="flex items-center gap-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
+            <svg class="h-5 w-5 text-ink" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-3">
+              <h3 class="text-sm font-semibold text-ink">GitHub Connection</h3>
+              <span id="github-badge" class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-hairline-soft text-body border-hairline">
+                <span class="h-1.5 w-1.5 rounded-full bg-mute" aria-hidden="true"></span>
+                Checking...
+              </span>
+            </div>
+            <p id="github-detail" class="mt-1 text-xs text-body">Verifying GitHub integration...</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Repository Info */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h3 class="text-sm font-semibold text-ink mb-3">Repository</h3>
+        <p id="repo-info" class="text-sm text-body">Checking repository status...</p>
+      </div>
+
+      {/* Published Reports */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h3 class="text-sm font-semibold text-ink mb-4">Published Reports</h3>
+        <div id="publications-list" class="space-y-3">
+          <div class="animate-pulse space-y-3">
+            <div class="h-12 rounded bg-hairline-soft"></div>
+            <div class="h-12 rounded bg-hairline-soft"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Publish from Research */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h3 class="text-sm font-semibold text-ink mb-3">Publish Report to GitHub</h3>
+        <p class="text-sm text-body mb-4">Select a completed research run with a generated report to publish to a GitHub branch.</p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div class="flex-1">
+            <label for="publish-select" class="block text-sm font-medium text-ink mb-1.5">Research Run</label>
+            <select id="publish-select" class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link">
+              <option value="">Loading research runs...</option>
+            </select>
+          </div>
+          <button id="publish-btn" disabled class="inline-flex items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50 disabled:pointer-events-none">
+            Publish to GitHub
+          </button>
+        </div>
+        <div id="publish-message" class="mt-3 text-sm hidden" role="status"></div>
+      </div>
+    </div>
+
+    {/* Toast */}
+    <div id="toast" class="hidden fixed bottom-4 right-4 z-50 rounded-md border px-4 py-3 text-sm shadow-lg" role="status" aria-live="polite"></div>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const contentEl = document.getElementById('content')!;
+    const backendStatusEl = document.getElementById('backend-status')!;
+
+    function showState(state: 'loading' | 'error' | 'content') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      contentEl.classList.toggle('hidden', state !== 'content');
+    }
+
+    function showBackendStatus(connected: boolean) {
+      backendStatusEl.classList.remove('hidden');
+      if (connected) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server.';
+      }
+    }
+
+    function showToast(message: string, type: 'success' | 'error') {
+      const toast = document.getElementById('toast')!;
+      toast.className = `fixed bottom-4 right-4 z-50 rounded-md border px-4 py-3 text-sm shadow-lg ${type === 'success' ? 'border-green-200 bg-success-soft text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`;
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 4000);
+    }
+
+    async function loadGitHubStatus() {
+      showState('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/health/github`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        const badge = document.getElementById('github-badge')!;
+        const detail = document.getElementById('github-detail')!;
+        const repoInfo = document.getElementById('repo-info')!;
+
+        if (data.configured) {
+          badge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-success-soft text-green-800 border-green-200';
+          badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true"></span> Connected';
+          detail.textContent = 'GitHub integration is configured and ready.';
+          detail.className = 'mt-1 text-xs text-green-700';
+          repoInfo.textContent = 'Repository is configured. Reports can be published to review branches.';
+        } else {
+          badge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-warning-soft text-amber-800 border-amber-200';
+          badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true"></span> Not Configured';
+          detail.textContent = 'Set GITHUB_TOKEN in the backend environment to enable GitHub integration.';
+          detail.className = 'mt-1 text-xs text-amber-700';
+          repoInfo.textContent = 'No repository configured. Set GITHUB_TOKEN and GITHUB_REPO in the backend environment variables.';
+        }
+
+        showState('content');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : `Failed to load GitHub status: ${msg}`;
+        showState('error');
+      }
+    }
+
+    async function loadPublications() {
+      const listEl = document.getElementById('publications-list')!;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = data.items || [];
+
+        // Check GitHub status for completed research runs
+        const completed = items.filter((r: any) => r.status === 'completed');
+        if (completed.length === 0) {
+          listEl.innerHTML = '<p class="text-sm text-mute">No completed research runs to publish.</p>';
+          return;
+        }
+
+        // Load GitHub status for each (limit to avoid overload)
+        const toCheck = completed.slice(0, 10);
+        const results = await Promise.allSettled(
+          toCheck.map((r: any) =>
+            fetch(`${API_BASE}/api/research/${r.id}/github`, { signal: AbortSignal.timeout(5000) })
+              .then(res => res.ok ? res.json() : null)
+              .catch(() => null)
+          )
+        );
+
+        const published = results
+          .map((result, i) => {
+            if (result.status === 'fulfilled' && result.value && result.value.status !== 'not_published') {
+              return { ...toCheck[i], github: result.value };
+            }
+            return null;
+          })
+          .filter(Boolean);
+
+        if (published.length === 0) {
+          listEl.innerHTML = '<p class="text-sm text-mute">No reports have been published to GitHub yet.</p>';
+          return;
+        }
+
+        listEl.innerHTML = published.map((p: any) => `
+          <div class="flex items-center justify-between rounded-sm border border-hairline-soft px-4 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-ink truncate">${p.topic}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
+                ${p.github.branch ? `<span class="font-mono">Branch: ${p.github.branch}</span>` : ''}
+                ${p.github.repository ? `<span>${p.github.repository}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center gap-2 ml-4">
+              <span class="inline-flex items-center gap-1.5 rounded-full border bg-success-soft text-green-800 border-green-200 px-2 py-0.5 text-xs font-medium">
+                Published
+              </span>
+              ${p.github.branch ? `<a href="https://github.com/${p.github.repository || ''}/tree/${p.github.branch}" target="_blank" rel="noopener noreferrer" class="text-xs text-link no-underline hover:underline">Open ↗</a>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch {
+        listEl.innerHTML = '<p class="text-sm text-mute">Unable to load publications.</p>';
+      }
+    }
+
+    async function loadResearchRuns() {
+      const select = document.getElementById('publish-select') as HTMLSelectElement;
+      const publishBtn = document.getElementById('publish-btn') as HTMLButtonElement;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = data.items || [];
+        const completed = items.filter((r: any) => r.status === 'completed');
+
+        select.innerHTML = '';
+        if (completed.length === 0) {
+          select.innerHTML = '<option value="">No completed research runs</option>';
+          return;
+        }
+
+        select.innerHTML = '<option value="">Select a research run...</option>' +
+          completed.map((r: any) => `<option value="${r.id}">#${r.id} — ${r.topic}</option>`).join('');
+
+        publishBtn.disabled = false;
+      } catch {
+        select.innerHTML = '<option value="">Unable to load research runs</option>';
+      }
+    }
+
+    async function publishToGithub(researchId: number) {
+      const publishBtn = document.getElementById('publish-btn') as HTMLButtonElement;
+      const msgEl = document.getElementById('publish-message')!;
+
+      publishBtn.disabled = true;
+      publishBtn.textContent = 'Publishing...';
+      msgEl.className = 'mt-3 text-sm text-body';
+      msgEl.textContent = 'Publishing report to GitHub...';
+      msgEl.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${researchId}/github`, {
+          method: 'POST',
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const msg = data.detail?.message || data.detail || `Request failed (${res.status})`;
+          throw new Error(msg);
+        }
+
+        const result = await res.json();
+        msgEl.className = 'mt-3 text-sm text-green-800';
+        msgEl.textContent = `Published to branch: ${result.branch || 'research branch'}`;
+        showToast('Report published to GitHub.', 'success');
+
+        // Reload publications
+        await loadPublications();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to publish';
+        msgEl.className = 'mt-3 text-sm text-error';
+        msgEl.textContent = msg;
+        showToast(msg, 'error');
+      } finally {
+        publishBtn.disabled = false;
+        publishBtn.textContent = 'Publish to GitHub';
+      }
+    }
+
+    document.getElementById('publish-btn')?.addEventListener('click', () => {
+      const select = document.getElementById('publish-select') as HTMLSelectElement;
+      const id = parseInt(select.value, 10);
+      if (id && !isNaN(id)) publishToGithub(id);
+    });
+
+    async function init() {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        showBackendStatus(res.ok);
+      } catch {
+        showBackendStatus(false);
+      }
+      await Promise.all([loadGitHubStatus(), loadPublications(), loadResearchRuns()]);
+    }
+
+    init();
+  </script>
 </DashboardLayout>

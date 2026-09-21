@@ -1,7 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import StatusBadge from '../../components/StatusBadge.astro';
 ---
 
 <DashboardLayout title="Models — AI Idea Researcher">
@@ -17,43 +16,216 @@ import StatusBadge from '../../components/StatusBadge.astro';
       <p class="mt-1 text-sm text-body">AI models configured for research and analysis tasks.</p>
     </div>
 
-    {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
-      <span class="font-medium">Model registry not connected.</span> Model health checks and priority routing will be available when the backend exposes model configuration endpoints.
-    </div>
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
 
-    {/* Known models from backend config */}
-    <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
-      <h2 class="text-base font-semibold text-ink mb-4">Configured Providers</h2>
-      <p class="text-sm text-body mb-4">The backend uses the following AI provider via OpenRouter. Models are configured server-side.</p>
-      <div class="space-y-3">
-        <div class="flex items-center gap-3 rounded-sm border border-hairline-soft p-3">
-          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-hairline-soft">
-            <svg class="h-4 w-4 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-medium text-ink">OpenRouter</p>
-              <StatusBadge status="not-connected" label="Server-side" />
-            </div>
-            <p class="mt-0.5 text-xs text-mute">AI provider gateway — models configured server-side via API key</p>
-          </div>
+    {/* Loading State */}
+    <div id="loading-state" class="rounded-md border border-hairline bg-canvas-elevated p-6">
+      <div class="animate-pulse space-y-4">
+        <div class="h-4 w-1/4 rounded bg-hairline-soft"></div>
+        <div class="h-3 w-1/2 rounded bg-hairline-soft"></div>
+        <div class="space-y-3">
+          <div class="h-16 rounded bg-hairline-soft"></div>
+          <div class="h-16 rounded bg-hairline-soft"></div>
         </div>
       </div>
     </div>
 
-    {/* Future features preview */}
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Model health checks</p>
-        <p class="mt-1 text-xs text-faint">Monitor model availability and latency</p>
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </div>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Priority routing</p>
-        <p class="mt-1 text-xs text-faint">Configure model selection and fallbacks</p>
+      <h3 class="text-lg font-semibold text-ink">Unable to load models</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <button onclick="window.location.reload()" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90">
+        Retry
+      </button>
+    </div>
+
+    {/* Content */}
+    <div id="content" class="hidden space-y-6">
+      {/* Provider */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <div class="flex items-center gap-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
+            <svg class="h-5 w-5 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-3">
+              <h3 class="text-sm font-semibold text-ink">OpenRouter</h3>
+              <span id="provider-status" class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-hairline-soft text-body border-hairline">
+                <span class="h-1.5 w-1.5 rounded-full bg-mute" aria-hidden="true"></span>
+                Checking...
+              </span>
+            </div>
+            <p class="mt-0.5 text-xs text-mute">AI provider gateway — models configured server-side</p>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4 border-t border-hairline-soft pt-4">
+          <div>
+            <p class="text-xs text-mute">Configured Key Slots</p>
+            <p id="key-slots" class="mt-1 text-lg font-semibold text-ink">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-mute">Available Key Slots</p>
+            <p id="available-slots" class="mt-1 text-lg font-semibold text-ink">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-mute">Default Model</p>
+            <p id="default-model" class="mt-1 text-sm font-medium text-ink">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-mute">Provider Status</p>
+            <p id="provider-detail" class="mt-1 text-sm font-medium text-ink">—</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Configured Models */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-4">Agent Models</h2>
+        <p class="text-sm text-body mb-4">Models assigned to each agent in the research pipeline.</p>
+        <div id="models-list" class="space-y-3"></div>
+      </div>
+
+      {/* Key Pool (safe metadata only) */}
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-4">API Key Pool</h2>
+        <p class="text-sm text-body mb-4">Key slot status — secrets are never exposed to the browser.</p>
+        <div id="key-pool" class="space-y-2"></div>
+        <div class="mt-4 rounded-md border border-hairline-soft bg-hairline-soft/50 p-3">
+          <p class="text-xs text-mute">API key values are stored server-side and never sent to the browser. Only slot numbers and status are displayed.</p>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const contentEl = document.getElementById('content')!;
+    const backendStatusEl = document.getElementById('backend-status')!;
+
+    function showState(state: 'loading' | 'error' | 'content') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      contentEl.classList.toggle('hidden', state !== 'content');
+    }
+
+    function showBackendStatus(connected: boolean) {
+      backendStatusEl.classList.remove('hidden');
+      if (connected) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server.';
+      }
+    }
+
+    async function loadModels() {
+      showState('loading');
+
+      try {
+        const [statusRes, modelsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/ai/status`, { signal: AbortSignal.timeout(10000) }),
+          fetch(`${API_BASE}/api/ai/models`, { signal: AbortSignal.timeout(10000) }),
+        ]);
+
+        if (!statusRes.ok && !modelsRes.ok) throw new Error('Failed to load model data');
+
+        const status = statusRes.ok ? await statusRes.json() : null;
+        const models = modelsRes.ok ? await modelsRes.json() : null;
+
+        if (status) {
+          // Provider status
+          const statusBadge = document.getElementById('provider-status')!;
+          if (status.status === 'ok') {
+            statusBadge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-success-soft text-green-800 border-green-200';
+            statusBadge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true"></span> Active';
+          } else {
+            statusBadge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-warning-soft text-amber-800 border-amber-200';
+            statusBadge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true"></span> Not Configured';
+          }
+
+          document.getElementById('key-slots')!.textContent = String(status.configured_key_slots ?? 0);
+          document.getElementById('available-slots')!.textContent = String(status.available_key_slots ?? 0);
+          document.getElementById('default-model')!.textContent = status.default_model || 'Not configured';
+          document.getElementById('provider-detail')!.textContent = status.status === 'ok' ? 'Connected' : 'Not configured';
+
+          // Key pool visualization (safe metadata only)
+          const keyPoolEl = document.getElementById('key-pool')!;
+          const configured = status.configured_key_slots || 0;
+          const available = status.available_key_slots || 0;
+          const rateLimited = configured - available;
+
+          if (configured === 0) {
+            keyPoolEl.innerHTML = '<p class="text-sm text-mute">No API keys configured.</p>';
+          } else {
+            let html = '';
+            for (let i = 0; i < configured; i++) {
+              const isAvailable = i < available;
+              html += `
+                <div class="flex items-center justify-between rounded-sm border border-hairline-soft px-3 py-2">
+                  <span class="text-sm text-ink font-mono">Slot ${String(i).padStart(2, '0')}</span>
+                  <span class="inline-flex items-center gap-1.5 text-xs font-medium ${isAvailable ? 'text-green-800' : 'text-amber-800'}">
+                    <span class="h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-green-500' : 'bg-amber-500'}" aria-hidden="true"></span>
+                    ${isAvailable ? 'Available' : 'In Use'}
+                  </span>
+                </div>
+              `;
+            }
+            keyPoolEl.innerHTML = html;
+          }
+        }
+
+        if (models) {
+          const modelsListEl = document.getElementById('models-list')!;
+          const modelEntries = Object.entries(models.models || {});
+
+          if (modelEntries.length === 0) {
+            modelsListEl.innerHTML = '<p class="text-sm text-mute">No agent models configured.</p>';
+          } else {
+            modelsListEl.innerHTML = modelEntries.map(([agent, model]) => `
+              <div class="flex items-center justify-between rounded-sm border border-hairline-soft px-3 py-3">
+                <div>
+                  <p class="text-sm font-medium text-ink">${agent}</p>
+                  <p class="text-xs text-mute">Agent</p>
+                </div>
+                <span class="text-sm font-mono text-body">${model}</span>
+              </div>
+            `).join('');
+          }
+        }
+
+        showState('content');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : `Failed to load models: ${msg}`;
+        showState('error');
+      }
+    }
+
+    async function init() {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        showBackendStatus(res.ok);
+      } catch {
+        showBackendStatus(false);
+      }
+      await loadModels();
+    }
+
+    init();
+  </script>
 </DashboardLayout>

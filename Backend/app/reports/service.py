@@ -183,6 +183,6 @@ class ReportService:
         # Normalize and verify path stays within reports_dir
         normalized = os.path.normpath(path)
         reports_normalized = os.path.normpath(reports_dir)
-        if not normalized.startswith(reviews_normalized if False else reports_normalized):
+        if not normalized.startswith(reports_normalized):
             raise ReportGenerationError("Report path escape detected.")
         return normalized

@@ -1,0 +1,251 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+---
+
+<DashboardLayout title="Idea Detail — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Ideas', href: '/dashboard/ideas' },
+      { label: 'Detail' },
+    ]} />
+
+    {/* Back link */}
+    <a href="/dashboard/ideas" class="inline-flex items-center gap-1.5 text-sm text-body no-underline hover:text-ink">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Ideas
+    </a>
+
+    {/* Loading State */}
+    <div id="loading-state" class="flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+      <p class="text-sm text-body">Loading idea details...</p>
+    </div>
+
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">Idea not found</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <a href="/dashboard/ideas" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+        Back to Ideas
+      </a>
+    </div>
+
+    {/* Content */}
+    <div id="content" class="hidden space-y-6">
+      {/* Header */}
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+          <h1 id="idea-title" class="text-2xl font-semibold text-ink"></h1>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <span id="status-badge" class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"></span>
+            <span id="idea-date" class="text-sm text-mute"></span>
+            <span id="idea-research" class="text-sm text-mute"></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div class="border-b border-hairline" role="tablist">
+        <div class="flex gap-0 overflow-x-auto">
+          <button role="tab" aria-selected="true" data-tab="overview" class="tab-btn whitespace-nowrap border-b-2 border-link px-4 py-2.5 text-sm font-medium text-ink">Overview</button>
+          <button role="tab" aria-selected="false" data-tab="market" class="tab-btn whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-mute hover:text-ink">Market Analysis</button>
+          <button role="tab" aria-selected="false" data-tab="technical" class="tab-btn whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-mute hover:text-ink">Technical</button>
+          <button role="tab" aria-selected="false" data-tab="validation" class="tab-btn whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-mute hover:text-ink">Validation</button>
+        </div>
+      </div>
+
+      {/* Tab: Overview */}
+      <div id="tab-overview" class="tab-content space-y-6">
+        {/* Problem */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Problem</h2>
+          <p id="idea-problem" class="text-sm text-body leading-relaxed"></p>
+        </div>
+
+        {/* Target Users */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Target Users</h2>
+          <p id="idea-target-users" class="text-sm text-body leading-relaxed"></p>
+        </div>
+
+        {/* Solution */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Solution</h2>
+          <p id="idea-solution" class="text-sm text-body leading-relaxed"></p>
+        </div>
+
+        {/* MVP */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">MVP</h2>
+          <p id="idea-mvp" class="text-sm text-body leading-relaxed"></p>
+        </div>
+      </div>
+
+      {/* Tab: Market Analysis */}
+      <div id="tab-market" class="tab-content hidden space-y-6">
+        {/* Monetization */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Monetization</h2>
+          <p id="idea-monetization" class="text-sm text-body leading-relaxed"></p>
+        </div>
+
+        {/* Differentiation */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Differentiation</h2>
+          <p id="idea-differentiation" class="text-sm text-body leading-relaxed"></p>
+        </div>
+      </div>
+
+      {/* Tab: Technical */}
+      <div id="tab-technical" class="tab-content hidden space-y-6">
+        {/* Technical Complexity */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Technical Complexity</h2>
+          <p id="idea-complexity" class="text-sm text-body leading-relaxed"></p>
+        </div>
+
+        {/* Risks */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Risks</h2>
+          <p id="idea-risks" class="text-sm text-body leading-relaxed"></p>
+        </div>
+      </div>
+
+      {/* Tab: Validation */}
+      <div id="tab-validation" class="tab-content hidden space-y-6">
+        {/* Validation Plan */}
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+          <h2 class="text-base font-semibold text-ink mb-3">Validation Plan</h2>
+          <p id="idea-validation" class="text-sm text-body leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const params = new URLSearchParams(window.location.search);
+    const ideaId = parseInt(params.get('id') || '0', 10);
+
+    const statusConfig: Record<string, { classes: string; label: string }> = {
+      draft:        { classes: 'bg-hairline-soft text-body border-hairline',      label: 'Draft' },
+      validated:    { classes: 'bg-success-soft text-green-800 border-green-200',  label: 'Validated' },
+      in_progress:  { classes: 'bg-link-soft text-blue-800 border-blue-200',       label: 'In Progress' },
+      archived:     { classes: 'bg-hairline-soft text-mute border-hairline',       label: 'Archived' },
+    };
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const contentEl = document.getElementById('content')!;
+
+    function showState(state: 'loading' | 'error' | 'content') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      contentEl.classList.toggle('hidden', state !== 'content');
+    }
+
+    function showError(msg: string) {
+      errorMsgEl.textContent = msg;
+      showState('error');
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach((b) => {
+          b.classList.remove('border-link', 'text-ink');
+          b.classList.add('border-transparent', 'text-mute');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('border-link', 'text-ink');
+        btn.classList.remove('border-transparent', 'text-mute');
+        btn.setAttribute('aria-selected', 'true');
+
+        // Show/hide tab content
+        const tabId = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach((tc) => tc.classList.add('hidden'));
+        document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
+      });
+    });
+
+    async function loadIdea() {
+      if (!ideaId || isNaN(ideaId)) {
+        showError('Invalid idea ID. Please navigate from the ideas list.');
+        return;
+      }
+
+      showState('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ideas/${ideaId}`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) {
+          if (res.status === 404) {
+            showError('This idea was not found. It may have been deleted or the ID is incorrect.');
+            return;
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const idea = await res.json();
+
+        // Fill header
+        document.getElementById('idea-title')!.textContent = idea.title;
+
+        const badge = document.getElementById('status-badge')!;
+        const config = statusConfig[idea.status] || statusConfig.draft;
+        badge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full" aria-hidden="true"></span> ${config.label}`;
+        badge.className = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${config.classes}`;
+
+        document.getElementById('idea-date')!.textContent = idea.created_at ? formatDate(idea.created_at) : '';
+        document.getElementById('idea-research')!.textContent = idea.research_run_id ? `Research #${idea.research_run_id}` : '';
+
+        // Fill content sections
+        const setField = (id: string, value: string | null | undefined) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = value || 'Not specified.';
+        };
+
+        setField('idea-problem', idea.problem);
+        setField('idea-target-users', idea.target_users);
+        setField('idea-solution', idea.solution);
+        setField('idea-mvp', idea.mvp);
+        setField('idea-monetization', idea.monetization);
+        setField('idea-differentiation', idea.differentiation);
+        setField('idea-complexity', idea.technical_complexity);
+        setField('idea-risks', idea.risks);
+        setField('idea-validation', idea.validation_plan);
+
+        showState('content');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to load idea';
+        showError(msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : msg);
+      }
+    }
+
+    loadIdea();
+  </script>
+</DashboardLayout>
