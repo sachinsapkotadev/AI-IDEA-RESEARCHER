@@ -325,6 +325,223 @@ pytest -v
 
 ---
 
+## Free Deployment Guide
+
+### Deploy Backend on Render (Free Tier)
+
+Render offers a free tier for web services with PostgreSQL.
+
+#### Step 1: Create PostgreSQL Database
+
+1. Go to [render.com](https://render.com) → Sign up / Log in
+2. Click **New** → **PostgreSQL**
+3. Settings:
+   - **Name:** `ai-idea-researcher-db`
+   - **Database:** `ai_idea_researcher`
+   - **User:** `ai_researcher`
+   - **Plan:** Free
+4. Click **Create Database**
+5. Copy the **Internal Database URL** (format: `postgresql://user:password@host:port/dbname`)
+
+#### Step 2: Deploy Web Service
+
+1. Click **New** → **Web Service**
+2. Connect your GitHub repo: `sachinsapkotadev/AI-IDEA-RESEARCHER`
+3. Settings:
+   - **Name:** `ai-idea-researcher-api`
+   - **Runtime:** Python 3
+   - **Build Command:**
+     ```
+     cd Backend && pip install -r requirements.txt
+     ```
+   - **Start Command:**
+     ```
+     cd Backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+     ```
+   - **Plan:** Free
+4. Add **Environment Variables:**
+
+   | Key | Value |
+   |-----|-------|
+   | `DATABASE_URL` | *(paste Internal Database URL from Step 1)* |
+   | `OPENROUTER_API_KEY` | *(your OpenRouter key)* |
+   | `OPENROUTER_MODEL` | *(your model name)* |
+   | `SEARCH_PROVIDER` | `google` |
+   | `SEARCH_API_KEY` | *(your Google API key)* |
+   | `SEARCH_ENGINE_ID` | *(your Search Engine ID)* |
+   | `CORS_ORIGINS` | `https://your-app.onrender.com,http://localhost:4321` |
+   | `ENVIRONMENT` | `production` |
+
+5. Click **Create Web Service**
+6. Wait for build to finish → your API is live at `https://your-app.onrender.com`
+7. API docs: `https://your-app.onrender.com/docs`
+
+> **Free tier notes:** Render spins down after 15 min inactivity. First request after sleep takes ~30s. Add a cron ping (e.g., UptimeRobot) to keep it awake.
+
+---
+
+### Deploy Website on Vercel (Free Tier)
+
+Vercel offers free hosting for Astro/Next.js sites with automatic deployments.
+
+#### Step 1: Install Vercel CLI (optional)
+
+```bash
+npm i -g vercel
+```
+
+#### Step 2: Deploy
+
+**Option A — CLI:**
+```bash
+cd Website
+vercel --prod
+```
+Follow prompts. Vercel auto-detects Astro.
+
+**Option B — GitHub Integration (recommended):**
+
+1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
+2. Click **Add New** → **Project**
+3. Import `sachinsapkotadev/AI-IDEA-RESEARCHER`
+4. Settings:
+   - **Framework Preset:** Astro
+   - **Root Directory:** `Website`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+5. Add **Environment Variables:**
+
+   | Key | Value |
+   |-----|-------|
+   | `PUBLIC_API_URL` | `https://your-app.onrender.com` |
+   | `NODE_VERSION` | `22` |
+
+6. Click **Deploy**
+7. Your site is live at `https://your-project.vercel.app`
+
+> **Free tier:** 100GB bandwidth/month, automatic HTTPS, preview deployments on every push.
+
+---
+
+### Android App — Auto Build & Publish with GitHub Actions
+
+The Android folder uses GitHub Actions to automatically build APK/AAB on every push to `main` and publish as GitHub Release.
+
+#### Setup GitHub Actions
+
+Create `.github/workflows/android-build.yml` in your repo root:
+
+```yaml
+name: Android Build & Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Android/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x Android/gradlew
+
+      - name: Build Debug APK
+        working-directory: Android
+        run: ./gradlew assembleDebug
+
+      - name: Build Release AAB (if signing configured)
+        working-directory: Android
+        run: ./gradlew bundleRelease
+        continue-on-error: true
+
+      - name: Get version name
+        id: version
+        run: |
+          cd Android
+          VERSION=$(grep 'versionName' app/build.gradle.kts | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-${{ steps.version.outputs.VERSION }}
+          path: Android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Release AAB
+        uses: actions/upload-artifact@v4
+        if: hashFiles('Android/app/build/outputs/bundle/release/app-release.aab') != ''
+        with:
+          name: app-release-${{ steps.version.outputs.VERSION }}
+          path: Android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release v${{ steps.version.outputs.VERSION }}
+          files: |
+            Android/app/build/outputs/apk/debug/app-debug.apk
+            Android/app/build/outputs/bundle/release/app-release.aab
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### How It Works
+
+1. **Push to `main`** (changes in `Android/` folder) → workflow triggers automatically
+2. Builds **debug APK** and **release AAB** (if signing is configured)
+3. Uploads both as **build artifacts**
+4. Creates a **GitHub Release** with the APK/AAB attached
+5. Download APK from the Releases page to install on any Android device
+
+#### Download APK
+
+After push → go to **Releases** page:
+```
+https://github.com/sachinsapkotadev/AI-IDEA-RESEARCHER/releases
+```
+Download `app-debug.apk` → install on Android device.
+
+#### Optional: Auto-sign APK
+
+To publish signed releases to Google Play:
+
+1. Generate keystore:
+   ```bash
+   keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias ai-researcher
+   ```
+2. Encode keystore as base64:
+   ```bash
+   base64 -i release-key.jks | tr -d '\n'
+   ```
+3. Add these **GitHub Secrets** (repo → Settings → Secrets → Actions):
+
+   | Secret | Value |
+   |--------|-------|
+   | `KEYSTORE_BASE64` | *(base64 encoded keystore)* |
+   | `KEYSTORE_PASSWORD` | *(keystore password)* |
+   | `KEY_ALIAS` | `ai-researcher` |
+   | `KEY_PASSWORD` | *(key password)* |
+
+4. Update the workflow to use `signingConfigs` in `app/build.gradle.kts`
+
+---
+
 ## License
 
 Private repository — All rights reserved.
