@@ -13,6 +13,7 @@ Config: .env (OPENROUTER_API_KEY_01 .. _50)
 import os
 import sys
 import asyncio
+import logging
 from itertools import cycle
 from pathlib import Path
 
@@ -62,6 +63,7 @@ async def next_key() -> str | None:
 
 # ── FastAPI app ─────────────────────────────────────────────────────────
 app = FastAPI(title="OpenRouter Key Rotation Proxy", docs_url=None, redoc_url=None)
+logger = logging.getLogger("proxy")
 
 
 @app.get("/health")
@@ -92,7 +94,7 @@ async def proxy(request: Request, path: str):
     key_idx = (list(next_key.__code__.co_freevars).index("key_cycle") if False else 0)
     # Log
     key_num = API_KEYS.index(api_key) + 1 if api_key in API_KEYS else 0
-    print(f"[proxy] {request.method} /{path}  key #{key_num}/{len(API_KEYS)}")
+    logger.info("%s /%s  key #%d/%d", request.method, path, key_num, len(API_KEYS))
 
     # Build upstream URL
     upstream_url = f"{UPSTREAM}/{path}"
@@ -126,7 +128,7 @@ async def proxy(request: Request, path: str):
 
                 # 429 = rate limited, rotate key and retry
                 if resp.status_code == 429 and attempt < MAX_RETRIES - 1:
-                    print(f"[proxy] 429 on key #{key_num}, rotating...")
+                    logger.warning("429 on key #%d, rotating...", key_num)
                     api_key = await next_key()
                     key_num = API_KEYS.index(api_key) + 1 if api_key in API_KEYS else 0
                     headers["authorization"] = f"Bearer {api_key}"
@@ -148,7 +150,7 @@ async def proxy(request: Request, path: str):
                 )
 
             except httpx.RequestError as e:
-                print(f"[proxy] Upstream error: {e}")
+                logger.error("Upstream error: %s", e)
                 if attempt < MAX_RETRIES - 1:
                     await asyncio.sleep(0.2)
                     continue
@@ -162,6 +164,9 @@ async def proxy(request: Request, path: str):
 
 # ── Main ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    from app.core.log_viewer import install_handler
+    install_handler()
+
     print(f"\n  OpenRouter Key Rotation Proxy")
     print(f"  ─────────────────────────────")
     print(f"  Listening:  http://{PROXY_HOST}:{PROXY_PORT}")

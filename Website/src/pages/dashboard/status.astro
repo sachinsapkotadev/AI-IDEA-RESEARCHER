@@ -1,0 +1,234 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+---
+
+<DashboardLayout title="Server Status — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-8">
+    <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Server Status' }]} class="mb-2" />
+
+    <div>
+      <h1 class="text-2xl font-semibold text-ink">Server Status</h1>
+      <p class="mt-1 text-sm text-body">Real-time backend health and system metrics.</p>
+    </div>
+
+    {/* Overall Status Banner */}
+    <div id="overall-status" class="rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite">
+      <span class="text-mute">Checking server status...</span>
+    </div>
+
+    {/* Uptime + Environment */}
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-5">
+        <p class="text-sm text-mute">Uptime</p>
+        <p id="stat-uptime" class="mt-1 text-2xl font-semibold text-ink">—</p>
+        <p id="stat-env" class="mt-1 text-xs text-mute">—</p>
+      </div>
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-5">
+        <p class="text-sm text-mute">Database</p>
+        <p id="stat-db" class="mt-1 text-2xl font-semibold text-ink">—</p>
+        <p id="stat-db-detail" class="mt-1 text-xs text-mute">Checking...</p>
+      </div>
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-5">
+        <p class="text-sm text-mute">AI Provider</p>
+        <p id="stat-ai" class="mt-1 text-2xl font-semibold text-ink">—</p>
+        <p id="stat-ai-detail" class="mt-1 text-xs text-mute">Checking...</p>
+      </div>
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-5">
+        <p class="text-sm text-mute">GitHub</p>
+        <p id="stat-github" class="mt-1 text-2xl font-semibold text-ink">—</p>
+        <p id="stat-github-detail" class="mt-1 text-xs text-mute">Checking...</p>
+      </div>
+    </div>
+
+    {/* System Resources */}
+    <section>
+      <h2 class="text-lg font-semibold text-ink mb-4">System Resources</h2>
+      <div id="system-resources" class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-3 w-1/4 rounded bg-hairline-soft"></div>
+          <div class="h-2 w-full rounded-full bg-hairline-soft"></div>
+          <div class="h-3 w-1/3 rounded bg-hairline-soft"></div>
+          <div class="h-2 w-full rounded-full bg-hairline-soft"></div>
+        </div>
+      </div>
+    </section>
+
+    {/* AI Models */}
+    <section>
+      <h2 class="text-lg font-semibold text-ink mb-4">AI Model Assignments</h2>
+      <div class="rounded-md border border-hairline bg-canvas-elevated overflow-x-auto">
+        <table class="w-full text-sm" aria-label="AI model assignments">
+          <thead>
+            <tr class="border-b border-hairline text-left">
+              <th scope="col" class="pb-3 pr-4 pl-4 font-medium text-mute">Agent</th>
+              <th scope="col" class="pb-3 pr-4 font-medium text-mute">Model</th>
+              <th scope="col" class="pb-3 pr-4 font-medium text-mute">Status</th>
+            </tr>
+          </thead>
+          <tbody id="models-tbody">
+            <tr><td colspan="3" class="py-4 pl-4 text-mute">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {/* Deep Research Jobs */}
+    <section>
+      <h2 class="text-lg font-semibold text-ink mb-4">Active Deep Research Jobs</h2>
+      <div id="deep-research-jobs" class="rounded-md border border-hairline bg-canvas-elevated p-6">
+        <p class="text-sm text-mute">Loading...</p>
+      </div>
+    </section>
+
+    {/* Raw Status */}
+    <details class="rounded-md border border-hairline bg-canvas-elevated">
+      <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-ink">Raw Status JSON</summary>
+      <pre id="raw-status" class="overflow-x-auto px-4 pb-4 text-xs text-body font-mono">Loading...</pre>
+    </details>
+  </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const statusEl = document.getElementById('overall-status')!;
+    const uptimeEl = document.getElementById('stat-uptime')!;
+    const envEl = document.getElementById('stat-env')!;
+    const dbEl = document.getElementById('stat-db')!;
+    const dbDetailEl = document.getElementById('stat-db-detail')!;
+    const aiEl = document.getElementById('stat-ai')!;
+    const aiDetailEl = document.getElementById('stat-ai-detail')!;
+    const githubEl = document.getElementById('stat-github')!;
+    const githubDetailEl = document.getElementById('stat-github-detail')!;
+    const systemEl = document.getElementById('system-resources')!;
+    const modelsTbody = document.getElementById('models-tbody')!;
+    const deepJobsEl = document.getElementById('deep-research-jobs')!;
+    const rawStatusEl = document.getElementById('raw-status')!;
+
+    function statusColor(status: string) {
+      if (['ok', 'connected', 'configured', 'online'].includes(status)) return 'text-green-700';
+      if (['not_configured', 'disconnected'].includes(status)) return 'text-amber-700';
+      return 'text-red-700';
+    }
+
+    function statusBadge(status: string) {
+      const colors: Record<string, string> = {
+        ok: 'bg-green-50 text-green-800 border-green-200',
+        connected: 'bg-green-50 text-green-800 border-green-200',
+        configured: 'bg-green-50 text-green-800 border-green-200',
+        not_configured: 'bg-amber-50 text-amber-800 border-amber-200',
+        disconnected: 'bg-red-50 text-red-800 border-red-200',
+        error: 'bg-red-50 text-red-800 border-red-200',
+      };
+      const cls = colors[status] || 'bg-gray-50 text-gray-800 border-gray-200';
+      return `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${cls}">${status}</span>`;
+    }
+
+    function renderBar(label: string, pct: number, used: number, total: number, unit: string) {
+      const color = pct > 80 ? 'bg-red-500' : pct > 60 ? 'bg-amber-500' : 'bg-green-500';
+      return `
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-ink font-medium">${label}</span>
+            <span class="text-mute">${used}${unit} / ${total}${unit} (${pct}%)</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-hairline-soft">
+            <div class="h-2 rounded-full ${color} transition-all duration-500" style="width: ${Math.min(100, pct)}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function refresh() {
+      try {
+        const res = await fetch(`${API_BASE}/api/server-status`, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Overall status
+        statusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        statusEl.innerHTML = `<span class="font-medium">All systems operational</span> — Last checked: ${new Date().toLocaleTimeString()}`;
+
+        // Uptime + env
+        uptimeEl.textContent = data.uptime_human || '—';
+        envEl.textContent = data.environment || '—';
+
+        // Database
+        const dbStatus = data.services?.database?.status || 'unknown';
+        dbEl.textContent = dbStatus;
+        dbEl.className = `mt-1 text-2xl font-semibold ${statusColor(dbStatus)}`;
+        dbDetailEl.textContent = data.services?.database?.error || (dbStatus === 'connected' ? 'All good' : 'Check config');
+
+        // AI
+        const aiStatus = data.services?.ai?.status || 'unknown';
+        aiEl.textContent = aiStatus;
+        aiEl.className = `mt-1 text-2xl font-semibold ${statusColor(aiStatus)}`;
+        aiDetailEl.textContent = `${data.services?.ai?.configured_keys || 0} keys configured`;
+
+        // GitHub
+        const ghStatus = data.services?.github?.status || 'unknown';
+        githubEl.textContent = ghStatus;
+        githubEl.className = `mt-1 text-2xl font-semibold ${statusColor(ghStatus)}`;
+        githubDetailEl.textContent = ghStatus === 'configured' ? 'Token set' : 'Not configured';
+
+        // System resources
+        if (data.system) {
+          systemEl.innerHTML = `
+            <div class="space-y-4">
+              ${renderBar('CPU', data.system.cpu_percent || 0, (data.system.cpu_percent || 0).toFixed(1), 100, '%')}
+              ${renderBar('Memory', data.system.memory_pct || 0, data.system.memory_used_mb || 0, data.system.memory_total_mb || 0, ' MB')}
+              ${renderBar('Disk', data.system.disk_pct || 0, data.system.disk_used_gb || 0, data.system.disk_total_gb || 0, ' GB')}
+            </div>
+          `;
+        } else {
+          systemEl.innerHTML = '<p class="text-sm text-mute">System metrics unavailable (psutil not installed)</p>';
+        }
+
+        // AI Models
+        const models = data.services?.ai?.models || {};
+        if (Object.keys(models).length > 0) {
+          modelsTbody.innerHTML = Object.entries(models).map(([agent, model]) => `
+            <tr class="border-b border-hairline-soft last:border-0">
+              <td class="py-2.5 pr-4 pl-4 font-medium text-ink">${agent}</td>
+              <td class="py-2.5 pr-4 font-mono text-xs text-body">${model}</td>
+              <td class="py-2.5 pr-4">${statusBadge('active')}</td>
+            </tr>
+          `).join('');
+        } else {
+          modelsTbody.innerHTML = '<tr><td colspan="3" class="py-4 pl-4 text-mute">No models configured</td></tr>';
+        }
+
+        // Deep research jobs
+        const jobs = data.deep_research?.jobs || [];
+        if (jobs.length === 0) {
+          deepJobsEl.innerHTML = '<p class="text-sm text-mute">No active deep research jobs.</p>';
+        } else {
+          deepJobsEl.innerHTML = jobs.map((j: any) => `
+            <div class="flex items-center justify-between border-b border-hairline-soft py-3 last:border-0">
+              <div>
+                <p class="text-sm font-medium text-ink">${j.topic}</p>
+                <p class="text-xs text-mute">Iteration ${j.current_iteration}/${j.max_iterations} · ${j.sources_collected} sources</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-24 h-1.5 rounded-full bg-hairline-soft">
+                  <div class="h-1.5 rounded-full bg-link" style="width: ${j.progress_pct}%"></div>
+                </div>
+                ${statusBadge(j.status)}
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Raw JSON
+        rawStatusEl.textContent = JSON.stringify(data, null, 2);
+
+      } catch (err) {
+        statusEl.className = 'rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800';
+        statusEl.innerHTML = '<span class="font-medium">Server unreachable</span> — Backend may be down.';
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 10000); // Poll every 10 seconds
+  </script>
+</DashboardLayout>

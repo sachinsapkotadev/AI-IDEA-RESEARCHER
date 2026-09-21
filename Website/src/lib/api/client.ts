@@ -27,6 +27,10 @@ import type {
   GithubPublicationStatus,
   AiStatusResponse,
   AiModelsResponse,
+  ServerStatusResponse,
+  DeepResearchCreateResponse,
+  DeepResearchJob,
+  DeepResearchListResponse,
 } from './types';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
@@ -298,4 +302,41 @@ export async function getAiStatus(): Promise<AiStatusResponse> {
 
 export async function getAiModels(): Promise<AiModelsResponse> {
   return request<AiModelsResponse>('/api/ai/models');
+}
+
+// ============================================================
+// Server Status
+// ============================================================
+
+export async function getServerStatus(): Promise<ServerStatusResponse> {
+  return request<ServerStatusResponse>('/api/server-status');
+}
+
+// ============================================================
+// Deep Research (12-hour loop)
+// ============================================================
+
+export async function startDeepResearch(
+  topic: string,
+): Promise<DeepResearchCreateResponse> {
+  return request<DeepResearchCreateResponse>('/api/deep-research', {
+    method: 'POST',
+    body: JSON.stringify({ topic }),
+  });
+}
+
+export async function getDeepResearchStatus(
+  jobId: string,
+): Promise<DeepResearchJob> {
+  return request<DeepResearchJob>(`/api/deep-research/${jobId}`);
+}
+
+export async function stopDeepResearch(
+  jobId: string,
+): Promise<{ job_id: string; status: string; message: string }> {
+  return request(`/api/deep-research/${jobId}/stop`, { method: 'POST' });
+}
+
+export async function listDeepResearchJobs(): Promise<DeepResearchListResponse> {
+  return request<DeepResearchListResponse>('/api/deep-research');
 }

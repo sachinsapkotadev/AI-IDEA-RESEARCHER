@@ -15,7 +15,10 @@ from app.api.routes.ideas import router as ideas_router
 from app.api.routes.report import router as report_router
 from app.api.routes.github import router as github_router
 from app.api.routes.ai_status import router as ai_status_router
+from app.api.routes.server_status import router as server_status_router
+from app.api.routes.deep_research import router as deep_research_router
 from app.core.config import get_settings
+from app.core.log_viewer import install_handler, router as logs_router
 from app.schemas.health import RootResponse
 
 import app.database.models  # noqa: F401 — register models with Base.metadata
@@ -28,6 +31,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+# Install the live-log handler so the /logs dashboard receives all output
+install_handler()
 
 
 @asynccontextmanager
@@ -61,6 +67,9 @@ app.include_router(ideas_router)
 app.include_router(report_router)
 app.include_router(github_router)
 app.include_router(ai_status_router)
+app.include_router(server_status_router)
+app.include_router(deep_research_router)
+app.include_router(logs_router, prefix="/logs")
 
 
 @app.get("/", response_model=RootResponse)

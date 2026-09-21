@@ -207,3 +207,61 @@ export interface AiModelsResponse {
 export interface ApiErrorResponse {
   detail?: string | { code: string; message: string };
 }
+
+// ---- Server Status ----
+export interface ServerStatusResponse {
+  status: string;
+  timestamp: string;
+  uptime_seconds: number;
+  uptime_human: string;
+  environment: string;
+  services: {
+    database: { status: string; error: string | null };
+    ai: { status: string; configured_keys: number; models: Record<string, string> };
+    github: { status: string };
+  };
+  system: {
+    cpu_percent: number;
+    memory_total_mb: number;
+    memory_used_mb: number;
+    memory_pct: number;
+    disk_total_gb: number;
+    disk_used_gb: number;
+    disk_pct: number;
+  } | null;
+  deep_research: {
+    active_count: number;
+    jobs: DeepResearchJob[];
+  };
+}
+
+// ---- Deep Research ----
+export interface DeepResearchJob {
+  job_id: string;
+  topic: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'stopped';
+  current_iteration: number;
+  max_iterations: number;
+  started_at: string | null;
+  completed_at: string | null;
+  elapsed_hours: number;
+  sub_queries: string[];
+  iteration_log: Record<string, any>[];
+  final_answer: string | null;
+  error: string | null;
+  sources_collected: number;
+  agents_run: number;
+  progress_pct: number;
+}
+
+export interface DeepResearchCreateResponse {
+  job_id: string;
+  topic: string;
+  status: string;
+  message: string;
+}
+
+export interface DeepResearchListResponse {
+  jobs: DeepResearchJob[];
+  total: number;
+}
