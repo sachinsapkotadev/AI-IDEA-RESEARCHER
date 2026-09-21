@@ -9,56 +9,122 @@ interface Props {
 
 const { title, description } = Astro.props;
 
-const sidebarLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: 'grid' },
-  { href: '/dashboard/research', label: 'Research', icon: 'search' },
-  { href: '/dashboard/ideas', label: 'Ideas', icon: 'lightbulb' },
-  { href: '/dashboard/agents', label: 'Agents', icon: 'cpu' },
-  { href: '/dashboard/reports', label: 'Reports', icon: 'file-text' },
-  { href: '/dashboard/models', label: 'Models', icon: 'layers' },
-  { href: '/dashboard/github', label: 'GitHub', icon: 'github' },
-  { href: '/dashboard/automation', label: 'Automation', icon: 'clock' },
-  { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
+interface SidebarLink {
+  href: string;
+  label: string;
+  section: 'main' | 'system' | 'bottom';
+}
+
+const sidebarLinks: SidebarLink[] = [
+  { href: '/dashboard', label: 'Dashboard', section: 'main' },
+  { href: '/dashboard/research', label: 'Research', section: 'main' },
+  { href: '/dashboard/ideas', label: 'Ideas', section: 'main' },
+  { href: '/dashboard/agents', label: 'Agents', section: 'main' },
+  { href: '/dashboard/reports', label: 'Reports', section: 'main' },
+  { href: '/dashboard/models', label: 'Models', section: 'system' },
+  { href: '/dashboard/github', label: 'GitHub', section: 'system' },
+  { href: '/dashboard/automation', label: 'Automation', section: 'system' },
+  { href: '/dashboard/settings', label: 'Settings', section: 'bottom' },
 ];
 
+const mainLinks = sidebarLinks.filter(l => l.section === 'main');
+const systemLinks = sidebarLinks.filter(l => l.section === 'system');
+const bottomLinks = sidebarLinks.filter(l => l.section === 'bottom');
+
 const currentPath = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === '/dashboard') return currentPath === '/dashboard' || currentPath === '/dashboard/';
+  return currentPath.startsWith(href);
+}
 ---
 
 <BaseHead title={title} description={description}>
+  {/* noindex for dashboard pages */}
+  <meta name="robots" content="noindex, nofollow" />
+
   <div class="flex min-h-screen bg-canvas">
-    {/* Sidebar - desktop */}
+    {/* Sidebar — desktop */}
     <aside class="hidden w-60 flex-shrink-0 border-r border-hairline bg-canvas-elevated lg:flex lg:flex-col">
-      <div class="flex h-16 items-center gap-2 border-b border-hairline px-5">
-        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      {/* Logo */}
+      <div class="flex h-14 items-center gap-2 border-b border-hairline px-5">
+        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline" aria-label="AI Idea Researcher — Home">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
           AI Idea Researcher
         </a>
       </div>
-      <nav class="flex-1 overflow-y-auto px-3 py-4">
-        <ul class="flex flex-col gap-0.5">
-          {sidebarLinks.map((link) => (
+
+      {/* Navigation */}
+      <nav class="flex-1 overflow-y-auto px-3 py-4" aria-label="Dashboard navigation">
+        {/* Main section */}
+        <ul class="flex flex-col gap-0.5" role="list">
+          {mainLinks.map((link) => (
             <li>
               <a
                 href={link.href}
                 class:list={[
-                  'flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-body no-underline transition-colors hover:bg-hairline-soft hover:text-ink',
-                  currentPath === link.href || (link.href !== '/dashboard' && currentPath.startsWith(link.href))
+                  'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                  isActive(link.href)
                     ? 'bg-hairline-soft font-medium text-ink'
-                    : '',
+                    : 'text-body hover:bg-hairline-soft hover:text-ink',
                 ]}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
               </a>
             </li>
           ))}
         </ul>
+
+        {/* System section */}
+        <div class="mt-6">
+          <p class="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-faint">System</p>
+          <ul class="flex flex-col gap-0.5" role="list">
+            {systemLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class:list={[
+                    'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                    isActive(link.href)
+                      ? 'bg-hairline-soft font-medium text-ink'
+                      : 'text-body hover:bg-hairline-soft hover:text-ink',
+                  ]}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
-      <div class="border-t border-hairline p-4">
-        <div class="flex items-center gap-3">
-          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-on-primary">
+
+      {/* Bottom section — Settings + User */}
+      <div class="border-t border-hairline px-3 py-3">
+        <ul class="flex flex-col gap-0.5" role="list">
+          {bottomLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                  isActive(link.href)
+                    ? 'bg-hairline-soft font-medium text-ink'
+                    : 'text-body hover:bg-hairline-soft hover:text-ink',
+                ]}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="mt-2 flex items-center gap-3 border-t border-hairline pt-3">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-on-primary" aria-hidden="true">
             U
           </div>
           <div class="flex-1 truncate">
@@ -74,66 +140,128 @@ const currentPath = Astro.url.pathname;
     <div class="flex flex-1 flex-col">
       {/* Mobile header */}
       <header class="flex h-14 items-center justify-between border-b border-hairline bg-canvas-elevated px-4 lg:hidden">
-        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline" aria-label="AI Idea Researcher — Home">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
           AI Idea Researcher
         </a>
-        <ThemeToggle />
-        <button
-          id="mobile-sidebar-toggle"
-          class="flex items-center justify-center rounded-sm p-2 text-ink"
-          aria-label="Toggle navigation"
-        >
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        <div class="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            id="mobile-sidebar-toggle"
+            class="flex items-center justify-center rounded-sm p-2 text-ink"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-sidebar"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* Mobile sidebar overlay */}
-      <div id="mobile-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/40 lg:hidden"></div>
+      <div
+        id="mobile-sidebar-overlay"
+        class="fixed inset-0 z-40 hidden bg-black/40 lg:hidden"
+        aria-hidden="true"
+      ></div>
+
       {/* Mobile sidebar panel */}
-      <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 z-50 hidden w-64 bg-canvas-elevated shadow-lg lg:hidden">
-        <div class="flex h-16 items-center justify-between border-b border-hairline px-5">
+      <aside
+        id="mobile-sidebar"
+        class="fixed inset-y-0 left-0 z-50 hidden w-64 bg-canvas-elevated shadow-lg lg:hidden"
+        aria-label="Dashboard navigation"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="flex h-14 items-center justify-between border-b border-hairline px-5">
           <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
             AI Idea Researcher
           </a>
-          <button id="mobile-sidebar-close" class="rounded-sm p-1 text-ink" aria-label="Close menu">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <button id="mobile-sidebar-close" class="rounded-sm p-1 text-ink" aria-label="Close navigation menu">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <nav class="overflow-y-auto px-3 py-4">
-          <ul class="flex flex-col gap-0.5">
-            {sidebarLinks.map((link) => (
+        <nav class="overflow-y-auto px-3 py-4" aria-label="Dashboard navigation">
+          {/* Main section */}
+          <ul class="flex flex-col gap-0.5" role="list">
+            {mainLinks.map((link) => (
               <li>
                 <a
                   href={link.href}
                   class:list={[
-                    'flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-body no-underline transition-colors hover:bg-hairline-soft hover:text-ink',
-                    currentPath === link.href || (link.href !== '/dashboard' && currentPath.startsWith(link.href))
+                    'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                    isActive(link.href)
                       ? 'bg-hairline-soft font-medium text-ink'
-                      : '',
+                      : 'text-body hover:bg-hairline-soft hover:text-ink',
                   ]}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </a>
               </li>
             ))}
           </ul>
+
+          {/* System section */}
+          <div class="mt-6">
+            <p class="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-faint">System</p>
+            <ul class="flex flex-col gap-0.5" role="list">
+              {systemLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class:list={[
+                      'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                      isActive(link.href)
+                        ? 'bg-hairline-soft font-medium text-ink'
+                        : 'text-body hover:bg-hairline-soft hover:text-ink',
+                    ]}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Bottom section */}
+          <div class="mt-6 border-t border-hairline pt-4">
+            <ul class="flex flex-col gap-0.5" role="list">
+              {bottomLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class:list={[
+                      'flex items-center gap-3 rounded-sm px-3 py-2 text-sm no-underline transition-colors',
+                      isActive(link.href)
+                        ? 'bg-hairline-soft font-medium text-ink'
+                        : 'text-body hover:bg-hairline-soft hover:text-ink',
+                    ]}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </nav>
       </aside>
 
       {/* Page content */}
-      <main class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto" id="main-content">
         <slot />
       </main>
     </div>
@@ -148,15 +276,27 @@ const currentPath = Astro.url.pathname;
     function openSidebar() {
       overlay?.classList.remove('hidden');
       sidebar?.classList.remove('hidden');
+      toggleBtn?.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      closeBtn?.focus();
     }
 
     function closeSidebar() {
       overlay?.classList.add('hidden');
       sidebar?.classList.add('hidden');
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      toggleBtn?.focus();
     }
 
     toggleBtn?.addEventListener('click', openSidebar);
     closeBtn?.addEventListener('click', closeSidebar);
     overlay?.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !sidebar?.classList.contains('hidden')) {
+        closeSidebar();
+      }
+    });
   </script>
 </BaseHead>

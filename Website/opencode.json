@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "shadcn-ui": {
+        "type": "local",
+        "command": ["npx", "-y", "@heilgar/shadcn-ui-mcp-server"],
+        "timeout": {
+          "startup": 60000
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+---
+/**
+ * Skeleton loading placeholder for cards.
+ * Shows animated placeholder blocks matching card layout.
+ */
+interface Props {
+  lines?: number;
+  class?: string;
+}
+
+const { lines = 3, class: className = '' } = Astro.props;
+---
+
+<div class:list={['animate-pulse space-y-3', className]}>
+  <div class="h-4 w-3/4 rounded bg-hairline-soft"></div>
+  {Array.from({ length: lines }).map(() => (
+    <div class="h-3 w-full rounded bg-hairline-soft"></div>
+  ))}
+</div>

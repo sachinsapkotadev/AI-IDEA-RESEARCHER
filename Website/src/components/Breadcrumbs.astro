@@ -1,0 +1,43 @@
+---
+/**
+ * Breadcrumbs — subtle navigation trail.
+ * Only renders when items are provided.
+ */
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+---
+
+{items.length > 0 && (
+  <nav aria-label="Breadcrumb" class:list={['text-sm', className]}>
+    <ol class="flex flex-wrap items-center gap-1.5">
+      {items.map((item, i) => (
+        <li class="flex items-center gap-1.5">
+          {i > 0 && (
+            <svg class="h-3.5 w-3.5 flex-shrink-0 text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+          {item.href ? (
+            <a
+              href={item.href}
+              class="text-mute no-underline transition-colors hover:text-ink"
+            >
+              {item.label}
+            </a>
+          ) : (
+            <span class="text-ink" aria-current="page">{item.label}</span>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}

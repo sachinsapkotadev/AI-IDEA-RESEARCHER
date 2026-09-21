@@ -1,0 +1,96 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openrouter-free/inclusionai/ling-3.0-flash-vl",
+  "providers": {
+    "openrouter-free": {
+      "name": "OpenRouter Free (Rotating Keys)",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:3457/v1"
+      },
+      "env": ["OPENROUTER_API_KEY"],
+      "models": {
+        "inclusionai/ling-3.0-flash-vl": {
+          "name": "Ling 3.0 Flash VL",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nex-agi/nex-n2.5-mini": {
+          "name": "Nex N2.5 Mini",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nex-agi/nex-n2.5-pro": {
+          "name": "Nex N2.5 Pro",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "inclusionai/ling-3.0-flash-sante": {
+          "name": "Ling 3.0 Flash Sante",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "inclusionai/ling-3.0-flash-fin": {
+          "name": "Ling 3.0 Flash Fin",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "qwen/qwen3.8-27b": {
+          "name": "Qwen 3.8 27B",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "deepgram/flux-tts": {
+          "name": "Deepgram Flux TTS",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/nemotron-3.5-lightning": {
+          "name": "Nemotron 3.5 Lightning",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "thinkingmachines/inkling-small": {
+          "name": "Inkling Small",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "fish-audio/s2.1-pro-free": {
+          "name": "Fish Audio S2.1 Pro",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/nemotron-3-embed-1b": {
+          "name": "Nemotron 3 Embed 1B",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "thinkingmachines/inkling": {
+          "name": "Inkling",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "poolside/laguna-s-2.1": {
+          "name": "Laguna S 2.1",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "poolside/laguna-xs-2.1": {
+          "name": "Laguna XS 2.1",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "cohere/north-mini-code": {
+          "name": "Cohere North Mini Code",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "z-ai/glm-5.2": {
+          "name": "GLM 5.2",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/llama-nemotron-rerank-vl-1b-v2": {
+          "name": "Nemotron Rerank VL 1B V2",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/nemotron-3-ultra-550b-a55b": {
+          "name": "Nemotron 3 Ultra 550B",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+          "name": "Nemotron 3 Nano Omni 30B",
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "nvidia/llama-nemotron-embed-vl-1b-v2": {
+          "name": "Nemotron Embed VL 1B V2",
+          "limit": { "context": 128000, "output": 8192 }
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,15 @@
 ---
 import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 ---
 
 <DashboardLayout title="Research — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Research' },
+    ]} />
+
     {/* Header */}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -13,7 +19,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
     </div>
 
     {/* Backend Status */}
-    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm"></div>
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
 
     {/* Start Research Form */}
     <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
@@ -32,31 +38,68 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
             maxlength="500"
             placeholder="e.g. SaaS opportunities for small businesses"
             class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+            aria-describedby="topic-hint topic-error"
           />
-          <p id="topic-error" class="mt-1 text-xs text-error hidden"></p>
+          <p id="topic-hint" class="mt-1 text-xs text-mute">3–500 characters</p>
+          <p id="topic-error" class="mt-1 text-xs text-error hidden" role="alert"></p>
         </div>
         <button
           type="submit"
           id="submit-btn"
           class="inline-flex items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50 disabled:pointer-events-none sm:self-end"
         >
-          <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M12 4v16m8-8H4" />
           </svg>
           Start Research
         </button>
       </form>
-      <p id="form-message" class="mt-3 text-sm hidden"></p>
+      <div id="form-message" class="mt-3 text-sm hidden" role="status" aria-live="polite"></div>
     </div>
 
     {/* Research History */}
-    <section>
-      <h2 class="text-lg font-semibold text-ink mb-4">Research History</h2>
+    <section aria-labelledby="research-history-heading">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h2 id="research-history-heading" class="text-lg font-semibold text-ink">Research History</h2>
 
-      {/* Loading State */}
-      <div id="loading-state" class="flex flex-col items-center justify-center py-16 text-center">
-        <div class="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
-        <p class="text-sm text-body">Loading research history...</p>
+        {/* Client-side search */}
+        <div class="relative w-full sm:w-72">
+          <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Filter by topic..."
+            class="w-full rounded-sm border border-hairline bg-canvas-elevated py-2 pl-10 pr-4 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+            aria-label="Filter research by topic"
+          />
+        </div>
+      </div>
+
+      {/* Loading skeleton */}
+      <div id="loading-state" class="rounded-md border border-hairline bg-canvas-elevated">
+        <div class="animate-pulse">
+          <div class="border-b border-hairline-soft px-4 py-3">
+            <div class="flex gap-4">
+              <div class="h-3 w-1/3 rounded bg-hairline-soft"></div>
+              <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+              <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+              <div class="hidden h-3 w-12 rounded bg-hairline-soft md:block"></div>
+            </div>
+          </div>
+          {Array.from({ length: 5 }).map(() => (
+            <div class="border-b border-hairline-soft px-4 py-3 last:border-b-0">
+              <div class="flex gap-4">
+                <div class="h-3 w-2/5 rounded bg-hairline-soft"></div>
+                <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+                <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+                <div class="hidden h-3 w-12 rounded bg-hairline-soft md:block"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Error State */}
@@ -88,71 +131,62 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
         <p class="mt-2 max-w-sm text-sm text-body">Start your first research run to discover new ideas.</p>
       </div>
 
+      {/* No results from filter */}
+      <div id="no-results" class="hidden flex flex-col items-center justify-center py-16 text-center">
+        <p class="text-sm text-body">No research runs match your filter.</p>
+        <button
+          id="clear-filter-btn"
+          class="mt-3 text-sm text-link font-medium no-underline hover:underline"
+        >
+          Clear filter
+        </button>
+      </div>
+
       {/* Research Table */}
       <div id="research-table" class="hidden rounded-md border border-hairline bg-canvas-elevated overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm" aria-label="Research runs">
           <thead>
             <tr class="border-b border-hairline text-left">
-              <th class="pb-3 pr-4 pl-4 font-medium text-mute">Topic</th>
-              <th class="pb-3 pr-4 font-medium text-mute">Status</th>
-              <th class="hidden pb-3 pr-4 font-medium text-mute sm:table-cell">Date</th>
-              <th class="hidden pb-3 pr-4 font-medium text-mute md:table-cell">Sources</th>
-              <th class="hidden pb-3 pr-4 font-medium text-mute lg:table-cell">Ideas</th>
-              <th class="pb-3 pr-4 font-medium text-mute text-right">Action</th>
+              <th scope="col" class="pb-3 pr-4 pl-4 font-medium text-mute">Topic</th>
+              <th scope="col" class="pb-3 pr-4 font-medium text-mute">Status</th>
+              <th scope="col" class="hidden pb-3 pr-4 font-medium text-mute sm:table-cell">Date</th>
+              <th scope="col" class="hidden pb-3 pr-4 font-medium text-mute md:table-cell">Sources</th>
+              <th scope="col" class="pb-3 pr-4 font-medium text-mute text-right">Action</th>
             </tr>
           </thead>
-          <tbody id="research-tbody">
-          </tbody>
+          <tbody id="research-tbody"></tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      <div id="pagination" class="hidden mt-4 flex items-center justify-between">
-        <p id="pagination-info" class="text-sm text-mute"></p>
-        <div class="flex gap-2">
-          <button
-            id="prev-page"
-            class="rounded-sm border border-hairline bg-canvas-elevated px-3 py-1.5 text-sm text-body hover:bg-hairline-soft disabled:opacity-50 disabled:pointer-events-none"
-            disabled
-          >
-            Previous
-          </button>
-          <button
-            id="next-page"
-            class="rounded-sm border border-hairline bg-canvas-elevated px-3 py-1.5 text-sm text-body hover:bg-hairline-soft disabled:opacity-50 disabled:pointer-events-none"
-            disabled
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      {/* Pagination info */}
+      <div id="pagination-info" class="hidden mt-3 text-sm text-mute"></div>
     </section>
   </div>
 
   <script>
     const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
 
-    const statusColors: Record<string, string> = {
-      completed: 'bg-green-50 text-green-800 border-green-200',
-      running: 'bg-link-soft text-blue-800 border-blue-200',
-      pending: 'bg-warning-soft text-amber-800 border-amber-200',
-      failed: 'bg-red-50 text-red-800 border-red-200',
+    const statusConfig: Record<string, { classes: string; label: string }> = {
+      completed: { classes: 'bg-success-soft text-green-800 border-green-200', label: 'Completed' },
+      running:   { classes: 'bg-link-soft text-blue-800 border-blue-200',     label: 'Running' },
+      pending:   { classes: 'bg-warning-soft text-amber-800 border-amber-200', label: 'Pending' },
+      failed:    { classes: 'bg-red-50 text-red-800 border-red-200',          label: 'Failed' },
     };
 
-    let currentPage = 1;
-    let totalPages = 1;
+    let allItems: any[] = [];
+    let currentFilter = '';
 
     // Elements
     const loadingEl = document.getElementById('loading-state')!;
     const errorEl = document.getElementById('error-state')!;
     const errorMsgEl = document.getElementById('error-message')!;
     const emptyEl = document.getElementById('empty-state')!;
+    const noResultsEl = document.getElementById('no-results')!;
     const tableEl = document.getElementById('research-table')!;
     const tbodyEl = document.getElementById('research-tbody')!;
-    const paginationEl = document.getElementById('pagination')!;
     const paginationInfoEl = document.getElementById('pagination-info')!;
-    const prevBtn = document.getElementById('prev-page') as HTMLButtonElement;
-    const nextBtn = document.getElementById('next-page') as HTMLButtonElement;
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const clearFilterBtn = document.getElementById('clear-filter-btn')!;
     const form = document.getElementById('research-form') as HTMLFormElement;
     const topicInput = document.getElementById('research-topic') as HTMLInputElement;
     const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
@@ -160,16 +194,23 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
     const formMessage = document.getElementById('form-message')!;
     const backendStatus = document.getElementById('backend-status')!;
 
-    function showState(state: 'loading' | 'error' | 'empty' | 'table') {
+    function showState(state: 'loading' | 'error' | 'empty' | 'table' | 'no-results') {
       loadingEl.classList.toggle('hidden', state !== 'loading');
       errorEl.classList.toggle('hidden', state !== 'error');
       emptyEl.classList.toggle('hidden', state !== 'empty');
+      noResultsEl.classList.toggle('hidden', state !== 'no-results');
       tableEl.classList.toggle('hidden', state !== 'table');
-      paginationEl.classList.toggle('hidden', state !== 'table');
+      paginationInfoEl.classList.toggle('hidden', state !== 'table');
     }
 
     function formatDate(iso: string) {
       return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
 
     function showBackendStatus(connected: boolean) {
@@ -185,92 +226,95 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 
     async function checkHealth() {
       try {
-        const res = await fetch(`${API_BASE}/health`);
-        if (res.ok) {
-          showBackendStatus(true);
-          return true;
-        }
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        if (res.ok) { showBackendStatus(true); return true; }
       } catch {}
       showBackendStatus(false);
       return false;
     }
 
-    async function loadResearch(page = 1) {
+    function renderFiltered() {
+      const filtered = currentFilter
+        ? allItems.filter(r => r.topic.toLowerCase().includes(currentFilter.toLowerCase()))
+        : allItems;
+
+      if (allItems.length === 0) {
+        showState('empty');
+        return;
+      }
+
+      if (filtered.length === 0) {
+        showState('no-results');
+        return;
+      }
+
+      tbodyEl.innerHTML = filtered.map((r: any) => {
+        const config = statusConfig[r.status] || statusConfig.pending;
+        const date = formatDate(r.created_at);
+        return `
+          <tr class="border-b border-hairline-soft last:border-0 hover:bg-hairline-soft/50">
+            <td class="py-3 pr-4 pl-4">
+              <a href="/dashboard/research/view?id=${r.id}" class="font-medium text-ink no-underline hover:underline">${escapeHtml(r.topic)}</a>
+            </td>
+            <td class="py-3 pr-4">
+              <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${config.classes}">
+                <span class="h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
+                ${config.label}
+              </span>
+            </td>
+            <td class="hidden py-3 pr-4 text-mute sm:table-cell">${date}</td>
+            <td class="hidden py-3 pr-4 text-mute md:table-cell">${r.sources_found ?? '—'}</td>
+            <td class="py-3 pr-4 text-right">
+              <a href="/dashboard/research/view?id=${r.id}" class="text-sm text-link font-medium no-underline hover:underline">View</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const total = allItems.length;
+      paginationInfoEl.textContent = currentFilter
+        ? `Showing ${filtered.length} of ${total} research runs`
+        : `${total} research run${total !== 1 ? 's' : ''}`;
+
+      showState('table');
+    }
+
+    async function loadResearch() {
       showState('loading');
-      currentPage = page;
 
       try {
-        const res = await fetch(`${API_BASE}/api/research?page=${page}&page_size=20`);
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        const items = data.items || [];
-        const total = data.total || 0;
-        const pageSize = data.page_size || 20;
-        totalPages = Math.ceil(total / pageSize) || 1;
-
-        if (items.length === 0) {
-          showState('empty');
-          return;
-        }
-
-        renderTable(items);
-        renderPagination(total, page, pageSize);
-        showState('table');
+        allItems = data.items || [];
+        renderFiltered();
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error';
-        errorMsgEl.textContent = msg.includes('fetch')
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
           ? 'Unable to connect to the backend. Please check if the server is running.'
           : `Failed to load research: ${msg}`;
         showState('error');
       }
     }
 
-    function renderTable(items: any[]) {
-      tbodyEl.innerHTML = items.map((r: any) => {
-        const colorClass = statusColors[r.status] || statusColors.pending;
-        const ideasCount = r.result?.findings?.length ?? '—';
-        const sourceCount = r.sources_found ?? '—';
-        const date = formatDate(r.created_at);
-        return `
-          <tr class="border-b border-hairline-soft last:border-0 hover:bg-hairline-soft/50">
-            <td class="py-3 pr-4 pl-4">
-              <a href="/dashboard/research/${r.id}" class="font-medium text-ink no-underline hover:underline">${escapeHtml(r.topic)}</a>
-            </td>
-            <td class="py-3 pr-4">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorClass}">${r.status}</span>
-            </td>
-            <td class="hidden py-3 pr-4 text-mute sm:table-cell">${date}</td>
-            <td class="hidden py-3 pr-4 text-mute md:table-cell">${sourceCount}</td>
-            <td class="hidden py-3 pr-4 text-mute lg:table-cell">${ideasCount}</td>
-            <td class="py-3 pr-4 text-right">
-              <a href="/dashboard/research/${r.id}" class="text-sm text-link font-medium no-underline hover:underline">View</a>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
+    // Search filter
+    searchInput?.addEventListener('input', (e) => {
+      currentFilter = (e.target as HTMLInputElement).value;
+      renderFiltered();
+    });
 
-    function renderPagination(total: number, page: number, pageSize: number) {
-      const start = (page - 1) * pageSize + 1;
-      const end = Math.min(page * pageSize, total);
-      paginationInfoEl.textContent = `Showing ${start}–${end} of ${total} research runs`;
-      prevBtn.disabled = page <= 1;
-      nextBtn.disabled = page >= totalPages;
-    }
-
-    function escapeHtml(str: string) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
+    clearFilterBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      currentFilter = '';
+      renderFiltered();
+    });
 
     // Form handling
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const topic = topicInput.value.trim();
 
-      // Validation
       if (topic.length < 3) {
         topicError.textContent = 'Topic must be at least 3 characters.';
         topicError.classList.remove('hidden');
@@ -304,19 +348,12 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
         }
 
         const result = await res.json();
-        formMessage.textContent = `Research started! ID: ${result.id}`;
-        formMessage.className = 'mt-3 text-sm text-green-800';
-        formMessage.classList.remove('hidden');
-        topicInput.value = '';
-
-        // Reload the list
-        loadResearch(1);
+        window.location.href = `/dashboard/research/view?id=${result.id}`;
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to start research';
         formMessage.textContent = msg;
         formMessage.className = 'mt-3 text-sm text-error';
         formMessage.classList.remove('hidden');
-      } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = `
           <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -327,20 +364,11 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
       }
     });
 
-    // Clear error on input
     topicInput?.addEventListener('input', () => {
       topicError.classList.add('hidden');
     });
 
-    // Pagination
-    prevBtn?.addEventListener('click', () => {
-      if (currentPage > 1) loadResearch(currentPage - 1);
-    });
-    nextBtn?.addEventListener('click', () => {
-      if (currentPage < totalPages) loadResearch(currentPage + 1);
-    });
-
     // Init
-    checkHealth().then(() => loadResearch(1));
+    checkHealth().then(() => loadResearch());
   </script>
 </DashboardLayout>

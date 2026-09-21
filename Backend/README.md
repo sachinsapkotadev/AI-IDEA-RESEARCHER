@@ -128,6 +128,12 @@ Once running, visit:
 | GET | `/api/research` | List research runs (paginated) |
 | GET | `/api/research/{id}` | Get a research run by ID |
 | GET | `/api/research/{id}/sources` | Get sources for a research run |
+| POST | `/api/research/{id}/analyze` | Run multi-agent analysis pipeline |
+| GET | `/api/research/{id}/analysis-status` | Get pipeline status |
+| GET | `/api/research/{id}/agents` | Get agent execution history |
+| GET | `/api/research/{id}/ideas` | Get ideas from a research run |
+| GET | `/api/ideas` | List all ideas (paginated, filterable) |
+| GET | `/api/ideas/{id}` | Get a single idea |
 
 ### POST /api/research
 
@@ -223,6 +229,49 @@ Validated Research Result
 PostgreSQL ResearchRun
 ```
 
+### Multi-Agent Analysis Pipeline (Phase 5)
+
+```
+ResearchRun (completed)
+    ↓
+POST /api/research/{id}/analyze
+    ↓
+AgentOrchestrator
+    ↓
+┌─────────────────────────────────────────────┐
+│ Stage 1: MarketAnalyst                      │
+│   Input: research sources                   │
+│   Output: problems, users, demand, trends   │
+├─────────────────────────────────────────────┤
+│ Stage 2: CompetitorAnalyst                  │
+│   Input: research + market analysis         │
+│   Output: competitors, gaps, landscape      │
+├─────────────────────────────────────────────┤
+│ Stage 3: IdeaGenerator                      │
+│   Input: research + market + competitors    │
+│   Output: 3-5 SaaS opportunity ideas        │
+├─────────────────────────────────────────────┤
+│ Stage 4: TechnicalAnalyst                   │
+│   Input: ideas + research context           │
+│   Output: feasibility, complexity, risks    │
+├─────────────────────────────────────────────┤
+│ Stage 5: ValidationPlanner                  │
+│   Input: ideas + market + competitors + tech│
+│   Output: validation plans, success/failure │
+└─────────────────────────────────────────────┘
+    ↓
+PostgreSQL (Idea model + AgentRun tracking)
+```
+
+**Key design decisions:**
+- Agents run sequentially in dependency order
+- If any required agent fails, pipeline stops safely
+- Each agent records execution metrics (tokens, duration)
+- No Celery/Redis yet — FastAPI BackgroundTasks (not durable)
+- Each agent receives only the context it needs (token optimization)
+- All AI output validated via Pydantic before persistence
+- External source content treated as untrusted data
+
 ### Source Quality Categories
 
 | Category | Description |
@@ -293,11 +342,23 @@ Before sending content to the AI:
 - SSRF protection
 - Comprehensive test suite (56 tests)
 
+**Phase 5 — Multi-Agent Analysis Pipeline** ✅ Complete
+
+- Agent architecture (base class, Pydantic validation, lifecycle tracking)
+- 5 analysis agents: Market, Competitor, Idea, Technical, Validation
+- AgentOrchestrator with sequential dependency pipeline
+- Failure handling: pipeline stops on required agent failure
+- Token usage tracking per agent
+- Background execution via FastAPI BackgroundTasks
+- Idea generation and persistence to PostgreSQL
+- Agent execution history API
+- Pipeline status tracking API
+- 112 total tests (56 existing + 56 Phase 5)
+
 ## Future Architecture
 
 | Phase | Description |
 |-------|-------------|
-| Phase 5 | Multi-agent system (Market Analyst, Competitor Analyst, etc.) |
 | Phase 6 | GitHub integration |
 | Phase 7 | API authentication |
 | Phase 8 | Frontend clients |
@@ -317,7 +378,9 @@ Backend/
 │   │   └── routes/
 │   │       ├── __init__.py
 │   │       ├── health.py
-│   │       └── research.py
+│   │       ├── research.py
+│   │       ├── analysis.py
+│   │       └── ideas.py
 │   ├── schemas/
 │   │   ├── __init__.py
 │   │   ├── health.py
@@ -340,7 +403,19 @@ Backend/
 │   │   ├── schemas.py
 │   │   ├── errors.py
 │   │   └── research_agent.py
-│   └── research/              # Phase 4
+│   ├── agents/                  # Phase 5
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── schemas.py
+│   │   ├── context_utils.py
+│   │   ├── orchestrator.py
+│   │   ├── research.py
+│   │   ├── market.py
+│   │   ├── competitor.py
+│   │   ├── idea.py
+│   │   ├── technical.py
+│   │   └── validation.py
+│   └── research/
 │       ├── __init__.py
 │       ├── schemas.py
 │       ├── service.py
@@ -362,7 +437,8 @@ Backend/
 ├── tests/
 │   ├── __init__.py
 │   ├── test_health.py
-│   └── test_research.py
+│   ├── test_research.py
+│   └── test_phase5.py
 ├── alembic.ini
 ├── .env.example
 ├── .gitignore

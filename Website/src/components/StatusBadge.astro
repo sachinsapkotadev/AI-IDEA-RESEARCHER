@@ -1,0 +1,43 @@
+---
+/**
+ * Accessible status badge for research status.
+ * Uses text labels + optional dot indicator, not color alone.
+ */
+type Status = 'pending' | 'running' | 'completed' | 'failed' | 'idle' | 'error' | 'active' | 'paused' | 'not-connected' | 'coming-soon';
+
+interface Props {
+  status: Status;
+  label?: string;
+  class?: string;
+}
+
+const { status, label, class: className = '' } = Astro.props;
+
+const config: Record<Status, { classes: string; dot: string; text: string }> = {
+  pending:     { classes: 'bg-warning-soft text-amber-800 border-amber-200', dot: 'bg-amber-500', text: 'Pending' },
+  running:     { classes: 'bg-link-soft text-blue-800 border-blue-200',     dot: 'bg-blue-500', text: 'Running' },
+  completed:   { classes: 'bg-success-soft text-green-800 border-green-200', dot: 'bg-green-500', text: 'Completed' },
+  failed:      { classes: 'bg-red-50 text-red-800 border-red-200',          dot: 'bg-red-500', text: 'Failed' },
+  idle:        { classes: 'bg-hairline-soft text-body border-hairline',      dot: 'bg-mute', text: 'Idle' },
+  error:       { classes: 'bg-red-50 text-red-800 border-red-200',          dot: 'bg-red-500', text: 'Error' },
+  active:      { classes: 'bg-success-soft text-green-800 border-green-200', dot: 'bg-green-500', text: 'Active' },
+  paused:      { classes: 'bg-warning-soft text-amber-800 border-amber-200', dot: 'bg-amber-500', text: 'Paused' },
+  'not-connected': { classes: 'bg-hairline-soft text-body border-hairline', dot: 'bg-mute', text: 'Not Connected' },
+  'coming-soon':   { classes: 'bg-link-soft text-blue-800 border-blue-200', dot: 'bg-blue-400', text: 'Coming Soon' },
+};
+
+const c = config[status] || config.idle;
+const displayText = label || c.text;
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+    c.classes,
+    className,
+  ]}
+  role="status"
+>
+  <span class:list={['h-1.5 w-1.5 flex-shrink-0 rounded-full', c.dot]} aria-hidden="true"></span>
+  {displayText}
+</span>
