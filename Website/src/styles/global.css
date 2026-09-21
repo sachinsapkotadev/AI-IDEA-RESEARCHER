@@ -199,15 +199,24 @@ body {
 
 .hero-glow {
   background: radial-gradient(
-    ellipse at 30% 50%,
-    rgba(0, 112, 243, 0.18) 0%,
-    rgba(121, 40, 202, 0.14) 30%,
-    rgba(255, 0, 128, 0.10) 55%,
-    rgba(80, 227, 194, 0.08) 75%,
+    ellipse at 50% 0%,
+    rgba(0, 112, 243, 0.35) 0%,
+    rgba(121, 40, 202, 0.28) 25%,
+    rgba(255, 0, 128, 0.20) 50%,
+    rgba(80, 227, 194, 0.12) 75%,
     transparent 100%
   );
+  opacity: 1;
 }
 
 html.dark .hero-glow {
-  opacity: 0.35;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(0, 112, 243, 0.40) 0%,
+    rgba(121, 40, 202, 0.32) 25%,
+    rgba(255, 0, 128, 0.24) 50%,
+    rgba(80, 227, 194, 0.14) 75%,
+    transparent 100%
+  );
+  opacity: 1;
 }

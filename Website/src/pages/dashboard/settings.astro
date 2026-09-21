@@ -1,8 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Card from '../../components/Card.astro';
-import Badge from '../../components/Badge.astro';
-import Button from '../../components/Button.astro';
 ---
 
 <DashboardLayout title="Settings — AI Idea Researcher">
@@ -12,6 +10,30 @@ import Button from '../../components/Button.astro';
       <h1 class="text-2xl font-semibold text-ink">Settings</h1>
       <p class="mt-1 text-sm text-body">Manage your account and application preferences.</p>
     </div>
+
+    {/* API Connection */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">API Connection</h2>
+        <div id="api-status" class="flex items-center gap-3">
+          <div id="api-dot" class="h-3 w-3 rounded-full bg-mute animate-pulse"></div>
+          <div>
+            <p id="api-label" class="text-sm font-medium text-ink">Checking connection...</p>
+            <p id="api-detail" class="text-xs text-body">Verifying backend availability</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink">API URL</label>
+          <input
+            type="url"
+            value={import.meta.env.PUBLIC_API_URL || 'http://localhost:8000'}
+            disabled
+            class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm font-mono text-mute cursor-not-allowed"
+          />
+        </div>
+        <p class="text-xs text-mute">Set via PUBLIC_API_URL environment variable. Backend handles all API keys and database connections.</p>
+      </div>
+    </Card>
 
     {/* Profile */}
     <Card padding="lg">
@@ -41,30 +63,6 @@ import Button from '../../components/Button.astro';
       </div>
     </Card>
 
-    {/* API Connection */}
-    <Card padding="lg">
-      <div class="space-y-4">
-        <h2 class="text-base font-semibold text-ink">API Connection</h2>
-        <div class="flex items-center gap-3">
-          <div class="h-3 w-3 rounded-full bg-error"></div>
-          <div>
-            <p class="text-sm font-medium text-ink">Not Connected</p>
-            <p class="text-xs text-body">Connect to your backend API to enable live data and full functionality.</p>
-          </div>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium text-ink">API URL</label>
-          <input
-            type="url"
-            value="http://localhost:8000"
-            disabled
-            class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm font-mono text-mute cursor-not-allowed"
-          />
-        </div>
-        <Button variant="secondary" size="sm" disabled>Test Connection</Button>
-      </div>
-    </Card>
-
     {/* Notification Preferences */}
     <Card padding="lg">
       <div class="space-y-4">
@@ -74,7 +72,6 @@ import Button from '../../components/Button.astro';
             { label: 'Research completed', desc: 'Notify when a research run finishes' },
             { label: 'Report generated', desc: 'Notify when a new report is ready' },
             { label: 'Agent errors', desc: 'Notify when an agent encounters an error' },
-            { label: 'Weekly summary', desc: 'Receive a weekly digest of activity' },
           ].map((item) => (
             <div class="flex items-center justify-between py-2">
               <div>
@@ -94,151 +91,49 @@ import Button from '../../components/Button.astro';
       </div>
     </Card>
 
-    {/* Research Preferences */}
-    <Card padding="lg">
-      <div class="space-y-4">
-        <h2 class="text-base font-semibold text-ink">Research Preferences</h2>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-ink">Default Model</label>
-            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
-              <option>Claude 3.5 Sonnet</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-ink">Research Depth</label>
-            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
-              <option>Standard</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-ink">Auto-generate Reports</label>
-            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
-              <option>Yes</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-ink">Idea Categories</label>
-            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
-              <option>All</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </Card>
-
-    {/* Theme */}
-    <Card padding="lg">
-      <div class="space-y-4">
-        <h2 class="text-base font-semibold text-ink">Theme</h2>
-        <div class="flex items-center gap-3">
-          <div class="flex gap-2" id="settings-theme-toggle">
-            <button
-              data-theme="light"
-              class="theme-option flex items-center gap-2 rounded-md border border-hairline bg-canvas-elevated px-4 py-2 transition-colors"
-            >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span class="text-sm font-medium text-ink">Light</span>
-            </button>
-            <button
-              data-theme="dark"
-              class="theme-option flex items-center gap-2 rounded-md border border-hairline bg-canvas-elevated px-4 py-2 transition-colors"
-            >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-              <span class="text-sm font-medium text-ink">Dark</span>
-            </button>
-            <button
-              data-theme="system"
-              class="theme-option flex items-center gap-2 rounded-md border border-hairline bg-canvas-elevated px-4 py-2 transition-colors"
-            >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span class="text-sm font-medium text-ink">System</span>
-            </button>
-          </div>
-        </div>
-        <p class="text-xs text-mute">Choose your preferred color scheme.</p>
-      </div>
-    </Card>
-
-    <script>
-      function initSettingsTheme() {
-        const buttons = document.querySelectorAll<HTMLButtonElement>('#settings-theme-toggle .theme-option');
-        if (!buttons.length) return;
-
-        function updateUI() {
-          const saved = localStorage.getItem('theme');
-          const isDark = document.documentElement.classList.contains('dark');
-          const active = saved || 'system';
-
-          buttons.forEach((btn) => {
-            const theme = btn.dataset.theme;
-            const isActive = theme === active || (theme === 'system' && !saved);
-            btn.classList.toggle('border-2', isActive);
-            btn.classList.toggle('border-ink', isActive);
-            btn.classList.toggle('border-hairline', !isActive);
-          });
-        }
-
-        buttons.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const theme = btn.dataset.theme;
-            if (theme === 'system') {
-              localStorage.removeItem('theme');
-              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              document.documentElement.classList.toggle('dark', prefersDark);
-            } else {
-              localStorage.setItem('theme', theme);
-              document.documentElement.classList.toggle('dark', theme === 'dark');
-            }
-            updateUI();
-          });
-        });
-
-        updateUI();
-      }
-
-      initSettingsTheme();
-      document.addEventListener('astro:page-load', initSettingsTheme);
-    </script>
-
     {/* Security */}
     <Card padding="lg">
       <div class="space-y-4">
         <h2 class="text-base font-semibold text-ink">Security</h2>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between py-2">
-            <div>
-              <p class="text-sm font-medium text-ink">Change Password</p>
-              <p class="text-xs text-body">Update your account password.</p>
-            </div>
-            <Button variant="secondary" size="sm" disabled>Change</Button>
-          </div>
-          <div class="border-t border-hairline-soft pt-3">
-            <div class="flex items-center justify-between py-2">
-              <div>
-                <p class="text-sm font-medium text-ink">Two-Factor Authentication</p>
-                <p class="text-xs text-body">Add an extra layer of security to your account.</p>
-              </div>
-              <Badge variant="default">Coming Soon</Badge>
-            </div>
-          </div>
-          <div class="border-t border-hairline-soft pt-3">
-            <div class="flex items-center justify-between py-2">
-              <div>
-                <p class="text-sm font-medium text-ink">API Keys</p>
-                <p class="text-xs text-body">Manage your API keys for external integrations.</p>
-              </div>
-              <Button variant="secondary" size="sm" disabled>Manage</Button>
-            </div>
-          </div>
+        <div class="rounded-md border border-hairline-soft bg-hairline-soft/50 p-4">
+          <p class="text-sm text-body">
+            Authentication and API key management will be available in a future release.
+            The backend handles all sensitive credentials (OPENROUTER_API_KEY, DATABASE_URL, GITHUB_TOKEN)
+            — these are never exposed to the frontend.
+          </p>
         </div>
       </div>
     </Card>
+
+    <script>
+      const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+      async function checkApi() {
+        const dot = document.getElementById('api-dot')!;
+        const label = document.getElementById('api-label')!;
+        const detail = document.getElementById('api-detail')!;
+
+        try {
+          const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+          if (res.ok) {
+            const data = await res.json();
+            dot.className = 'h-3 w-3 rounded-full bg-green-500';
+            label.textContent = 'Connected';
+            label.className = 'text-sm font-medium text-green-800';
+            detail.textContent = `Backend is online (status: ${data.status})`;
+            detail.className = 'text-xs text-green-700';
+            return;
+          }
+        } catch {}
+
+        dot.className = 'h-3 w-3 rounded-full bg-red-500';
+        label.textContent = 'Not Connected';
+        label.className = 'text-sm font-medium text-error';
+        detail.textContent = `Unable to reach ${API_BASE}`;
+        detail.className = 'text-xs text-body';
+      }
+
+      checkApi();
+    </script>
   </div>
 </DashboardLayout>

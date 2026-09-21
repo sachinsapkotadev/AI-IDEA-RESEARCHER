@@ -1,5 +1,13 @@
 ---
 import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: '1' } },
+    { params: { id: '2' } },
+    { params: { id: '3' } },
+  ];
+}
 ---
 
 <DashboardLayout title="Research Detail — AI Idea Researcher">
@@ -283,8 +291,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
         document.getElementById('date')!.textContent = formatDate(data.created_at);
 
         // Sources link
-        const sourcesLink = document.getElementById('sources-link')!;
-        sourcesLink.href = `#sources-section`;
+        const sourcesLink = document.getElementById('sources-link') as HTMLAnchorElement;
+        sourcesLink.href = '#sources-section';
         document.getElementById('sources-count')!.textContent = `${data.sources_found ?? 0} sources`;
 
         // Stats

@@ -1,5 +1,6 @@
 ---
 interface Props {
+  id?: string;
   label: string;
   value: string | number;
   change?: string;
@@ -7,7 +8,7 @@ interface Props {
   class?: string;
 }
 
-const { label, value, change, changeType = 'neutral', class: className = '' } = Astro.props;
+const { id, label, value, change, changeType = 'neutral', class: className = '' } = Astro.props;
 
 const changeColors: Record<string, string> = {
   up: 'text-success',
@@ -16,7 +17,7 @@ const changeColors: Record<string, string> = {
 };
 ---
 
-<div class:list={['rounded-md border border-hairline bg-canvas-elevated p-5', className]}>
+<div id={id} class:list={['rounded-md border border-hairline bg-canvas-elevated p-5', className]}>
   <p class="text-sm text-mute">{label}</p>
   <p class="mt-1 text-2xl font-semibold text-ink">{value}</p>
   {change && (
