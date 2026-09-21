@@ -21,6 +21,22 @@ class Settings(BaseSettings):
     GITHUB_TOKEN: str = ""
     GITHUB_REPOSITORY: str = ""
 
+    # Search Provider (Phase 4)
+    SEARCH_PROVIDER: str = "google"
+    SEARCH_API_KEY: str = ""
+    SEARCH_ENGINE_ID: str = ""
+    SEARCH_DEFAULT_NUM: int = 10
+
+    # Source Limits (Phase 4)
+    MAX_SEARCH_RESULTS: int = 10
+    MAX_SOURCES_PER_RESEARCH: int = 10
+    MAX_CONTENT_LENGTH_PER_SOURCE: int = 50_000
+    MAX_TOTAL_RESEARCH_CONTEXT: int = 100_000
+    MAX_CONCURRENT_RESEARCH: int = 5
+
+    # Content Extraction (Phase 4)
+    SEARCH_USER_AGENT: str = "AI-Idea-Researcher/1.0 (+https://ai-idea-researcher.local)"
+
     # CORS
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8080"
 

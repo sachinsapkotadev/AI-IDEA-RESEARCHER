@@ -48,8 +48,7 @@ def setup_db():
 @pytest.fixture
 def client():
     from app.main import app as _app
-    with TestClient(_app) as c:
-        yield c
+    return TestClient(_app)
 
 
 def _make_ai_response(content: dict, model: str = "test-model") -> dict:
@@ -265,22 +264,31 @@ class TestProvider:
 
     @pytest.mark.asyncio
     async def test_malformed_json(self):
-        """AI returns unparseable content → provider should raise AIResponseParsingError."""
-        from app.ai.provider import OpenRouterProvider
+        """AI returns unparseable content → agent raises error."""
         from app.ai.errors import AIResponseParsingError
-        with patch("app.ai.client.get_settings") as m:
-            m.return_value = MagicMock(OPENROUTER_API_KEY="k", OPENROUTER_MODEL="m", OPENROUTER_BASE_URL="u")
-            with patch("app.ai.client.httpx.AsyncClient") as h:
-                r = MagicMock(); r.status_code = 200
-                r.json.return_value = {
-                    "choices": [{"message": {"content": "no json here just plain text"}}],
-                    "model": "m",
-                }
-                h.return_value.__aenter__ = AsyncMock(return_value=h)
-                h.return_value.__aexit__ = AsyncMock(return_value=False)
-                h.post = AsyncMock(return_value=r)
-                with pytest.raises(AIResponseParsingError):
-                    await OpenRouterProvider().generate(prompt="t")
+        from app.ai.research_agent import ResearchAgent
+        from app.database.models.research import ResearchRun
+        from app.ai.schemas import AIResponse
+
+        engine = _make_test_engine()
+        S = sessionmaker(bind=engine)
+        db = S()
+        try:
+            run = ResearchRun(topic="Test")
+            db.add(run); db.flush()
+
+            mock = MagicMock()
+            mock.model = "m"
+            mock.generate = AsyncMock(return_value=AIResponse(
+                content="no json here just plain text", model="m",
+            ))
+
+            agent = ResearchAgent(provider=mock)
+            with pytest.raises(AIResponseParsingError):
+                await agent.run(run, db)
+        finally:
+            db.close()
+            engine.dispose()
 
 
 # --- Agent Tests ---

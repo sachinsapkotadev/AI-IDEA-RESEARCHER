@@ -110,6 +110,20 @@ html.dark {
 
   --shadow-whisper: 0px 1px 1px rgba(0, 0, 0, 0.2);
   --shadow-floating: 0px 2px 2px rgba(0, 0, 0, 0.15), 0px 8px 16px -4px rgba(0, 0, 0, 0.3);
+
+  /* Fix hardcoded Tailwind color classes for dark mode */
+  --tw-green-50: #052e16;
+  --tw-green-100: #14532d;
+  --tw-green-200: #166534;
+  --tw-green-800: #86efac;
+  --tw-green-300: #22c55e;
+  --tw-red-50: #450a0a;
+  --tw-red-200: #7f1d1d;
+  --tw-red-800: #fca5a5;
+  --tw-amber-200: #78350f;
+  --tw-amber-800: #fcd34d;
+  --tw-blue-200: #1e3a5f;
+  --tw-blue-800: #93c5fd;
 }
 
 /* ============================================

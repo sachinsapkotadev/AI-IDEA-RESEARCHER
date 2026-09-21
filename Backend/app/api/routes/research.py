@@ -1,6 +1,5 @@
 """Research API routes."""
 
-import json
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -14,15 +13,20 @@ from app.ai.errors import (
     AIRateLimitError,
     AITimeoutError,
 )
-from app.ai.research_agent import ResearchAgent
+from app.core.config import get_settings
 from app.database.database import get_db
 from app.database.models.research import ResearchRun
+from app.database.models.source import ResearchSource
+from app.research.errors import NoUsableSourcesError, SearchConfigurationError, SearchProviderError
+from app.research.service import ResearchService
 from app.schemas.research import (
     AIErrorResponse,
     ResearchCreateRequest,
     ResearchListResponse,
     ResearchRunResponse,
     ResearchResultResponse,
+    ResearchSourcesResponse,
+    SourceResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,18 +36,26 @@ router = APIRouter(prefix="/api/research", tags=["research"])
 
 def _format_run(run: ResearchRun) -> ResearchRunResponse:
     """Format a ResearchRun for API response."""
+    import json
+
     result = None
+    sources_count = len(run.sources) if run.sources else 0
+    sources_used = 0
+
     if run.report_path:
         try:
             result_data = json.loads(run.report_path)
             result = ResearchResultResponse(**result_data)
-        except (json.JSONDecodeError, Exception):
+            sources_used = len(result.source_references)
+        except Exception:
             pass
 
     return ResearchRunResponse(
         id=run.id,
         topic=run.topic,
         status=run.status.value,
+        sources_found=sources_count,
+        sources_used=sources_used,
         result=result,
         started_at=run.started_at.isoformat() if run.started_at else None,
         completed_at=run.completed_at.isoformat() if run.completed_at else None,
@@ -66,23 +78,68 @@ async def create_research(
 ) -> ResearchRunResponse:
     """Start a new research run on the given topic.
 
-    Creates a ResearchRun, invokes the AI Research Agent,
-    validates the result, and saves it.
+    Performs real web search, content extraction, and AI analysis.
     """
+    settings = get_settings()
     topic = request.topic.strip()
+
+    # Basic concurrency check
+    running_count = (
+        db.query(ResearchRun)
+        .filter(ResearchRun.status == "running")
+        .count()
+    )
+    if running_count >= settings.MAX_CONCURRENT_RESEARCH:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "TOO_MANY_RESEARCH_RUNS",
+                "message": "Maximum concurrent research runs reached. Try again later.",
+            },
+        )
 
     # Create research run
     research_run = ResearchRun(topic=topic)
     db.add(research_run)
     db.flush()
 
-    # Run the research agent
-    agent = ResearchAgent()
+    # Run the research pipeline
+    service = ResearchService()
     try:
-        result = await agent.run(research_run, db)
+        result = await service.run(research_run, db)
+    except SearchConfigurationError as exc:
+        research_run.status = "failed"
+        db.commit()
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "SEARCH_CONFIGURATION_ERROR",
+                "message": "Search provider is not configured. Set SEARCH_API_KEY and SEARCH_ENGINE_ID.",
+            },
+        ) from exc
+    except SearchProviderError as exc:
+        research_run.status = "failed"
+        db.commit()
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "SEARCH_PROVIDER_ERROR",
+                "message": "Search provider error. Try again later.",
+            },
+        ) from exc
+    except NoUsableSourcesError as exc:
+        research_run.status = "failed"
+        db.commit()
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "NO_USABLE_SOURCES",
+                "message": str(exc),
+            },
+        ) from exc
     except AIConfigurationError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=503,
             detail={
@@ -92,7 +149,7 @@ async def create_research(
         ) from exc
     except AIRateLimitError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=429,
             detail={
@@ -102,7 +159,7 @@ async def create_research(
         ) from exc
     except AITimeoutError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=504,
             detail={
@@ -112,7 +169,7 @@ async def create_research(
         ) from exc
     except AIResponseParsingError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=502,
             detail={
@@ -122,7 +179,7 @@ async def create_research(
         ) from exc
     except AIResponseValidationError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=502,
             detail={
@@ -132,7 +189,7 @@ async def create_research(
         ) from exc
     except AIProviderError as exc:
         research_run.status = "failed"
-        db.flush()
+        db.commit()
         raise HTTPException(
             status_code=503,
             detail={
@@ -141,11 +198,8 @@ async def create_research(
             },
         ) from exc
 
-    # Save the result as JSON in report_path
-    research_run.report_path = result.model_dump_json()
-    db.commit()
+    # Refresh to get relationships
     db.refresh(research_run)
-
     return _format_run(research_run)
 
 
@@ -185,7 +239,58 @@ async def get_research(
     db: Session = Depends(get_db),
 ) -> ResearchRunResponse:
     """Get a single research run by ID."""
-    run = db.query(ResearchRun).filter(ResearchRun.id == research_id).first()
+    run = (
+        db.query(ResearchRun)
+        .filter(ResearchRun.id == research_id)
+        .first()
+    )
     if not run:
         raise HTTPException(status_code=404, detail="Research run not found")
     return _format_run(run)
+
+
+@router.get(
+    "/{research_id}/sources",
+    response_model=ResearchSourcesResponse,
+    responses={404: {"description": "Research run not found"}},
+)
+async def get_research_sources(
+    research_id: int,
+    db: Session = Depends(get_db),
+) -> ResearchSourcesResponse:
+    """Get sources for a research run."""
+    run = (
+        db.query(ResearchRun)
+        .filter(ResearchRun.id == research_id)
+        .first()
+    )
+    if not run:
+        raise HTTPException(status_code=404, detail="Research run not found")
+
+    sources = (
+        db.query(ResearchSource)
+        .filter(ResearchSource.research_run_id == research_id)
+        .order_by(ResearchSource.rank)
+        .all()
+    )
+
+    source_list = [
+        SourceResponse(
+            id=s.id,
+            title=s.title,
+            url=s.url,
+            source_type=s.source_type.value if s.source_type else "web",
+            domain=s.domain,
+            quality=s.quality,
+            status=s.status.value if s.status else "unknown",
+            word_count=s.word_count,
+            rank=s.rank,
+        )
+        for s in sources
+    ]
+
+    return ResearchSourcesResponse(
+        research_id=run.id,
+        topic=run.topic,
+        sources=source_list,
+    )
