@@ -1,20 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import Card from '../../components/Card.astro';
-import Badge from '../../components/Badge.astro';
-import Button from '../../components/Button.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import { DEMO_REPORTS } from '../../lib/api/demo';
-
-const statusColors: Record<string, 'success' | 'warning' | 'info' | 'default'> = {
-  pushed: 'success',
-  generated: 'info',
-  draft: 'default',
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
 ---
 
 <DashboardLayout title="Reports — AI Idea Researcher">
@@ -25,50 +11,32 @@ function formatDate(iso: string) {
       <p class="mt-1 text-sm text-body">Generated research reports and analysis documents.</p>
     </div>
 
-    {/* Demo Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
-      <span class="font-medium">Demo mode</span> — showing sample reports.
+    {/* Status Banner */}
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800">
+      <span class="font-medium">Coming soon.</span> Reports will become available when the report-generation backend is implemented.
     </div>
 
-    {/* Reports List */}
-    {DEMO_REPORTS.length === 0 ? (
-      <EmptyState
-        icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-        title="No reports yet"
-        description="Reports are generated when a research run completes."
-        actionLabel="Start Research"
-        actionHref="/dashboard/research"
-      />
-    ) : (
-      <div class="space-y-4">
-        {DEMO_REPORTS.map((report) => (
-          <Card padding="md">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div class="space-y-1 min-w-0">
-                <div class="flex items-center gap-3">
-                  <h3 class="text-sm font-semibold text-ink truncate">{report.title}</h3>
-                  <Badge variant={statusColors[report.status]}>{report.status}</Badge>
-                </div>
-                <p class="text-xs text-mute">{formatDate(report.created_at)}</p>
-                {report.github_branch && (
-                  <p class="flex items-center gap-1.5 text-xs text-body">
-                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.813a4.5 4.5 0 00-6.364 0l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                    </svg>
-                    {report.github_branch}
-                  </p>
-                )}
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <Button variant="secondary" size="sm">View</Button>
-                {report.github_branch && (
-                  <Button variant="ghost" size="sm">Push to GitHub</Button>
-                )}
-              </div>
-            </div>
-          </Card>
-        ))}
+    {/* Empty State */}
+    <EmptyState
+      icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+      title="No reports yet"
+      description="Reports will be generated automatically when research runs complete and the report backend is connected."
+    />
+
+    {/* Future features preview */}
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">Auto-generation</p>
+        <p class="mt-1 text-xs text-faint">Reports created from research results</p>
       </div>
-    )}
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">GitHub push</p>
+        <p class="mt-1 text-xs text-faint">Push reports to your repository</p>
+      </div>
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">PDF export</p>
+        <p class="mt-1 text-xs text-faint">Download reports as PDF</p>
+      </div>
+    </div>
   </div>
 </DashboardLayout>

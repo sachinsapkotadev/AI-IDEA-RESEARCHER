@@ -1,0 +1,344 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Research Detail — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    {/* Back link */}
+    <a href="/dashboard/research" class="inline-flex items-center gap-1.5 text-sm text-body no-underline hover:text-ink">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Research
+    </a>
+
+    {/* Loading State */}
+    <div id="loading-state" class="flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+      <p class="text-sm text-body">Loading research details...</p>
+    </div>
+
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">Research not found</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <a
+        href="/dashboard/research"
+        class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90"
+      >
+        Back to Research
+      </a>
+    </div>
+
+    {/* Content */}
+    <div id="content" class="hidden space-y-6">
+      {/* Header */}
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+          <h1 id="topic" class="text-2xl font-semibold text-ink"></h1>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <span id="status-badge" class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium"></span>
+            <span id="date" class="text-sm text-mute"></span>
+          </div>
+        </div>
+        <a
+          id="sources-link"
+          href="#"
+          class="inline-flex items-center gap-2 rounded-sm border border-hairline bg-canvas-elevated px-4 py-2 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.813a4.5 4.5 0 00-6.364 0l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+          <span id="sources-count">0 sources</span>
+        </a>
+      </div>
+
+      {/* Stats row */}
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-4">
+          <p class="text-xs text-mute">Sources Found</p>
+          <p id="stat-sources" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-4">
+          <p class="text-xs text-mute">Sources Used</p>
+          <p id="stat-sources-used" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-4">
+          <p class="text-xs text-mute">Findings</p>
+          <p id="stat-findings" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+        <div class="rounded-md border border-hairline bg-canvas-elevated p-4">
+          <p class="text-xs text-mute">Duration</p>
+          <p id="stat-duration" class="mt-1 text-xl font-semibold text-ink">—</p>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div id="summary-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-3">Summary</h2>
+        <p id="summary-text" class="text-sm text-body leading-relaxed"></p>
+      </div>
+
+      {/* Findings */}
+      <div id="findings-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-3">Findings</h2>
+        <ul id="findings-list" class="space-y-2"></ul>
+      </div>
+
+      {/* Problems */}
+      <div id="problems-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-3">Problems Identified</h2>
+        <ul id="problems-list" class="space-y-2"></ul>
+      </div>
+
+      {/* Opportunities */}
+      <div id="opportunities-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-3">Opportunities</h2>
+        <ul id="opportunities-list" class="space-y-2"></ul>
+      </div>
+
+      {/* Uncertainties */}
+      <div id="uncertainties-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-3">Uncertainties</h2>
+        <ul id="uncertainties-list" class="space-y-2"></ul>
+      </div>
+
+      {/* Sources Section */}
+      <div id="sources-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
+        <h2 class="text-base font-semibold text-ink mb-4">Sources</h2>
+        <div id="sources-loading" class="flex items-center justify-center py-8">
+          <div class="h-6 w-6 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+        </div>
+        <div id="sources-list" class="hidden space-y-3"></div>
+        <div id="sources-empty" class="hidden text-center py-8">
+          <p class="text-sm text-mute">No sources collected for this research run.</p>
+        </div>
+        <div id="sources-error" class="hidden text-center py-8">
+          <p class="text-sm text-body">Unable to load sources.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const statusColors: Record<string, string> = {
+      completed: 'bg-green-50 text-green-800 border-green-200',
+      running: 'bg-link-soft text-blue-800 border-blue-200',
+      pending: 'bg-warning-soft text-amber-800 border-amber-200',
+      failed: 'bg-red-50 text-red-800 border-red-200',
+    };
+
+    const statusLabels: Record<string, string> = {
+      completed: 'Completed',
+      running: 'Running',
+      pending: 'Pending',
+      failed: 'Failed',
+    };
+
+    // Get research ID from URL
+    const pathParts = window.location.pathname.split('/');
+    const researchId = parseInt(pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2] || '0', 10);
+
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const contentEl = document.getElementById('content')!;
+
+    function showState(state: 'loading' | 'error' | 'content') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      contentEl.classList.toggle('hidden', state !== 'content');
+    }
+
+    function showError(msg: string) {
+      errorMsgEl.textContent = msg;
+      showState('error');
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+    }
+
+    function formatDuration(started?: string | null, completed?: string | null) {
+      if (!started || !completed) return '—';
+      const ms = new Date(completed).getTime() - new Date(started).getTime();
+      const seconds = Math.round(ms / 1000);
+      if (seconds < 60) return `${seconds}s`;
+      return `${Math.round(seconds / 60)}m ${seconds % 60}s`;
+    }
+
+    function renderList(items: string[], containerId: string) {
+      const el = document.getElementById(containerId)!;
+      if (!items || items.length === 0) {
+        el.closest('.hidden, [class*="hidden"]')?.classList.remove('hidden');
+        el.innerHTML = '<li class="text-sm text-mute">None reported.</li>';
+        return;
+      }
+      el.innerHTML = items.map(item =>
+        `<li class="flex items-start gap-2 text-sm text-body">
+          <span class="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-link"></span>
+          <span>${escapeHtml(item)}</span>
+        </li>`
+      ).join('');
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    async function loadSources(id: number) {
+      const sourcesLoading = document.getElementById('sources-loading')!;
+      const sourcesList = document.getElementById('sources-list')!;
+      const sourcesEmpty = document.getElementById('sources-empty')!;
+      const sourcesError = document.getElementById('sources-error')!;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${id}/sources`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const sources = data.sources || [];
+
+        sourcesLoading.classList.add('hidden');
+
+        if (sources.length === 0) {
+          sourcesEmpty.classList.remove('hidden');
+          return;
+        }
+
+        sourcesList.innerHTML = sources.map((s: any) => {
+          const domain = s.domain || (s.url ? new URL(s.url).hostname : '—');
+          const rankBadge = s.rank ? `<span class="text-xs text-mute">#${s.rank}</span>` : '';
+          const statusDot = s.status === 'success' ? 'bg-green-500' : s.status === 'failed' ? 'bg-red-500' : 'bg-mute';
+          const wordCount = s.word_count ? `${s.word_count.toLocaleString()} words` : '';
+
+          return `
+            <div class="flex items-start gap-3 rounded-sm border border-hairline-soft p-3">
+              <div class="mt-1 h-2 w-2 flex-shrink-0 rounded-full ${statusDot}"></div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-medium text-ink truncate">
+                    ${s.url
+                      ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="no-underline hover:underline text-link">${escapeHtml(s.title)}</a>`
+                      : escapeHtml(s.title)
+                    }
+                  </p>
+                  ${rankBadge}
+                </div>
+                <div class="mt-1 flex items-center gap-3 text-xs text-mute">
+                  <span>${escapeHtml(domain)}</span>
+                  <span class="capitalize">${escapeHtml(s.source_type || 'web')}</span>
+                  ${wordCount ? `<span>${wordCount}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        sourcesList.classList.remove('hidden');
+      } catch {
+        sourcesLoading.classList.add('hidden');
+        sourcesError.classList.remove('hidden');
+      }
+    }
+
+    async function loadResearch() {
+      if (!researchId || isNaN(researchId)) {
+        showError('Invalid research ID.');
+        return;
+      }
+
+      showState('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${researchId}`);
+        if (!res.ok) {
+          if (res.status === 404) {
+            showError('This research run was not found.');
+            return;
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        // Fill header
+        document.getElementById('topic')!.textContent = data.topic;
+
+        const badge = document.getElementById('status-badge')!;
+        badge.textContent = statusLabels[data.status] || data.status;
+        badge.className = `inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[data.status] || statusColors.pending}`;
+
+        document.getElementById('date')!.textContent = formatDate(data.created_at);
+
+        // Sources link
+        const sourcesLink = document.getElementById('sources-link')!;
+        sourcesLink.href = `#sources-section`;
+        document.getElementById('sources-count')!.textContent = `${data.sources_found ?? 0} sources`;
+
+        // Stats
+        document.getElementById('stat-sources')!.textContent = String(data.sources_found ?? 0);
+        document.getElementById('stat-sources-used')!.textContent = String(data.sources_used ?? 0);
+        document.getElementById('stat-findings')!.textContent = String(data.result?.findings?.length ?? 0);
+        document.getElementById('stat-duration')!.textContent = formatDuration(data.started_at, data.completed_at);
+
+        // Result sections
+        if (data.result) {
+          const r = data.result;
+
+          if (r.summary) {
+            document.getElementById('summary-section')!.classList.remove('hidden');
+            document.getElementById('summary-text')!.textContent = r.summary;
+          }
+
+          if (r.findings?.length > 0) {
+            document.getElementById('findings-section')!.classList.remove('hidden');
+            renderList(r.findings, 'findings-list');
+          }
+
+          if (r.problems?.length > 0) {
+            document.getElementById('problems-section')!.classList.remove('hidden');
+            renderList(r.problems, 'problems-list');
+          }
+
+          if (r.opportunities?.length > 0) {
+            document.getElementById('opportunities-section')!.classList.remove('hidden');
+            renderList(r.opportunities, 'opportunities-list');
+          }
+
+          if (r.uncertainties?.length > 0) {
+            document.getElementById('uncertainties-section')!.classList.remove('hidden');
+            renderList(r.uncertainties, 'uncertainties-list');
+          }
+        } else if (data.status === 'running') {
+          // Show running state
+          document.getElementById('summary-section')!.classList.remove('hidden');
+          document.getElementById('summary-text')!.innerHTML =
+            '<span class="inline-flex items-center gap-2"><span class="h-2 w-2 animate-pulse rounded-full bg-link"></span> Research is currently in progress...</span>';
+        }
+
+        // Show sources section
+        document.getElementById('sources-section')!.classList.remove('hidden');
+        loadSources(researchId);
+
+        showState('content');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to load research';
+        showError(msg);
+      }
+    }
+
+    loadResearch();
+  </script>
+</DashboardLayout>

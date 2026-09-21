@@ -13,24 +13,30 @@ import FAQ from '../components/FAQ.astro';
 >
 
   <!-- Hero -->
-  <section class="container-page pt-20 pb-16 md:pt-28 md:pb-24">
-    <div class="mx-auto max-w-4xl text-center">
-      <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
-        Early access — free to start
-      </span>
-      <h1 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl lg:text-5xl">
-        Stop guessing what to build. Start with the research.
-      </h1>
-      <p class="mx-auto mt-6 max-w-2xl text-lg text-body">
-        AI Idea Researcher scans industry trends, competitor moves, and market signals every day — then surfaces concrete product ideas backed by real data.
-      </p>
-      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
-          Start for free
-        </a>
-        <a href="/features" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
-          See how it works
-        </a>
+  <section class="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24">
+    {/* Mesh gradient glow */}
+    <div class="pointer-events-none absolute inset-0 -z-10">
+      <div class="hero-glow absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/4 rounded-full opacity-50 blur-3xl"></div>
+    </div>
+    <div class="container-page">
+      <div class="mx-auto max-w-4xl text-center">
+        <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
+          Early access — free to start
+        </span>
+        <h1 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+          Stop guessing what to build. Start with the research.
+        </h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg text-body">
+          AI Idea Researcher scans industry trends, competitor moves, and market signals every day — then surfaces concrete product ideas backed by real data.
+        </p>
+        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+            Start for free
+          </a>
+          <a href="/features" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
+            See how it works
+          </a>
+        </div>
       </div>
     </div>
   </section>

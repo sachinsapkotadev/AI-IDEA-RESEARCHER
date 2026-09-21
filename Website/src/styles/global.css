@@ -2,11 +2,10 @@
 
 /* ============================================
    AI IDEA RESEARCHER — Design Tokens
-   Based on DESIGN.md analysis
+   Vercel Geist system from DESIGN.md
    
-   NOTE: Custom spacing tokens use --space-* prefix
-   to avoid clashing with Tailwind v4's --spacing-*
-   internal tokens (used by max-w-*, p-*, gap-*, etc.)
+   Custom spacing uses --space-* prefix to avoid
+   clashing with Tailwind v4 internal --spacing-*
    ============================================ */
 
 @theme {
@@ -42,7 +41,7 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* --- Custom Design Spacing (uses --space-* prefix) --- */
+  /* --- Custom Spacing (uses --space-* prefix) --- */
   --space-xxs: 4px;
   --space-xs: 8px;
   --space-sm: 12px;
@@ -76,11 +75,13 @@
 }
 
 /* ============================================
-   Dark Mode — override design tokens on html.dark
-   Inverts the Vercel Geist palette for dark surfaces
+   Dark Mode — Vercel Geist dark palette
+   Overrides design tokens + fixes hardcoded
+   Tailwind utilities that don't use tokens.
    ============================================ */
 
 html.dark {
+  /* --- Surface tokens --- */
   --color-primary: #ffffff;
   --color-on-primary: #171717;
   --color-ink: #ededed;
@@ -91,6 +92,8 @@ html.dark {
   --color-hairline-soft: #1a1a1a;
   --color-canvas: #0a0a0a;
   --color-canvas-elevated: #141414;
+
+  /* --- Accent tokens --- */
   --color-link: #3291ff;
   --color-link-deep: #5ba0f5;
   --color-link-soft: #0a2d5c;
@@ -108,23 +111,30 @@ html.dark {
   --color-pink: #f472b6;
   --color-magenta: #ec4899;
 
+  /* --- Dark shadows --- */
   --shadow-whisper: 0px 1px 1px rgba(0, 0, 0, 0.2);
   --shadow-floating: 0px 2px 2px rgba(0, 0, 0, 0.15), 0px 8px 16px -4px rgba(0, 0, 0, 0.3);
-
-  /* Fix hardcoded Tailwind color classes for dark mode */
-  --tw-green-50: #052e16;
-  --tw-green-100: #14532d;
-  --tw-green-200: #166534;
-  --tw-green-800: #86efac;
-  --tw-green-300: #22c55e;
-  --tw-red-50: #450a0a;
-  --tw-red-200: #7f1d1d;
-  --tw-red-800: #fca5a5;
-  --tw-amber-200: #78350f;
-  --tw-amber-800: #fcd34d;
-  --tw-blue-200: #1e3a5f;
-  --tw-blue-800: #93c5fd;
 }
+
+/*
+  Hardcoded Tailwind utility overrides.
+  Tailwind v4 bakes literal colors into utilities.
+  These classes exist in source — we override them under html.dark.
+  Token-based classes (text-ink, bg-canvas etc) are already handled above.
+*/
+html.dark .bg-white { background-color: #1a1a1a !important; }
+html.dark .bg-red-50 { background-color: #450a0a !important; }
+
+html.dark .text-green-800 { color: #86efac !important; }
+html.dark .text-amber-800 { color: #fcd34d !important; }
+html.dark .text-red-800 { color: #fca5a5 !important; }
+html.dark .text-blue-800 { color: #93c5fd !important; }
+html.dark .text-amber-400 { color: #fbbf24 !important; }
+
+html.dark .border-green-200 { border-color: #166534 !important; }
+html.dark .border-amber-200 { border-color: #78350f !important; }
+html.dark .border-red-200 { border-color: #7f1d1d !important; }
+html.dark .border-blue-200 { border-color: #1e3a5f !important; }
 
 /* ============================================
    Base Styles
@@ -143,17 +153,13 @@ body {
   line-height: 1.6;
 }
 
-/* Focus visible for accessibility */
 :focus-visible {
   outline: 2px solid var(--color-link);
   outline-offset: 2px;
 }
 
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -185,4 +191,23 @@ body {
       padding-bottom: var(--space-section);
     }
   }
+}
+
+/* ============================================
+   Hero Mesh Gradient (Vercel-style glow)
+   ============================================ */
+
+.hero-glow {
+  background: radial-gradient(
+    ellipse at 30% 50%,
+    rgba(0, 112, 243, 0.18) 0%,
+    rgba(121, 40, 202, 0.14) 30%,
+    rgba(255, 0, 128, 0.10) 55%,
+    rgba(80, 227, 194, 0.08) 75%,
+    transparent 100%
+  );
+}
+
+html.dark .hero-glow {
+  opacity: 0.35;
 }

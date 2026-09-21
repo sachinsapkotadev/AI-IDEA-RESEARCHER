@@ -1,18 +1,5 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import Card from '../../components/Card.astro';
-import Badge from '../../components/Badge.astro';
-import { DEMO_MODELS } from '../../lib/api/demo';
-
-const statusColors: Record<string, 'success' | 'error'> = {
-  active: 'success',
-  unavailable: 'error',
-};
-
-function formatDate(iso?: string) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
 ---
 
 <DashboardLayout title="Models — AI Idea Researcher">
@@ -23,53 +10,40 @@ function formatDate(iso?: string) {
       <p class="mt-1 text-sm text-body">AI models configured for research and analysis tasks.</p>
     </div>
 
-    {/* Demo Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
-      <span class="font-medium">Demo mode</span> — showing configured models.
+    {/* Status Banner */}
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800">
+      <span class="font-medium">Not connected yet.</span> Model registry will be available when the backend exposes model configuration endpoints.
     </div>
 
-    {/* Models Table */}
-    <Card padding="sm" class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-hairline text-left">
-            <th class="pb-3 pr-4 font-medium text-mute">Provider</th>
-            <th class="pb-3 pr-4 font-medium text-mute">Model</th>
-            <th class="pb-3 pr-4 font-medium text-mute">Status</th>
-            <th class="hidden pb-3 pr-4 font-medium text-mute lg:table-cell">Capabilities</th>
-            <th class="hidden pb-3 pr-4 font-medium text-mute sm:table-cell">Priority</th>
-            <th class="hidden pb-3 font-medium text-mute md:table-cell">Last Checked</th>
-          </tr>
-        </thead>
-        <tbody>
-          {DEMO_MODELS.map((model) => (
-            <tr class="border-b border-hairline-soft last:border-0">
-              <td class="py-3 pr-4">
-                <p class="font-medium text-ink">{model.provider}</p>
-              </td>
-              <td class="py-3 pr-4">
-                <p class="text-ink">{model.name}</p>
-              </td>
-              <td class="py-3 pr-4">
-                <Badge variant={statusColors[model.status]}>{model.status}</Badge>
-              </td>
-              <td class="hidden py-3 pr-4 lg:table-cell">
-                <div class="flex flex-wrap gap-1">
-                  {model.capabilities.map((cap) => (
-                    <span class="rounded-full bg-hairline-soft px-2 py-0.5 text-xs text-body">{cap}</span>
-                  ))}
-                </div>
-              </td>
-              <td class="hidden py-3 pr-4 text-mute sm:table-cell">
-                #{model.priority}
-              </td>
-              <td class="hidden py-3 text-mute md:table-cell">
-                {formatDate(model.last_checked)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Card>
+    {/* Known models from backend config */}
+    <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+      <h2 class="text-base font-semibold text-ink mb-4">Configured Models</h2>
+      <p class="text-sm text-body mb-4">The backend uses the following AI providers via OpenRouter:</p>
+      <div class="space-y-3">
+        {[
+          { provider: 'OpenRouter', note: 'AI provider gateway — models configured server-side' },
+        ].map((item) => (
+          <div class="flex items-center gap-3 rounded-sm border border-hairline-soft p-3">
+            <div class="h-2 w-2 rounded-full bg-hairline"></div>
+            <div>
+              <p class="text-sm font-medium text-ink">{item.provider}</p>
+              <p class="text-xs text-mute">{item.note}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Future features preview */}
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">Model health checks</p>
+        <p class="mt-1 text-xs text-faint">Monitor model availability and latency</p>
+      </div>
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">Priority routing</p>
+        <p class="mt-1 text-xs text-faint">Configure model selection and fallbacks</p>
+      </div>
+    </div>
   </div>
 </DashboardLayout>

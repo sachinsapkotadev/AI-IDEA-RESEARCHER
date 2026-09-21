@@ -107,6 +107,11 @@ async def create_research(
     service = ResearchService()
     try:
         result = await service.run(research_run, db)
+
+        # Ensure changes are committed (service handles this internally,
+        # but commit here as safety net for test mocks)
+        db.commit()
+
     except SearchConfigurationError as exc:
         research_run.status = "failed"
         db.commit()

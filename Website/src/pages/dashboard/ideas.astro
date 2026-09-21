@@ -1,25 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import Card from '../../components/Card.astro';
-import Badge from '../../components/Badge.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import { DEMO_IDEAS } from '../../lib/api/demo';
-
-const statusColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
-  validated: 'success',
-  draft: 'default',
-  in_progress: 'info',
-  archived: 'default',
-};
-
-const complexityColors: Record<string, string> = {
-  low: 'text-success',
-  medium: 'text-warning',
-  high: 'text-error',
-};
-
-const categories = ['All', ...Array.from(new Set(DEMO_IDEAS.map(i => i.category)))];
-const activeCategory = 'All';
 ---
 
 <DashboardLayout title="Ideas — AI Idea Researcher">
@@ -30,12 +11,12 @@ const activeCategory = 'All';
       <p class="mt-1 text-sm text-body">Browse discovered startup ideas and opportunities.</p>
     </div>
 
-    {/* Demo Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
-      <span class="font-medium">Demo mode</span> — showing sample ideas.
+    {/* Status Banner */}
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800">
+      <span class="font-medium">Coming soon.</span> Ideas will be generated from completed research runs when the backend Idea endpoints are implemented.
     </div>
 
-    {/* Search & Filters */}
+    {/* Search & Filters (visual placeholder) */}
     <div class="space-y-3">
       <div class="relative">
         <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -45,57 +26,31 @@ const activeCategory = 'All';
         <input
           type="text"
           placeholder="Search ideas..."
-          class="w-full rounded-sm border border-hairline bg-canvas-elevated py-2 pl-10 pr-4 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+          disabled
+          class="w-full rounded-sm border border-hairline bg-hairline-soft py-2 pl-10 pr-4 text-sm text-mute cursor-not-allowed"
         />
-      </div>
-      <div class="flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <button
-            class:list={[
-              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-              cat === activeCategory
-                ? 'border-ink bg-ink text-on-primary'
-                : 'border-hairline bg-canvas-elevated text-body hover:border-ink hover:text-ink',
-            ]}
-          >
-            {cat}
-          </button>
-        ))}
       </div>
     </div>
 
-    {/* Ideas Grid */}
-    {DEMO_IDEAS.length === 0 ? (
-      <EmptyState
-        icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>'
-        title="No ideas yet"
-        description="Run a research session to start discovering ideas."
-        actionLabel="Start Research"
-        actionHref="/dashboard/research"
-      />
-    ) : (
-      <div class="grid gap-4 md:grid-cols-2">
-        {DEMO_IDEAS.map((idea) => (
-          <Card padding="md">
-            <div class="space-y-3">
-              <div>
-                <h3 class="text-base font-semibold text-ink">{idea.title}</h3>
-                <p class="mt-1 text-sm text-body line-clamp-2">{idea.problem}</p>
-              </div>
-              <div class="flex flex-wrap items-center gap-2">
-                <Badge variant="info">{idea.category}</Badge>
-                <Badge variant={statusColors[idea.status]}>{idea.status}</Badge>
-                <span class:list={['text-xs font-medium capitalize', complexityColors[idea.technical_complexity]]}>
-                  {idea.technical_complexity} complexity
-                </span>
-              </div>
-              <p class="text-xs text-mute">
-                Target: {idea.target_users}
-              </p>
-            </div>
-          </Card>
-        ))}
+    {/* Empty State */}
+    <EmptyState
+      icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>'
+      title="No ideas yet"
+      description="Ideas will appear here once the backend Idea endpoints are connected. Run a research session to start generating ideas."
+      actionLabel="Start Research"
+      actionHref="/dashboard/research"
+    />
+
+    {/* Future features preview */}
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">Idea categories</p>
+        <p class="mt-1 text-xs text-faint">Filter by category, status, complexity</p>
       </div>
-    )}
+      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-sm font-medium text-mute">Idea details</p>
+        <p class="mt-1 text-xs text-faint">View problem, solution, target users</p>
+      </div>
+    </div>
   </div>
 </DashboardLayout>

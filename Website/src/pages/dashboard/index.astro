@@ -3,35 +3,15 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StatCard from '../../components/StatCard.astro';
 import Card from '../../components/Card.astro';
 import Badge from '../../components/Badge.astro';
-import { DEMO_RESEARCH, DEMO_IDEAS, DEMO_AGENTS } from '../../lib/api/demo';
 
 const hour = new Date().getHours();
 const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-
-const recentIdeas = DEMO_IDEAS.slice(0, 3);
-const recentResearch = DEMO_RESEARCH.slice(0, 3);
-
-const statusColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
-  completed: 'success',
-  running: 'info',
-  pending: 'warning',
-  failed: 'error',
-  validated: 'success',
-  draft: 'default',
-  in_progress: 'info',
-  idle: 'default',
-};
-
-const runningAgents = DEMO_AGENTS.filter(a => a.status === 'running').length;
-const idleAgents = DEMO_AGENTS.filter(a => a.status === 'idle').length;
 ---
 
 <DashboardLayout title="Dashboard — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-8">
-    {/* Demo Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
-      <span class="font-medium">Demo mode</span> — connect your backend for live data.
-    </div>
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm"></div>
 
     {/* Greeting */}
     <div>
@@ -41,35 +21,15 @@ const idleAgents = DEMO_AGENTS.filter(a => a.status === 'idle').length;
 
     {/* Stats Grid */}
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <StatCard label="Research Runs" value="4" change="+1 this week" changeType="up" />
-      <StatCard label="Ideas Discovered" value="4" change="+3 this week" changeType="up" />
-      <StatCard label="Active Agents" value="7" change={`${runningAgents} running`} changeType="neutral" />
-      <StatCard label="Reports Generated" value="2" change="+1 this week" changeType="up" />
+      <StatCard id="stat-research" label="Research Runs" value="—" change="" changeType="neutral" />
+      <StatCard id="stat-sources" label="Sources Collected" value="—" change="" changeType="neutral" />
+      <StatCard id="stat-status" label="Backend" value="Checking..." change="" changeType="neutral" />
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-5">
+        <p class="text-sm text-mute">Ideas</p>
+        <p class="mt-1 text-2xl font-semibold text-ink">—</p>
+        <p class="mt-1 text-xs font-medium text-mute">Coming in Phase 5</p>
+      </div>
     </div>
-
-    {/* Recent Ideas */}
-    <section>
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-ink">Recent Ideas</h2>
-        <a href="/dashboard/ideas" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
-      </div>
-      <div class="grid gap-4 md:grid-cols-3">
-        {recentIdeas.map((idea) => (
-          <Card padding="sm">
-            <div class="space-y-2">
-              <div class="flex items-center gap-2">
-                <h3 class="text-sm font-medium text-ink truncate">{idea.title}</h3>
-              </div>
-              <p class="text-xs text-body line-clamp-2">{idea.problem}</p>
-              <div class="flex items-center gap-2 pt-1">
-                <Badge variant="info">{idea.category}</Badge>
-                <Badge variant={statusColors[idea.status]}>{idea.status}</Badge>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </section>
 
     {/* Recent Research */}
     <section>
@@ -77,47 +37,189 @@ const idleAgents = DEMO_AGENTS.filter(a => a.status === 'idle').length;
         <h2 class="text-lg font-semibold text-ink">Recent Research</h2>
         <a href="/dashboard/research" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
       </div>
-      <div class="grid gap-4 md:grid-cols-3">
-        {recentResearch.map((r) => (
-          <Card padding="sm">
-            <div class="space-y-2">
-              <h3 class="text-sm font-medium text-ink line-clamp-1">{r.topic}</h3>
-              <div class="flex items-center gap-2">
-                <Badge variant={statusColors[r.status]}>{r.status}</Badge>
-                <span class="text-xs text-mute">{r.ideas_count} ideas</span>
-              </div>
-              <p class="text-xs text-mute">
-                {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                {r.duration ? ` · ${Math.round(r.duration / 60)}m` : ''}
-              </p>
-            </div>
-          </Card>
-        ))}
+
+      {/* Loading */}
+      <div id="research-loading" class="flex items-center justify-center py-12">
+        <div class="h-6 w-6 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+      </div>
+
+      {/* Error */}
+      <div id="research-error" class="hidden rounded-md border border-hairline bg-canvas-elevated p-8 text-center">
+        <p class="text-sm text-body">Unable to load research data.</p>
+        <p class="mt-1 text-xs text-mute">Start the backend server to see live data.</p>
+      </div>
+
+      {/* Empty */}
+      <div id="research-empty" class="hidden rounded-md border border-hairline bg-canvas-elevated p-8 text-center">
+        <p class="text-sm text-body">No research runs yet.</p>
+        <a href="/dashboard/research" class="mt-3 inline-flex items-center text-sm text-link font-medium no-underline hover:underline">Start your first research →</a>
+      </div>
+
+      {/* Table */}
+      <div id="research-table" class="hidden rounded-md border border-hairline bg-canvas-elevated overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-hairline text-left">
+              <th class="pb-3 pr-4 pl-4 font-medium text-mute">Topic</th>
+              <th class="pb-3 pr-4 font-medium text-mute">Status</th>
+              <th class="hidden pb-3 pr-4 font-medium text-mute sm:table-cell">Date</th>
+              <th class="hidden pb-3 pr-4 font-medium text-mute md:table-cell">Sources</th>
+              <th class="pb-3 pr-4 font-medium text-mute text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="research-tbody"></tbody>
+        </table>
       </div>
     </section>
 
-    {/* Agent Status Summary */}
+    {/* Quick Actions */}
     <section>
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-ink">Agent Status</h2>
-        <a href="/dashboard/agents" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
+      <h2 class="text-lg font-semibold text-ink mb-4">Quick Actions</h2>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <a href="/dashboard/research" class="flex items-center gap-3 rounded-md border border-hairline bg-canvas-elevated p-4 no-underline transition-colors hover:bg-hairline-soft">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
+            <svg class="h-5 w-5 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink">New Research</p>
+            <p class="text-xs text-mute">Start a research run</p>
+          </div>
+        </a>
+        <a href="/dashboard/ideas" class="flex items-center gap-3 rounded-md border border-hairline bg-canvas-elevated p-4 no-underline transition-colors hover:bg-hairline-soft">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
+            <svg class="h-5 w-5 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink">Browse Ideas</p>
+            <p class="text-xs text-mute">View discovered ideas</p>
+          </div>
+        </a>
+        <a href="/dashboard/settings" class="flex items-center gap-3 rounded-md border border-hairline bg-canvas-elevated p-4 no-underline transition-colors hover:bg-hairline-soft">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-hairline-soft">
+            <svg class="h-5 w-5 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink">Settings</p>
+            <p class="text-xs text-mute">Configure your account</p>
+          </div>
+        </a>
       </div>
-      <Card>
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {DEMO_AGENTS.map((agent) => (
-            <div class="flex items-center gap-3">
-              <div class:list={[
-                'h-2 w-2 rounded-full flex-shrink-0',
-                agent.status === 'running' ? 'bg-link' : agent.status === 'error' ? 'bg-error' : 'bg-mute',
-              ]}></div>
-              <div class="min-w-0">
-                <p class="text-sm font-medium text-ink truncate">{agent.name}</p>
-                <p class="text-xs text-mute capitalize">{agent.status}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
     </section>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    const statusColors: Record<string, string> = {
+      completed: 'bg-green-50 text-green-800 border-green-200',
+      running: 'bg-link-soft text-blue-800 border-blue-200',
+      pending: 'bg-warning-soft text-amber-800 border-amber-200',
+      failed: 'bg-red-50 text-red-800 border-red-200',
+    };
+
+    const backendStatusEl = document.getElementById('backend-status')!;
+    const statResearch = document.getElementById('stat-research')!;
+    const statSources = document.getElementById('stat-sources')!;
+    const statStatus = document.getElementById('stat-status')!;
+    const researchLoading = document.getElementById('research-loading')!;
+    const researchError = document.getElementById('research-error')!;
+    const researchEmpty = document.getElementById('research-empty')!;
+    const researchTable = document.getElementById('research-table')!;
+    const researchTbody = document.getElementById('research-tbody')!;
+
+    function showResearchState(state: 'loading' | 'error' | 'empty' | 'table') {
+      researchLoading.classList.toggle('hidden', state !== 'loading');
+      researchError.classList.toggle('hidden', state !== 'error');
+      researchEmpty.classList.toggle('hidden', state !== 'empty');
+      researchTable.classList.toggle('hidden', state !== 'table');
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    async function init() {
+      // Check health
+      let isHealthy = false;
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        isHealthy = res.ok;
+      } catch {}
+
+      backendStatusEl.classList.remove('hidden');
+      if (isHealthy) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+        statStatus.querySelector('p:nth-child(2)')!.textContent = 'Online';
+        statStatus.querySelector('p:nth-child(3)')!.textContent = 'Connected';
+        statStatus.querySelector('p:nth-child(3)')!.className = 'mt-1 text-xs font-medium text-green-800';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server for live data.';
+        statStatus.querySelector('p:nth-child(2)')!.textContent = 'Offline';
+        statStatus.querySelector('p:nth-child(3)')!.textContent = 'Not connected';
+        statStatus.querySelector('p:nth-child(3)')!.className = 'mt-1 text-xs font-medium text-amber-800';
+      }
+
+      // Load research list
+      try {
+        const res = await fetch(`${API_BASE}/api/research?page=1&page_size=5`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const items = data.items || [];
+        const total = data.total || 0;
+
+        // Update stats
+        statResearch.querySelector('p:nth-child(2)')!.textContent = String(total);
+
+        let totalSources = 0;
+        items.forEach((r: any) => { totalSources += r.sources_found || 0; });
+        statSources.querySelector('p:nth-child(2)')!.textContent = String(totalSources);
+
+        if (items.length === 0) {
+          showResearchState('empty');
+          return;
+        }
+
+        researchTbody.innerHTML = items.map((r: any) => {
+          const colorClass = statusColors[r.status] || statusColors.pending;
+          return `
+            <tr class="border-b border-hairline-soft last:border-0 hover:bg-hairline-soft/50">
+              <td class="py-3 pr-4 pl-4">
+                <a href="/dashboard/research/${r.id}" class="font-medium text-ink no-underline hover:underline">${escapeHtml(r.topic)}</a>
+              </td>
+              <td class="py-3 pr-4">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorClass}">${r.status}</span>
+              </td>
+              <td class="hidden py-3 pr-4 text-mute sm:table-cell">${formatDate(r.created_at)}</td>
+              <td class="hidden py-3 pr-4 text-mute md:table-cell">${r.sources_found ?? '—'}</td>
+              <td class="py-3 pr-4 text-right">
+                <a href="/dashboard/research/${r.id}" class="text-sm text-link font-medium no-underline hover:underline">View</a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        showResearchState('table');
+      } catch {
+        showResearchState('error');
+      }
+    }
+
+    init();
+  </script>
 </DashboardLayout>

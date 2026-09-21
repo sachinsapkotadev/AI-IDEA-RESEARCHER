@@ -52,6 +52,14 @@ def classify_source(url: str) -> SourceQuality:
     if not hostname:
         return SourceQuality.UNKNOWN
 
+    # Check documentation domains first (before generic TLD check)
+    if hostname in _DOCS_DOMAINS or any(
+        hostname.endswith(f".{d}") for d in _DOCS_DOMAINS
+    ):
+        return SourceQuality.DOCUMENTATION
+    if "docs." in hostname or "/docs/" in path or "/documentation/" in path:
+        return SourceQuality.DOCUMENTATION
+
     # Check official domains
     if any(hostname.endswith(tld) for tld in _OFFICIAL_TLDS):
         return SourceQuality.OFFICIAL
@@ -63,14 +71,6 @@ def classify_source(url: str) -> SourceQuality:
         hostname.endswith(f".{d}") for d in _NEWS_DOMAINS
     ):
         return SourceQuality.NEWS
-
-    # Check documentation domains
-    if hostname in _DOCS_DOMAINS or any(
-        hostname.endswith(f".{d}") for d in _DOCS_DOMAINS
-    ):
-        return SourceQuality.DOCUMENTATION
-    if "docs." in hostname or "/docs/" in path or "/documentation/" in path:
-        return SourceQuality.DOCUMENTATION
 
     # Check community domains
     if hostname in _COMMUNITY_DOMAINS:

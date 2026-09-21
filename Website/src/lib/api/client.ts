@@ -1,162 +1,160 @@
+/**
+ * API client for the AI Idea Researcher backend.
+ *
+ * All backend communication goes through this module.
+ * Uses only PUBLIC_* env vars exposed to the browser.
+ */
+
+import type {
+  HealthResponse,
+  ResearchRun,
+  ResearchListResponse,
+  ResearchCreateRequest,
+  ResearchSourcesResponse,
+} from './types';
+
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+// ---- Error Handling ----
 
 export class ApiError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  code?: string;
+
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
   }
 }
 
+/**
+ * Parse backend error response into a user-friendly message.
+ */
+function parseErrorMessage(data: unknown, status: number): string {
+  if (typeof data === 'object' && data !== null) {
+    const obj = data as Record<string, unknown>;
+
+    // AIErrorResponse format: { detail: { code, message } }
+    if (obj.detail && typeof obj.detail === 'object') {
+      const detail = obj.detail as Record<string, unknown>;
+      if (detail.message) return String(detail.message);
+      if (detail.code) return String(detail.code);
+    }
+
+    // Simple detail string
+    if (typeof obj.detail === 'string') return obj.detail;
+
+    // Error message field
+    if (typeof obj.message === 'string') return obj.message;
+    if (typeof obj.error === 'string') return obj.error;
+  }
+
+  // Fallback by status code
+  const statusMessages: Record<number, string> = {
+    400: 'Invalid request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not found',
+    422: 'Validation error',
+    429: 'Too many requests. Try again later.',
+    500: 'Server error',
+    502: 'Backend gateway error',
+    503: 'Service temporarily unavailable',
+    504: 'Request timed out',
+  };
+
+  return statusMessages[status] || `Request failed (${status})`;
+}
+
+/**
+ * Make an API request with proper error handling.
+ */
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
+
+  let res: Response;
   try {
-    const res = await fetch(url, {
+    res = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,
       },
     });
-
-    if (!res.ok) {
-      if (res.status === 401) throw new ApiError('Unauthorized', 401);
-      if (res.status === 403) throw new ApiError('Forbidden', 403);
-      if (res.status === 404) throw new ApiError('Not found', 404);
-      if (res.status >= 500) throw new ApiError('Server error', res.status);
-      throw new ApiError(`Request failed: ${res.status}`, res.status);
-    }
-
-    return await res.json();
   } catch (err) {
-    if (err instanceof ApiError) throw err;
-    // Backend unavailable or network error
-    throw new ApiError('Backend unavailable', 0);
+    // Network failure / backend unavailable
+    throw new ApiError(
+      'Unable to connect to the backend. Please check if the server is running.',
+      0,
+    );
   }
+
+  // Parse response body
+  let data: unknown;
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      data = await res.json();
+    } catch {
+      throw new ApiError('Invalid response from server', res.status);
+    }
+  } else {
+    data = await res.text();
+  }
+
+  if (!res.ok) {
+    const message = parseErrorMessage(data, res.status);
+    const code =
+      typeof data === 'object' && data !== null
+        ? ((data as Record<string, unknown>).detail &&
+            typeof (data as Record<string, unknown>).detail === 'object'
+            ? ((data as Record<string, unknown>).detail as Record<string, unknown>)
+                .code as string | undefined
+            : undefined)
+        : undefined;
+    throw new ApiError(message, res.status, code);
+  }
+
+  return data as T;
 }
 
 // ---- Health ----
-export async function getHealth() {
-  return request<{ status: string }>('/api/health');
+
+export async function getHealth(): Promise<HealthResponse> {
+  return request<HealthResponse>('/health');
 }
 
 // ---- Research ----
-export interface Research {
-  id: string;
-  topic: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  created_at: string;
-  duration?: number;
-  ideas_count?: number;
-  report_id?: string;
+
+export async function getResearchList(
+  page = 1,
+  pageSize = 20,
+): Promise<ResearchListResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<ResearchListResponse>(`/api/research?${params}`);
 }
 
-export async function getResearch(): Promise<Research[]> {
-  return request<Research[]>('/api/research');
+export async function getResearchById(id: number): Promise<ResearchRun> {
+  return request<ResearchRun>(`/api/research/${id}`);
 }
 
-export async function getResearchById(id: string): Promise<Research> {
-  return request<Research>(`/api/research/${id}`);
-}
-
-export async function createResearch(topic: string): Promise<Research> {
-  return request<Research>('/api/research', {
+export async function createResearch(
+  topic: string,
+): Promise<ResearchRun> {
+  const body: ResearchCreateRequest = { topic };
+  return request<ResearchRun>('/api/research', {
     method: 'POST',
-    body: JSON.stringify({ topic }),
+    body: JSON.stringify(body),
   });
 }
 
-// ---- Ideas ----
-export interface Idea {
-  id: string;
-  title: string;
-  problem: string;
-  target_users: string;
-  solution: string;
-  category: string;
-  status: 'draft' | 'validated' | 'in_progress' | 'archived';
-  technical_complexity: 'low' | 'medium' | 'high';
-  created_at: string;
-  research_id?: string;
-}
-
-export async function getIdeas(): Promise<Idea[]> {
-  return request<Idea[]>('/api/ideas');
-}
-
-export async function getIdeaById(id: string): Promise<Idea> {
-  return request<Idea>(`/api/ideas/${id}`);
-}
-
-// ---- Reports ----
-export interface Report {
-  id: string;
-  title: string;
-  research_id: string;
-  status: 'draft' | 'generated' | 'pushed';
-  created_at: string;
-  github_branch?: string;
-}
-
-export async function getReports(): Promise<Report[]> {
-  return request<Report[]>('/api/reports');
-}
-
-// ---- Agents ----
-export interface Agent {
-  id: string;
-  name: string;
-  type: string;
-  status: 'idle' | 'running' | 'error';
-  model?: string;
-  last_run?: string;
-  tokens_used?: number;
-}
-
-export async function getAgents(): Promise<Agent[]> {
-  return request<Agent[]>('/api/agents');
-}
-
-// ---- Models ----
-export interface Model {
-  id: string;
-  provider: string;
-  name: string;
-  status: 'active' | 'unavailable';
-  capabilities: string[];
-  priority: number;
-  last_checked?: string;
-}
-
-export async function getModels(): Promise<Model[]> {
-  return request<Model[]>('/api/models');
-}
-
-// ---- GitHub ----
-export interface GithubStatus {
-  connected: boolean;
-  repository?: string;
-  branch?: string;
-  recent_branches?: string[];
-  last_sync?: string;
-}
-
-export async function getGithubStatus(): Promise<GithubStatus> {
-  return request<GithubStatus>('/api/github/status');
-}
-
-// ---- Automation ----
-export interface AutomationConfig {
-  daily_research: boolean;
-  schedule: string;
-  topics: string[];
-  last_run?: string;
-  next_run?: string;
-  status: 'active' | 'paused' | 'error';
-  notifications: boolean;
-}
-
-export async function getAutomationStatus(): Promise<AutomationConfig> {
-  return request<AutomationConfig>('/api/automation');
+export async function getResearchSources(
+  researchId: number,
+): Promise<ResearchSourcesResponse> {
+  return request<ResearchSourcesResponse>(`/api/research/${researchId}/sources`);
 }
