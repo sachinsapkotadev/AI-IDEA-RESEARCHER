@@ -13,6 +13,17 @@ export interface DatabaseHealthResponse {
   database: string;
 }
 
+export interface AiHealthResponse {
+  status: string;
+  provider: string;
+  configured_keys: number;
+}
+
+export interface GithubHealthResponse {
+  status: string;
+  configured: boolean;
+}
+
 // ---- Research ----
 export type ResearchStatus = 'pending' | 'running' | 'completed' | 'failed';
 
@@ -27,6 +38,18 @@ export interface ResearchResult {
 }
 
 export interface ResearchRun {
+  id: number;
+  topic: string;
+  status: ResearchStatus;
+  sources_found: number;
+  sources_used: number;
+  result: ResearchResult | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface ResearchRunResponse {
   id: number;
   topic: string;
   status: ResearchStatus;
@@ -71,70 +94,116 @@ export interface ResearchSourcesResponse {
   sources: ResearchSource[];
 }
 
-// ---- API Error ----
-export interface ApiErrorResponse {
-  detail?: string | { code: string; message: string };
+// ---- Analysis ----
+export interface AnalysisAcceptResponse {
+  research_id: number;
+  status: 'accepted';
+  message: string;
 }
 
-// ---- Future endpoints (not yet implemented in backend) ----
-// These types are placeholders for when the backend adds these endpoints.
+export interface AnalysisStatusResponse {
+  research_id: number;
+  status: string;
+  current_agent: string | null;
+  completed_agents: number;
+  total_agents: number;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface AgentRun {
+  agent_name: string;
+  status: string;
+  model: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+}
+
+export interface AgentsResponse {
+  research_id: number;
+  agents: AgentRun[];
+}
+
+// ---- Ideas ----
+export type IdeaStatus = 'draft' | 'validated' | 'in_progress' | 'archived';
 
 export interface Idea {
   id: number;
+  research_run_id: number;
   title: string;
   problem: string;
-  target_users: string;
   solution: string;
-  category: string;
-  status: 'draft' | 'validated' | 'in_progress' | 'archived';
-  technical_complexity: 'low' | 'medium' | 'high';
+  target_users: string;
+  mvp: string;
+  monetization: string;
+  differentiation: string;
+  technical_complexity: string;
+  risks: string;
+  validation_plan: string;
+  status: string;
   created_at: string;
-  research_id?: number;
+  updated_at: string;
 }
 
-export interface Report {
-  id: number;
-  title: string;
+export interface IdeaListResponse {
+  items: Idea[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface ResearchIdeasResponse {
   research_id: number;
-  status: 'draft' | 'generated' | 'pushed';
-  created_at: string;
-  github_branch?: string;
+  topic: string;
+  ideas: Idea[];
 }
 
-export interface Agent {
-  id: number;
-  name: string;
-  type: string;
-  status: 'idle' | 'running' | 'error';
-  model?: string;
-  last_run?: string;
-  tokens_used?: number;
+// ---- Report ----
+export interface ReportTriggerResponse {
+  research_id: number;
+  status: string;
+  message?: string;
 }
 
-export interface Model {
-  id: number;
-  provider: string;
-  name: string;
-  status: 'active' | 'unavailable';
-  capabilities: string[];
-  priority: number;
-  last_checked?: string;
+export interface ReportContent {
+  research_id: number;
+  content: string | null;
+  status: string;
+  created_at?: string;
 }
 
-export interface GithubStatus {
-  connected: boolean;
-  repository?: string;
+// ---- GitHub ----
+export interface GithubPublishResponse {
+  research_id: number;
+  status: string;
+  message?: string;
   branch?: string;
-  recent_branches?: string[];
-  last_sync?: string;
 }
 
-export interface AutomationConfig {
-  daily_research: boolean;
-  schedule: string;
-  topics: string[];
-  last_run?: string;
-  next_run?: string;
-  status: 'active' | 'paused' | 'error';
-  notifications: boolean;
+export interface GithubPublicationStatus {
+  research_id: number;
+  status: string;
+  branch?: string;
+  repository?: string;
+  message?: string;
+}
+
+// ---- AI Status ----
+export interface AiStatusResponse {
+  provider: string;
+  configured_key_slots: number;
+  available_key_slots: number;
+  default_model: string;
+  status: string;
+}
+
+export interface AiModelsResponse {
+  models: Record<string, string>;
+}
+
+// ---- API Error ----
+export interface ApiErrorResponse {
+  detail?: string | { code: string; message: string };
 }

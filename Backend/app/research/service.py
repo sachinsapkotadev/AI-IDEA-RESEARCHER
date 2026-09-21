@@ -71,7 +71,8 @@ class ResearchService:
         topic = research_run.topic
         start_time = time.time()
 
-        logger.info("Research pipeline started | topic=%s", topic[:80])
+        resolved_model = self._ai._resolve_model(None, "ResearchPipeline")
+        logger.info("Research pipeline started | topic=%s | model=%s", topic[:80], resolved_model)
 
         # Update status
         research_run.status = ResearchStatus.RUNNING
@@ -82,7 +83,7 @@ class ResearchService:
         agent_run = AgentRun(
             research_run_id=research_run.id,
             agent_name="ResearchPipeline",
-            model=self._ai.model,
+            model=resolved_model,
             status=AgentRunStatus.RUNNING,
             started_at=datetime.now(timezone.utc),
         )
@@ -199,6 +200,7 @@ class ResearchService:
             response = await self._ai.generate(
                 prompt=prompt,
                 system_prompt=SYSTEM_PROMPT,
+                agent_name="ResearchPipeline",
             )
 
             # Parse and validate
@@ -210,6 +212,7 @@ class ResearchService:
             agent_run.completed_at = datetime.now(timezone.utc)
             agent_run.input_tokens = response.usage.input_tokens
             agent_run.output_tokens = response.usage.output_tokens
+            agent_run.provider_key_slot = response.key_slot
 
             # Update research run
             research_run.status = ResearchStatus.COMPLETED
@@ -220,9 +223,11 @@ class ResearchService:
             metrics.duration_seconds = elapsed
 
             logger.info(
-                "Research pipeline completed | topic=%s | duration=%.1fs | "
-                "sources=%d | docs=%d | chars=%d",
+                "Research pipeline completed | topic=%s | model=%s | key_slot=%s | "
+                "duration=%.1fs | sources=%d | docs=%d | chars=%d",
                 topic[:60],
+                resolved_model,
+                response.key_slot,
                 elapsed,
                 metrics.sources_found,
                 metrics.documents_fetched,

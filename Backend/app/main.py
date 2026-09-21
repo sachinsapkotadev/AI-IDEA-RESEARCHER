@@ -12,6 +12,9 @@ from app.api.routes.health import router as health_router
 from app.api.routes.research import router as research_router
 from app.api.routes.analysis import router as analysis_router
 from app.api.routes.ideas import router as ideas_router
+from app.api.routes.report import router as report_router
+from app.api.routes.github import router as github_router
+from app.api.routes.ai_status import router as ai_status_router
 from app.core.config import get_settings
 from app.schemas.health import RootResponse
 
@@ -55,6 +58,9 @@ app.include_router(health_router)
 app.include_router(research_router)
 app.include_router(analysis_router)
 app.include_router(ideas_router)
+app.include_router(report_router)
+app.include_router(github_router)
+app.include_router(ai_status_router)
 
 
 @app.get("/", response_model=RootResponse)

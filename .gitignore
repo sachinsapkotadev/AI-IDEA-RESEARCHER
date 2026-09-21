@@ -45,5 +45,6 @@ local.properties
 __pycache__/
 *.pyc
 *.pyo
+*.db
 .venv/
 venv/

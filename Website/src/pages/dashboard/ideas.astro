@@ -1,7 +1,6 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import EmptyState from '../../components/EmptyState.astro';
 ---
 
 <DashboardLayout title="Ideas — AI Idea Researcher">
@@ -12,63 +11,243 @@ import EmptyState from '../../components/EmptyState.astro';
     ]} />
 
     {/* Header */}
-    <div>
-      <h1 class="text-2xl font-semibold text-ink">Ideas</h1>
-      <p class="mt-1 text-sm text-body">Browse discovered startup ideas and opportunities.</p>
-    </div>
-
-    {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
-      <span class="font-medium">Waiting for idea-generation backend.</span> Ideas will be generated from completed research runs when the multi-agent pipeline is connected.
-    </div>
-
-    {/* Search & Filters — visual structure, disabled */}
-    <div class="space-y-3">
-      <div class="relative">
-        <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-        <input
-          type="text"
-          placeholder="Search ideas..."
-          disabled
-          class="w-full rounded-sm border border-hairline bg-hairline-soft py-2 pl-10 pr-4 text-sm text-mute cursor-not-allowed"
-          aria-label="Search ideas (not yet available)"
-        />
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-ink">Ideas</h1>
+        <p class="mt-1 text-sm text-body">Browse discovered startup ideas and opportunities.</p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        {['All', 'Developer Tools', 'E-commerce', 'SaaS', 'AI/ML'].map((filter) => (
-          <span class="inline-flex items-center rounded-full border border-hairline bg-hairline-soft px-3 py-1 text-xs font-medium text-mute cursor-not-allowed">
-            {filter}
-          </span>
+    </div>
+
+    {/* Backend Status */}
+    <div id="backend-status" class="hidden rounded-md border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    {/* Search */}
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+      </svg>
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Filter by title..."
+        class="w-full rounded-sm border border-hairline bg-canvas-elevated py-2 pl-10 pr-4 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+        aria-label="Filter ideas by title"
+      />
+    </div>
+
+    {/* Loading State */}
+    <div id="loading-state" class="rounded-md border border-hairline bg-canvas-elevated">
+      <div class="animate-pulse">
+        <div class="border-b border-hairline-soft px-4 py-3">
+          <div class="flex gap-4">
+            <div class="h-3 w-1/3 rounded bg-hairline-soft"></div>
+            <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+            <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+          </div>
+        </div>
+        {Array.from({ length: 4 }).map(() => (
+          <div class="border-b border-hairline-soft px-4 py-4 last:border-b-0">
+            <div class="flex gap-4">
+              <div class="h-3 w-2/5 rounded bg-hairline-soft"></div>
+              <div class="h-3 w-16 rounded bg-hairline-soft"></div>
+              <div class="hidden h-3 w-20 rounded bg-hairline-soft sm:block"></div>
+            </div>
+            <div class="mt-2 h-2 w-3/4 rounded bg-hairline-soft"></div>
+          </div>
         ))}
       </div>
     </div>
 
-    {/* Empty State */}
-    <EmptyState
-      icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>'
-      title="No ideas yet"
-      description="Idea generation will appear here once the AI multi-agent pipeline is connected. Run a research session to start the process."
-      actionLabel="Start Research"
-      actionHref="/dashboard/research"
-    />
-
-    {/* Future features preview */}
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Idea list</p>
-        <p class="mt-1 text-xs text-faint">Title, problem, solution, status</p>
+    {/* Error State */}
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-error">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </div>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Idea categories</p>
-        <p class="mt-1 text-xs text-faint">Filter by category, status, complexity</p>
-      </div>
-      <div class="rounded-md border border-dashed border-hairline bg-canvas-elevated p-6 text-center">
-        <p class="text-sm font-medium text-mute">Idea detail</p>
-        <p class="mt-1 text-xs text-faint">Problem, solution, MVP, monetization</p>
-      </div>
+      <h3 class="text-lg font-semibold text-ink">Unable to connect</h3>
+      <p id="error-message" class="mt-2 max-w-sm text-sm text-body"></p>
+      <button
+        onclick="window.location.reload()"
+        class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-opacity hover:opacity-90"
+      >
+        Retry
+      </button>
     </div>
+
+    {/* Empty State */}
+    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-hairline-soft text-mute">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-ink">No ideas yet</h3>
+      <p class="mt-2 max-w-sm text-sm text-body">Ideas are generated from completed research runs via the multi-agent pipeline. Run a research session and then start analysis.</p>
+      <a href="/dashboard/research" class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+        Start Research
+      </a>
+    </div>
+
+    {/* No filter results */}
+    <div id="no-results" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <p class="text-sm text-body">No ideas match your filter.</p>
+      <button id="clear-filter-btn" class="mt-3 text-sm text-link font-medium no-underline hover:underline">
+        Clear filter
+      </button>
+    </div>
+
+    {/* Ideas Grid */}
+    <div id="ideas-grid" class="hidden grid gap-4 sm:grid-cols-2"></div>
+
+    {/* Pagination info */}
+    <div id="pagination-info" class="hidden mt-3 text-sm text-mute"></div>
   </div>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
+    let allIdeas: any[] = [];
+    let currentFilter = '';
+
+    const statusConfig: Record<string, { classes: string; label: string }> = {
+      draft:        { classes: 'bg-hairline-soft text-body border-hairline',      label: 'Draft' },
+      validated:    { classes: 'bg-success-soft text-green-800 border-green-200',  label: 'Validated' },
+      in_progress:  { classes: 'bg-link-soft text-blue-800 border-blue-200',       label: 'In Progress' },
+      archived:     { classes: 'bg-hairline-soft text-mute border-hairline',       label: 'Archived' },
+    };
+
+    const complexityConfig: Record<string, { classes: string }> = {
+      low:    { classes: 'text-success' },
+      medium: { classes: 'text-warning' },
+      high:   { classes: 'text-error' },
+    };
+
+    // Elements
+    const loadingEl = document.getElementById('loading-state')!;
+    const errorEl = document.getElementById('error-state')!;
+    const errorMsgEl = document.getElementById('error-message')!;
+    const emptyEl = document.getElementById('empty-state')!;
+    const noResultsEl = document.getElementById('no-results')!;
+    const gridEl = document.getElementById('ideas-grid')!;
+    const paginationInfoEl = document.getElementById('pagination-info')!;
+    const backendStatusEl = document.getElementById('backend-status')!;
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const clearFilterBtn = document.getElementById('clear-filter-btn')!;
+
+    function showState(state: 'loading' | 'error' | 'empty' | 'grid' | 'no-results') {
+      loadingEl.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      emptyEl.classList.toggle('hidden', state !== 'empty');
+      noResultsEl.classList.toggle('hidden', state !== 'no-results');
+      gridEl.classList.toggle('hidden', state !== 'grid');
+      paginationInfoEl.classList.toggle('hidden', state !== 'grid');
+    }
+
+    function showBackendStatus(connected: boolean) {
+      backendStatusEl.classList.remove('hidden');
+      if (connected) {
+        backendStatusEl.className = 'rounded-md border border-green-200 bg-success-soft px-4 py-3 text-sm text-green-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Connected</span> — backend is available.';
+      } else {
+        backendStatusEl.className = 'rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800';
+        backendStatusEl.innerHTML = '<span class="font-medium">Backend unavailable</span> — start the backend server to see ideas.';
+      }
+    }
+
+    function formatDate(iso: string) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderFiltered() {
+      const filtered = currentFilter
+        ? allIdeas.filter(i => i.title.toLowerCase().includes(currentFilter.toLowerCase()))
+        : allIdeas;
+
+      if (allIdeas.length === 0) {
+        showState('empty');
+        return;
+      }
+
+      if (filtered.length === 0) {
+        showState('no-results');
+        return;
+      }
+
+      gridEl.innerHTML = filtered.map((idea: any) => {
+        const sc = statusConfig[idea.status] || statusConfig.draft;
+        const cc = complexityConfig[idea.technical_complexity] || complexityConfig.medium;
+        return `
+          <a href="/dashboard/ideas/${idea.id}" class="group flex flex-col rounded-md border border-hairline bg-canvas-elevated p-5 no-underline transition-colors hover:bg-hairline-soft/50">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <h3 class="text-sm font-semibold text-ink group-hover:text-link line-clamp-2">${escapeHtml(idea.title)}</h3>
+              <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${sc.classes}">
+                ${sc.label}
+              </span>
+            </div>
+            <p class="text-xs text-body line-clamp-2 mb-3">${escapeHtml(idea.problem)}</p>
+            <div class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-mute">
+              ${idea.technical_complexity ? `<span class="${cc.classes}">Complexity: ${idea.technical_complexity}</span>` : ''}
+              ${idea.created_at ? `<span>${formatDate(idea.created_at)}</span>` : ''}
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      const total = allIdeas.length;
+      paginationInfoEl.textContent = currentFilter
+        ? `Showing ${filtered.length} of ${total} ideas`
+        : `${total} idea${total !== 1 ? 's' : ''}`;
+
+      showState('grid');
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+        if (res.ok) { showBackendStatus(true); return true; }
+      } catch {}
+      showBackendStatus(false);
+      return false;
+    }
+
+    async function loadIdeas() {
+      showState('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ideas?page=1&page_size=100`, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        allIdeas = data.items || [];
+        renderFiltered();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        errorMsgEl.textContent = msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : `Failed to load ideas: ${msg}`;
+        showState('error');
+      }
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      currentFilter = (e.target as HTMLInputElement).value;
+      renderFiltered();
+    });
+
+    clearFilterBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      currentFilter = '';
+      renderFiltered();
+    });
+
+    checkHealth().then(() => loadIdeas());
+  </script>
 </DashboardLayout>

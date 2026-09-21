@@ -24,13 +24,20 @@ def _get_engine() -> Engine:
                 "DATABASE_URL is not set. "
                 "Please configure it in your .env file or environment."
             )
-        _engine = create_engine(
-            _settings.DATABASE_URL,
-            pool_pre_ping=True,
-            pool_size=5,
-            max_overflow=10,
-            echo=_settings.DEBUG,
-        )
+        # SQLite needs check_same_thread=False; pool settings only for non-SQLite
+        is_sqlite = _settings.DATABASE_URL.startswith("sqlite")
+        engine_kwargs: dict = {
+            "echo": _settings.DEBUG,
+        }
+        if is_sqlite:
+            engine_kwargs["connect_args"] = {"check_same_thread": False}
+        else:
+            engine_kwargs.update({
+                "pool_pre_ping": True,
+                "pool_size": 5,
+                "max_overflow": 10,
+            })
+        _engine = create_engine(_settings.DATABASE_URL, **engine_kwargs)
         _SessionLocal = sessionmaker(
             bind=_engine, autocommit=False, autoflush=False
         )

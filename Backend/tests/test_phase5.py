@@ -323,7 +323,7 @@ class TestAgentExecution:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "market_problems": ["Problem 1"],
@@ -336,6 +336,7 @@ class TestAgentExecution:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=100, output_tokens=200),
+            key_slot="00",
         ))
 
         agent = MarketAnalyst(provider=mock_provider)
@@ -362,7 +363,7 @@ class TestAgentExecution:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "competitors": [],
@@ -372,6 +373,7 @@ class TestAgentExecution:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=50, output_tokens=100),
+            key_slot="01",
         ))
 
         agent = CompetitorAnalyst(provider=mock_provider)
@@ -395,7 +397,7 @@ class TestAgentExecution:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "ideas": [
@@ -416,6 +418,7 @@ class TestAgentExecution:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=200, output_tokens=300),
+            key_slot="02",
         ))
 
         agent = IdeaGenerator(provider=mock_provider)
@@ -443,7 +446,7 @@ class TestAgentExecution:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "idea_analyses": [
@@ -459,6 +462,7 @@ class TestAgentExecution:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=100, output_tokens=150),
+            key_slot="03",
         ))
 
         agent = TechnicalAnalyst(provider=mock_provider)
@@ -481,7 +485,7 @@ class TestAgentExecution:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "validation_plans": [
@@ -502,6 +506,7 @@ class TestAgentExecution:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=100, output_tokens=150),
+            key_slot="04",
         ))
 
         agent = ValidationPlanner(provider=mock_provider)
@@ -533,7 +538,7 @@ class TestAgentFailure:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(side_effect=AIProviderError("API down"))
 
         agent = MarketAnalyst(provider=mock_provider)
@@ -557,7 +562,7 @@ class TestAgentFailure:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content="This is not JSON at all",
             usage=MagicMock(input_tokens=50, output_tokens=50),
@@ -589,7 +594,7 @@ class TestAgentRunPersistence:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "market_problems": [],
@@ -629,7 +634,7 @@ class TestAgentRunPersistence:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(side_effect=AIProviderError("Error"))
 
         agent = MarketAnalyst(provider=mock_provider)
@@ -758,7 +763,7 @@ class TestTokenUsagePersistence:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "market_problems": [],
@@ -793,7 +798,7 @@ class TestTokenUsagePersistence:
         run = _create_completed_research(db)
 
         mock_provider = MagicMock()
-        mock_provider.model = "test-model"
+        mock_provider._resolve_model = MagicMock(return_value="test-model")
         mock_provider.generate = AsyncMock(side_effect=AIProviderError("Error"))
 
         agent = MarketAnalyst(provider=mock_provider)
