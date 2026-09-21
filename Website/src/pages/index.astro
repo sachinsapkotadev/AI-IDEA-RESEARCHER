@@ -13,7 +13,7 @@ import FAQ from '../components/FAQ.astro';
 >
 
   <!-- Hero -->
-  <section class="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24 anim-fade-up">
+  <section class="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24 ">
     {/* Mesh gradient glow */}
     <div class="pointer-events-none absolute inset-0 -z-10">
       <div class="hero-glow absolute left-1/2 top-0 h-[700px] w-[1200px] -translate-x-1/2 -translate-y-1/3 rounded-full blur-3xl"></div>
@@ -42,7 +42,7 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- Product explanation -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <div class="mx-auto max-w-3xl text-center">
       <SectionHeader
         title="Built for people who ship products"
@@ -50,15 +50,15 @@ import FAQ from '../components/FAQ.astro';
       />
     </div>
     <div class="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
-      <div class="anim-item rounded-md border border-hairline bg-canvas-elevated p-6 text-center" style="--i:0">
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
         <p class="text-3xl font-semibold text-ink">15 min</p>
         <p class="mt-2 text-sm text-body">Daily research, summarized and scored for you</p>
       </div>
-      <div class="anim-item rounded-md border border-hairline bg-canvas-elevated p-6 text-center" style="--i:1">
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
         <p class="text-3xl font-semibold text-ink">50+</p>
         <p class="mt-2 text-sm text-body">Signal sources: GitHub, Product Hunt, news, forums</p>
       </div>
-      <div class="anim-item rounded-md border border-hairline bg-canvas-elevated p-6 text-center" style="--i:2">
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
         <p class="text-3xl font-semibold text-ink">3 clicks</p>
         <p class="mt-2 text-sm text-body">From discovery to a saved, tagged research report</p>
       </div>
@@ -66,62 +66,62 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- Main capabilities -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="Everything you need to find your next product"
       description="From daily research automation to deep competitive analysis — one tool, no spreadsheets."
     />
     <div class="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <div class="anim-item" style="--i:0"><FeatureCard
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>'
         title="AI Research Agents"
         description="Autonomous agents scan the web daily, pull from multiple sources, and compile findings into structured reports."
-      /></div>
-      <div class="anim-item" style="--i:1"><FeatureCard
+      />
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>'
         title="SaaS Idea Discovery"
         description="Identify gaps in existing markets, spot underserved niches, and find product opportunities others miss."
-      /></div>
-      <div class="anim-item" style="--i:2"><FeatureCard
+      />
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'
         title="Market Research"
         description="Get data on market size, growth trends, and demand signals — no analyst needed. All compiled from public sources."
-      /></div>
-      <div class="anim-item" style="--i:3"><FeatureCard
+      />
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'
         title="Competitor Tracking"
         description="Monitor competitors' launches, pricing changes, and feature updates. Get notified when the market shifts."
-      /></div>
-      <div class="anim-item" style="--i:4"><FeatureCard
+      />
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>'
         title="GitHub Integration"
         description="Track trending repos, watch star growth, and discover open-source projects gaining traction in your niche."
-      /></div>
-      <div class="anim-item" style="--i:5"><FeatureCard
+      />
+      <FeatureCard
         icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
         title="Research Reports"
         description="Auto-generated reports with market data, opportunity scores, and actionable next steps — ready to share with your team."
-      /></div>
+      />
     </div>
   </section>
 
   <!-- How it works -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="Three steps to your next product idea"
     />
     <div class="mx-auto mt-12 grid max-w-4xl gap-8 md:grid-cols-3">
-      <div class="anim-item text-center" style="--i:0">
+      <div class="text-center">
         <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">1</div>
         <h3 class="text-base font-semibold text-ink">Connect your sources</h3>
         <p class="mt-2 text-sm text-body">Link GitHub, set your research topics, and define the industries you care about. Takes about two minutes.</p>
       </div>
-      <div class="anim-item text-center" style="--i:1">
+      <div class="text-center">
         <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">2</div>
         <h3 class="text-base font-semibold text-ink">AI scans daily</h3>
         <p class="mt-2 text-sm text-body">Our agents run every morning — pulling signals from dozens of sources and compiling findings into your dashboard.</p>
       </div>
-      <div class="anim-item text-center" style="--i:2">
+      <div class="text-center">
         <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">3</div>
         <h3 class="text-base font-semibold text-ink">Review and act</h3>
         <p class="mt-2 text-sm text-body">Browse scored opportunities, save the ones that fit, and start building with confidence backed by data.</p>
@@ -130,7 +130,7 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- Example research result mockup -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="See what a research report looks like"
       description="Each day, AI Idea Researcher delivers structured findings — scored, tagged, and ready to explore."
@@ -178,13 +178,13 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- Pricing preview -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="Simple pricing that scales with you"
       description="Start free. Upgrade when you're ready for more signals and deeper analysis."
     />
     <div class="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-3">
-      <div class="anim-item" style="--i:0"><PricingCard
+      <PricingCard
         tier="Free"
         price="$0"
         description="For individual makers exploring their first ideas."
@@ -196,8 +196,8 @@ import FAQ from '../components/FAQ.astro';
         ]}
         ctaLabel="Start for free"
         ctaHref="/dashboard"
-      /></div>
-      <div class="anim-item" style="--i:1"><PricingCard
+      />
+      <PricingCard
         tier="Pro"
         price="$29"
         description="For indie hackers and small teams who ship regularly."
@@ -212,8 +212,8 @@ import FAQ from '../components/FAQ.astro';
         highlighted={true}
         ctaLabel="Start 14-day trial"
         ctaHref="/dashboard"
-      /></div>
-      <div class="anim-item" style="--i:2"><PricingCard
+      />
+      <PricingCard
         tier="Business"
         price="$79"
         description="For teams and agencies running multiple product lines."
@@ -227,40 +227,40 @@ import FAQ from '../components/FAQ.astro';
         ]}
         ctaLabel="Contact us"
         ctaHref="/contact"
-      /></div>
+      />
     </div>
   </section>
 
   <!-- Testimonials -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="What makers are saying"
       description="Real feedback from people who use AI Idea Researcher to find product opportunities."
     />
     <div class="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-3">
-      <div class="anim-item" style="--i:0"><Testimonial
+      <Testimonial
         quote="I used to spend Sunday afternoons scrolling through Product Hunt and Reddit trying to spot trends. Now I get a daily briefing that's more thorough than anything I could do manually."
         author="Sarah Chen"
         role="Founder"
         company="LaunchKit"
-      /></div>
-      <div class="anim-item" style="--i:1"><Testimonial
+      />
+      <Testimonial
         quote="The competitor tracking alone is worth it. Last month it caught a pricing change in a competitor that gave me a 48-hour head start on repositioning our product."
         author="Marcus Johnson"
         role="Product Lead"
         company="DevStack"
-      /></div>
-      <div class="anim-item" style="--i:2"><Testimonial
+      />
+      <Testimonial
         quote="We validated three product ideas in two weeks using the research reports. The opportunity scoring is surprisingly accurate — it caught a niche we'd completely overlooked."
         author="Elena Rodriguez"
         role="Co-founder"
         company="BuildCraft"
-      /></div>
+      />
     </div>
   </section>
 
   <!-- FAQ -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <SectionHeader
       title="Frequently asked questions"
     />
@@ -293,7 +293,7 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- CTA -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28">
     <div class="rounded-lg border border-hairline bg-canvas-elevated px-8 py-16 text-center shadow-whisper">
       <h2 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
         Find your next product idea today

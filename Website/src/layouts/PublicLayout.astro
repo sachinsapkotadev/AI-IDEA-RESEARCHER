@@ -159,64 +159,163 @@ const currentPath = Astro.url.pathname;
   </script>
 
   <style is:global>
-    /* Scroll animations */
-    .anim-fade-up {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .anim-fade-up.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .anim-fade-up:nth-child(2) { transition-delay: 0.08s; }
-    .anim-fade-up:nth-child(3) { transition-delay: 0.14s; }
-    .anim-fade-up:nth-child(4) { transition-delay: 0.2s; }
+    /* ============================================
+       3D SCROLL ANIMATIONS — automatic, zero-class
+       ============================================ */
 
-    .anim-slide-left {
-      opacity: 0;
-      transform: translateX(-40px);
-      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .anim-slide-left.is-visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    /* Base: perspective container on body */
+    body { perspective: 1200px; }
 
-    .anim-slide-right {
+    /* All sections get 3D entrance */
+    main > section,
+    main > article > section,
+    article > section {
       opacity: 0;
-      transform: translateX(40px);
-      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: perspective(1200px) rotateX(4deg) translateY(60px) scale(0.97);
+      transform-origin: center bottom;
+      transition:
+        opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .anim-slide-right.is-visible {
+    main > section.t3d-in,
+    main > article > section.t3d-in,
+    article > section.t3d-in {
       opacity: 1;
-      transform: translateX(0);
+      transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }
 
-    .anim-scale {
+    /* Cards / bordered boxes — 3D tilt from left */
+    .rounded-md.border,
+    .rounded-lg.border,
+    table {
       opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: perspective(900px) rotateY(-6deg) translateX(-30px) scale(0.96);
+      transform-origin: left center;
+      transition:
+        opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .anim-scale.is-visible {
+    .rounded-md.border.t3d-in,
+    .rounded-lg.border.t3d-in,
+    table.t3d-in {
       opacity: 1;
-      transform: scale(1);
+      transform: perspective(900px) rotateY(0deg) translateX(0) scale(1);
     }
 
-    /* Staggered children */
-    .anim-item {
+    /* Grid children — 3D pop with stagger */
+    .grid > * {
       opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: calc(var(--i, 0) * 0.08s);
+      transform: perspective(800px) rotateX(8deg) translateY(40px) scale(0.93);
+      transform-origin: center bottom;
+      transition:
+        opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      transition-delay: calc(var(--ti, 0) * 0.1s);
     }
-    .anim-item.is-visible {
+    .grid > *.t3d-in {
       opacity: 1;
-      transform: translateY(0);
+      transform: perspective(800px) rotateX(0deg) translateY(0) scale(1);
     }
 
+    /* Hero h1 — 3D cinematic entrance */
+    h1 {
+      opacity: 0;
+      transform: perspective(1000px) rotateX(12deg) translateZ(-80px) scale(0.92);
+      transform-origin: center center;
+      transition:
+        opacity 0.9s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    h1.t3d-in {
+      opacity: 1;
+      transform: perspective(1000px) rotateX(0deg) translateZ(0) scale(1);
+    }
+
+    /* Checkmark list items — 3D slide from depth */
+    ul li {
+      opacity: 0;
+      transform: perspective(600px) translateZ(-40px) translateX(-20px) scale(0.95);
+      transition:
+        opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      transition-delay: calc(var(--ti, 0) * 0.07s);
+    }
+    ul li.t3d-in {
+      opacity: 1;
+      transform: perspective(600px) translateZ(0) translateX(0) scale(1);
+    }
+
+    /* Stat numbers — 3D counter pop */
+    .text-3xl.font-semibold,
+    .text-2xl.font-semibold {
+      opacity: 0;
+      transform: perspective(500px) rotateY(15deg) scale(0.8);
+      transition:
+        opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .text-3xl.font-semibold.t3d-in,
+    .text-2xl.font-semibold.t3d-in {
+      opacity: 1;
+      transform: perspective(500px) rotateY(0deg) scale(1);
+    }
+
+    /* Badge / pill — 3D bounce in */
+    .rounded-full.border,
+    .rounded-full.bg-ink,
+    .rounded-full.bg-primary {
+      opacity: 0;
+      transform: perspective(400px) rotateX(-20deg) scale(0.7);
+      transition:
+        opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .rounded-full.border.t3d-in,
+    .rounded-full.bg-ink.t3d-in,
+    .rounded-full.bg-primary.t3d-in {
+      opacity: 1;
+      transform: perspective(400px) rotateX(0deg) scale(1);
+    }
+
+    /* FeatureCard wrapper — 3D flip entrance */
+    .grid > div:has(> .feature-card),
+    .grid > div:has(> [class*="FeatureCard"]) {
+      opacity: 0;
+      transform: perspective(900px) rotateY(-12deg) translateY(30px);
+      transform-origin: left center;
+      transition:
+        opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+      transition-delay: calc(var(--ti, 0) * 0.12s);
+    }
+    .grid > div:has(> .feature-card).t3d-in,
+    .grid > div:has(> [class*="FeatureCard"]).t3d-in {
+      opacity: 1;
+      transform: perspective(900px) rotateY(0deg) translateY(0);
+    }
+
+    /* Footer — subtle 3D lift */
+    footer {
+      opacity: 0;
+      transform: perspective(1000px) rotateX(3deg) translateY(40px);
+      transform-origin: center bottom;
+      transition:
+        opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    footer.t3d-in {
+      opacity: 1;
+      transform: perspective(1000px) rotateX(0deg) translateY(0);
+    }
+
+    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .anim-fade-up, .anim-slide-left, .anim-slide-right, .anim-scale, .anim-item {
+      main > section, main > article > section, article > section,
+      .rounded-md.border, .rounded-lg.border, table,
+      .grid > *, h1, ul li,
+      .text-3xl.font-semibold, .text-2xl.font-semibold,
+      .rounded-full.border, .rounded-full.bg-ink, .rounded-full.bg-primary,
+      footer {
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;
@@ -226,16 +325,48 @@ const currentPath = Astro.url.pathname;
 
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
-      const els = document.querySelectorAll('.anim-fade-up, .anim-slide-left, .anim-slide-right, .anim-scale, .anim-item');
+      /* Auto-select every animatable element */
+      const sels = [
+        'main > section',
+        'main > article > section',
+        'article > section',
+        '.rounded-md.border',
+        '.rounded-lg.border',
+        'table',
+        '.grid > *',
+        'h1',
+        'ul li',
+        '.text-3xl.font-semibold',
+        '.text-2xl.font-semibold',
+        '.rounded-full.border',
+        '.rounded-full.bg-ink',
+        '.rounded-full.bg-primary',
+        'footer',
+      ];
+      const els = document.querySelectorAll(sels.join(','));
       if (!els.length) return;
+
+      /* Assign stagger index to grid children */
+      document.querySelectorAll('.grid').forEach(grid => {
+        [...grid.children].forEach((child, i) => {
+          child.style.setProperty('--ti', i);
+        });
+      });
+      /* Assign stagger to list items */
+      document.querySelectorAll('ul').forEach(ul => {
+        [...ul.children].forEach((li, i) => {
+          li.style.setProperty('--ti', i);
+        });
+      });
+
       const io = new IntersectionObserver((entries) => {
         entries.forEach(e => {
           if (e.isIntersecting) {
-            e.target.classList.add('is-visible');
+            e.target.classList.add('t3d-in');
             io.unobserve(e.target);
           }
         });
-      }, { threshold: 0.12 });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
       els.forEach(el => io.observe(el));
     });
   </script>

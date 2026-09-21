@@ -24,13 +24,13 @@ function formatDate(date: Date): string {
 <PublicLayout title="Blog — AI Idea Researcher" description="Insights on AI-powered market research, product validation, and competitor analysis.">
   <section class="section-padding container-page">
     {/* Page header */}
-    <div class="mx-auto mb-12 max-w-2xl text-center anim-fade-up">
+    <div class="mx-auto mb-12 max-w-2xl text-center">
       <h1 class="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Blog</h1>
       <p class="mt-4 text-lg text-body">Insights on AI-powered research, product strategy, and market intelligence.</p>
     </div>
 
     {/* Category filter (visual) */}
-    <div class="mb-10 flex flex-wrap items-center justify-center gap-2 anim-fade-up">
+    <div class="mb-10 flex flex-wrap items-center justify-center gap-2">
       <span class="rounded-full bg-ink px-3 py-1 text-xs font-medium text-on-primary">All</span>
       {categories.map((cat) => (
         <span class="rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body transition-colors hover:text-ink">
@@ -43,7 +43,7 @@ function formatDate(date: Date): string {
     {featuredPost && (
       <a
         href={`/blog/${featuredPost.id}`}
-        class="mb-12 block anim-scale rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] sm:p-10 no-underline"
+        class="mb-12 block rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] sm:p-10 no-underline"
       >
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Badge variant="info">Featured</Badge>
@@ -70,8 +70,7 @@ function formatDate(date: Date): string {
       {regularPosts.map((post, i) => (
         <a
           href={`/blog/${post.id}`}
-          class="anim-item group flex flex-col rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] no-underline"
-          style={`--i:${i}`}
+          class="group flex flex-col rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] no-underline"
         >
           <div class="mb-3">
             <Badge>{post.data.category}</Badge>

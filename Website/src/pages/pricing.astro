@@ -11,7 +11,7 @@ import FAQ from '../components/FAQ.astro';
 >
 
   <!-- Hero -->
-  <section class="container-page pt-20 pb-12 md:pt-28 md:pb-16 anim-fade-up">
+  <section class="container-page pt-20 pb-12 md:pt-28 md:pb-16 ">
     <div class="mx-auto max-w-3xl text-center">
       <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
         Pricing
@@ -26,9 +26,9 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- Pricing cards -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28 ">
     <div class="mx-auto grid max-w-4xl gap-6 lg:grid-cols-3">
-      <div class="anim-item" style="--i:0"><PricingCard
+      <PricingCard
         tier="Free"
         price="$0"
         period="/month"
@@ -43,8 +43,8 @@ import FAQ from '../components/FAQ.astro';
         ]}
         ctaLabel="Start for free"
         ctaHref="/dashboard"
-      /></div>
-      <div class="anim-item" style="--i:1"><PricingCard
+      />
+      <PricingCard
         tier="Pro"
         price="$29"
         period="/month"
@@ -61,8 +61,8 @@ import FAQ from '../components/FAQ.astro';
         highlighted={true}
         ctaLabel="Start 14-day trial"
         ctaHref="/dashboard"
-      /></div>
-      <div class="anim-item" style="--i:2"><PricingCard
+      />
+      <PricingCard
         tier="Business"
         price="$79"
         period="/month"
@@ -78,17 +78,17 @@ import FAQ from '../components/FAQ.astro';
         ]}
         ctaLabel="Contact us"
         ctaHref="/contact"
-      /></div>
+      />
     </div>
   </section>
 
   <!-- Comparison table -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28 ">
     <SectionHeader
       title="Compare plans"
       description="See exactly what's included in each plan."
     />
-    <div class="mx-auto mt-12 max-w-4xl overflow-x-auto anim-scale">
+    <div class="mx-auto mt-12 max-w-4xl overflow-x-auto">
       <table class="w-full text-left text-sm">
         <thead>
           <tr class="border-b border-hairline">
@@ -183,7 +183,7 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- FAQ -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28 ">
     <SectionHeader
       title="Pricing FAQ"
     />
@@ -212,7 +212,7 @@ import FAQ from '../components/FAQ.astro';
   </section>
 
   <!-- CTA -->
-  <section class="container-page pb-20 md:pb-28 anim-fade-up">
+  <section class="container-page pb-20 md:pb-28 ">
     <div class="rounded-lg border border-hairline bg-canvas-elevated px-8 py-16 text-center shadow-whisper">
       <h2 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
         Start building with data, not guesswork

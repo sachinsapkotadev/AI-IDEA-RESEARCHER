@@ -291,49 +291,76 @@ function isActive(href: string): boolean {
   </script>
 
   <style is:global>
-    .anim-fade-up {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .anim-fade-up.is-visible { opacity: 1; transform: translateY(0); }
+    /* 3D Scroll Animations */
+    body { perspective: 1200px; }
 
-    .anim-item {
+    main > section, main > div > section {
       opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: calc(var(--i, 0) * 0.08s);
+      transform: perspective(1200px) rotateX(4deg) translateY(60px) scale(0.97);
+      transform-origin: center bottom;
+      transition: opacity 0.8s cubic-bezier(0.23,1,0.32,1), transform 0.8s cubic-bezier(0.23,1,0.32,1);
     }
-    .anim-item.is-visible { opacity: 1; transform: translateY(0); }
+    main > section.t3d-in, main > div > section.t3d-in {
+      opacity: 1;
+      transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
+    }
 
-    .anim-scale {
+    .rounded-md.border, .rounded-lg.border {
       opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: perspective(900px) rotateY(-6deg) translateX(-30px) scale(0.96);
+      transform-origin: left center;
+      transition: opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1);
     }
-    .anim-scale.is-visible { opacity: 1; transform: scale(1); }
+    .rounded-md.border.t3d-in, .rounded-lg.border.t3d-in {
+      opacity: 1;
+      transform: perspective(900px) rotateY(0deg) translateX(0) scale(1);
+    }
+
+    .grid > * {
+      opacity: 0;
+      transform: perspective(800px) rotateX(8deg) translateY(40px) scale(0.93);
+      transform-origin: center bottom;
+      transition: opacity 0.6s cubic-bezier(0.23,1,0.32,1), transform 0.6s cubic-bezier(0.23,1,0.32,1);
+      transition-delay: calc(var(--ti,0) * 0.1s);
+    }
+    .grid > *.t3d-in {
+      opacity: 1;
+      transform: perspective(800px) rotateX(0deg) translateY(0) scale(1);
+    }
+
+    h1 {
+      opacity: 0;
+      transform: perspective(1000px) rotateX(12deg) translateZ(-80px) scale(0.92);
+      transition: opacity 0.9s cubic-bezier(0.23,1,0.32,1), transform 0.9s cubic-bezier(0.23,1,0.32,1);
+    }
+    h1.t3d-in { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateZ(0) scale(1); }
+
+    ul li {
+      opacity: 0;
+      transform: perspective(600px) translateZ(-40px) translateX(-20px) scale(0.95);
+      transition: opacity 0.5s cubic-bezier(0.23,1,0.32,1), transform 0.5s cubic-bezier(0.23,1,0.32,1);
+      transition-delay: calc(var(--ti,0) * 0.07s);
+    }
+    ul li.t3d-in { opacity: 1; transform: perspective(600px) translateZ(0) translateX(0) scale(1); }
 
     @media (prefers-reduced-motion: reduce) {
-      .anim-fade-up, .anim-item, .anim-scale {
-        opacity: 1 !important;
-        transform: none !important;
-        transition: none !important;
+      main > section, main > div > section, .rounded-md.border, .rounded-lg.border,
+      .grid > *, h1, ul li {
+        opacity: 1 !important; transform: none !important; transition: none !important;
       }
     }
   </style>
 
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
-      const els = document.querySelectorAll('.anim-fade-up, .anim-item, .anim-scale');
+      const sels = ['main > section','main > div > section','.rounded-md.border','.rounded-lg.border','.grid > *','h1','ul li'];
+      const els = document.querySelectorAll(sels.join(','));
       if (!els.length) return;
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('is-visible');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.12 });
+      document.querySelectorAll('.grid').forEach(g => [...g.children].forEach((c,i) => c.style.setProperty('--ti',i)));
+      document.querySelectorAll('ul').forEach(u => [...u.children].forEach((l,i) => l.style.setProperty('--ti',i)));
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('t3d-in');io.unobserve(e.target);} });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
       els.forEach(el => io.observe(el));
     });
   </script>

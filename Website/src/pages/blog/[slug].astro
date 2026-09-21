@@ -43,7 +43,7 @@ const shareTitle = encodeURIComponent(post.data.title);
     </a>
 
     {/* Post header */}
-    <header class="mx-auto max-w-3xl anim-fade-up">
+    <header class="mx-auto max-w-3xl">
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <Badge variant="info">{post.data.category}</Badge>
         {post.data.tags?.map((tag) => (
@@ -66,12 +66,12 @@ const shareTitle = encodeURIComponent(post.data.title);
     </header>
 
     {/* Post content */}
-    <div class="prose-container mx-auto mt-10 max-w-3xl anim-fade-up">
+    <div class="prose-container mx-auto mt-10 max-w-3xl">
       <Content />
     </div>
 
     {/* Share links */}
-    <div class="mx-auto mt-12 max-w-3xl border-t border-hairline pt-8 anim-fade-up">
+    <div class="mx-auto mt-12 max-w-3xl border-t border-hairline pt-8">
       <h3 class="mb-4 text-sm font-semibold text-ink">Share this post</h3>
       <div class="flex flex-wrap gap-3">
         <a
@@ -106,14 +106,13 @@ const shareTitle = encodeURIComponent(post.data.title);
 
     {/* Related posts */}
     {relatedPosts.length > 0 && (
-      <section class="mx-auto mt-16 max-w-3xl border-t border-hairline pt-12 anim-fade-up">
+      <section class="mx-auto mt-16 max-w-3xl border-t border-hairline pt-12">
         <h2 class="mb-6 text-xl font-bold text-ink">Continue reading</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {relatedPosts.map((related, i) => (
             <a
               href={`/blog/${related.id}`}
-              class="anim-item group flex flex-col rounded-lg border border-hairline bg-canvas-elevated p-5 transition-shadow hover:shadow-[var(--shadow-floating)] no-underline"
-              style={`--i:${i}`}
+              class="group flex flex-col rounded-lg border border-hairline bg-canvas-elevated p-5 transition-shadow hover:shadow-[var(--shadow-floating)] no-underline"
             >
               <Badge class="mb-2">{related.data.category}</Badge>
               <h3 class="text-sm font-semibold text-ink transition-colors group-hover:text-link line-clamp-2">
