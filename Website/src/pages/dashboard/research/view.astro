@@ -403,6 +403,9 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
         document.getElementById('sources-section')!.classList.remove('hidden');
         loadSources(researchId);
 
+        // Show action buttons based on status
+        showActionButtons(data.status);
+
         showState('content');
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to load research';
@@ -416,6 +419,130 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
     document.getElementById('retry-sources-btn')?.addEventListener('click', () => {
       if (researchId) loadSources(researchId);
     });
+
+    // ---- Action buttons ----
+    const feedbackEl = document.getElementById('action-feedback')!;
+    let currentStatus = '';
+
+    function showFeedback(type: 'info' | 'success' | 'error', msg: string) {
+      const styles = {
+        info:    'border-blue-200 bg-link-soft text-blue-800',
+        success: 'border-green-200 bg-success-soft text-green-800',
+        error:   'border-red-200 bg-red-50 text-red-800',
+      };
+      feedbackEl.className = `rounded-md border px-4 py-3 text-sm ${styles[type]}`;
+      feedbackEl.textContent = msg;
+      feedbackEl.classList.remove('hidden');
+    }
+
+    function hideFeedback() {
+      feedbackEl.classList.add('hidden');
+    }
+
+    function showActionButtons(status: string) {
+      currentStatus = status;
+      const analyzeBtn = document.getElementById('btn-analyze')!;
+      const reportBtn = document.getElementById('btn-report')!;
+      const publishBtn = document.getElementById('btn-publish')!;
+
+      if (status === 'completed') {
+        // All actions available for completed runs
+        analyzeBtn.classList.remove('hidden');
+        reportBtn.classList.remove('hidden');
+        publishBtn.classList.remove('hidden');
+      } else if (status === 'running') {
+        // Can show analyze as in-progress indicator
+        analyzeBtn.classList.remove('hidden');
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = `
+          <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Analyzing...
+        `;
+      }
+    }
+
+    async function handleAnalyze() {
+      const btn = document.getElementById('btn-analyze')!;
+      btn.disabled = true;
+      hideFeedback();
+      showFeedback('info', 'Starting analysis...');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${researchId}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail?.message || data.detail || `HTTP ${res.status}`);
+        }
+        showFeedback('success', 'Analysis started. The page will refresh when results are ready.');
+        // Reload after short delay to pick up new status
+        setTimeout(() => window.location.reload(), 3000);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to start analysis';
+        showFeedback('error', msg);
+        btn.disabled = false;
+      }
+    }
+
+    async function handleReport() {
+      const btn = document.getElementById('btn-report')!;
+      btn.disabled = true;
+      hideFeedback();
+      showFeedback('info', 'Generating report...');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${researchId}/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail?.message || data.detail || `HTTP ${res.status}`);
+        }
+        showFeedback('success', 'Report generated. Redirecting...');
+        setTimeout(() => { window.location.href = `/dashboard/reports?research=${researchId}`; }, 1500);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to generate report';
+        showFeedback('error', msg);
+        btn.disabled = false;
+      }
+    }
+
+    async function handlePublish() {
+      const btn = document.getElementById('btn-publish')!;
+      btn.disabled = true;
+      hideFeedback();
+      showFeedback('info', 'Publishing to GitHub...');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/research/${researchId}/github`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail?.message || data.detail || `HTTP ${res.status}`);
+        }
+        const result = await res.json();
+        showFeedback('success', result.message || `Published to branch: ${result.branch || 'main'}`);
+        btn.disabled = false;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to publish';
+        showFeedback('error', msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : msg);
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('btn-analyze')?.addEventListener('click', handleAnalyze);
+    document.getElementById('btn-report')?.addEventListener('click', handleReport);
+    document.getElementById('btn-publish')?.addEventListener('click', handlePublish);
 
     loadResearch();
   </script>

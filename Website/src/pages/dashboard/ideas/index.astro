@@ -1,6 +1,6 @@
 ---
-import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 ---
 
 <DashboardLayout title="Ideas — AI Idea Researcher">
@@ -185,7 +185,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
         const sc = statusConfig[idea.status] || statusConfig.draft;
         const cc = complexityConfig[idea.technical_complexity] || complexityConfig.medium;
         return `
-          <a href="/dashboard/ideas/${idea.id}" class="group flex flex-col rounded-md border border-hairline bg-canvas-elevated p-5 no-underline transition-colors hover:bg-hairline-soft/50">
+          <a href="/dashboard/ideas/view?id=${idea.id}" class="group flex flex-col rounded-md border border-hairline bg-canvas-elevated p-5 no-underline transition-colors hover:bg-hairline-soft/50">
             <div class="flex items-start justify-between gap-2 mb-2">
               <h3 class="text-sm font-semibold text-ink group-hover:text-link line-clamp-2">${escapeHtml(idea.title)}</h3>
               <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${sc.classes}">

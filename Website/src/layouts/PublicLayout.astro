@@ -17,6 +17,7 @@ const {
 } = Astro.props;
 
 const navLinks = [
+  { href: '/', label: 'Home' },
   { href: '/features', label: 'Features' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/blog', label: 'Blog' },
@@ -30,12 +31,8 @@ const currentPath = Astro.url.pathname;
   {showHeader && (
     <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-md">
       <nav class="container-page flex h-16 items-center justify-between">
-        <a href="/" class="flex items-center gap-2 text-lg font-semibold text-ink no-underline">
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          <span>AI Idea Researcher</span>
+        <a href="/" class="text-lg font-semibold text-ink no-underline">
+          AI Idea Researcher
         </a>
 
         {/* Desktop nav */}
@@ -108,11 +105,7 @@ const currentPath = Astro.url.pathname;
       <div class="container-page section-padding">
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <a href="/" class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink no-underline">
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
+            <a href="/" class="mb-4 text-lg font-semibold text-ink no-underline">
               AI Idea Researcher
             </a>
             <p class="mt-3 text-sm text-body">

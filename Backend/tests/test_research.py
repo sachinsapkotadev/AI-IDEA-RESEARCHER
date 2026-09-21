@@ -480,6 +480,7 @@ class TestResearchService:
 
         mock_ai = MagicMock()
         mock_ai.model = "test-model"
+        mock_ai._resolve_model = MagicMock(return_value="test-model")
         mock_ai.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "topic": "Test research topic",
@@ -491,6 +492,7 @@ class TestResearchService:
                 "uncertainties": ["Uncertainty 1"],
             }),
             usage=MagicMock(input_tokens=100, output_tokens=200),
+            key_slot="00",
         ))
 
         with patch("app.research.service.extract_content") as mock_extract:
@@ -528,6 +530,7 @@ class TestResearchService:
 
         mock_ai = MagicMock()
         mock_ai.model = "test-model"
+        mock_ai._resolve_model = MagicMock(return_value="test-model")
 
         service = ResearchService(search_provider=mock_search, ai_provider=mock_ai)
 
@@ -555,6 +558,7 @@ class TestResearchService:
 
         mock_ai = MagicMock()
         mock_ai.model = "test-model"
+        mock_ai._resolve_model = MagicMock(return_value="test-model")
         mock_ai.generate = AsyncMock(return_value=MagicMock(
             content=json.dumps({
                 "topic": "Partial failure topic",
@@ -563,6 +567,7 @@ class TestResearchService:
                 "source_references": ["S1"],
             }),
             usage=MagicMock(input_tokens=50, output_tokens=100),
+            key_slot="01",
         ))
 
         def mock_extract(url):

@@ -1,12 +1,11 @@
 """Tests for Phase 6 — Key pool, model registry, report generation, GitHub integration, AI status."""
 
+import asyncio
 import json
 import os
-import tempfile
 import time
 from datetime import datetime, timezone
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine
@@ -105,6 +104,13 @@ def _create_completed_research(db, topic="Test topic"):
     return run
 
 
+def _make_settings(**overrides):
+    """Create a Settings object that ignores .env file for clean test isolation."""
+    from app.core.config import Settings
+    # Use _env_file=None to prevent reading from .env
+    return Settings(_env_file=None, **overrides)
+
+
 # ============================================
 # 1. OpenRouterKeyPool Tests
 # ============================================
@@ -158,7 +164,6 @@ class TestOpenRouterKeyPool:
             ]
             pool = OpenRouterKeyPool()
             slots = [pool.get_key()[0] for _ in range(6)]
-            # Should cycle through all 3 twice
             assert slots[:3] == ["01", "02", "03"]
             assert slots[3:6] == ["01", "02", "03"]
 
@@ -174,7 +179,7 @@ class TestOpenRouterKeyPool:
 
     def test_get_key_all_unavailable_raises(self):
         """get_key raises RuntimeError when all keys in cooldown."""
-        from app.ai.key_pool import OpenRouterKeyPool, COOLDOWN_SECONDS
+        from app.ai.key_pool import OpenRouterKeyPool
 
         with patch("app.ai.key_pool.get_settings") as mock_settings:
             mock_settings.return_value.get_api_keys.return_value = [
@@ -182,7 +187,6 @@ class TestOpenRouterKeyPool:
             ]
             pool = OpenRouterKeyPool()
             pool.mark_failure("01")
-            # Key is in cooldown, but cooldown hasn't expired
             with pytest.raises(RuntimeError, match="temporarily unavailable"):
                 pool.get_key()
 
@@ -198,10 +202,8 @@ class TestOpenRouterKeyPool:
             pool = OpenRouterKeyPool()
             pool.mark_failure("01")
             pool.mark_failure("01")
-            # Key 01 has failures, should skip to 02
             slot, _ = pool.get_key()
             assert slot == "02"
-            # Mark success resets
             pool.mark_success("01")
             assert pool.available_count == 2
 
@@ -216,7 +218,7 @@ class TestOpenRouterKeyPool:
             ]
             pool = OpenRouterKeyPool()
             pool.mark_failure("01")
-            assert pool.available_count == 1  # 01 is in cooldown
+            assert pool.available_count == 1
 
     def test_mark_failure_non_retryable(self):
         """Non-retryable failure marks key unavailable immediately."""
@@ -241,7 +243,6 @@ class TestOpenRouterKeyPool:
             pool = OpenRouterKeyPool()
             pool.mark_failure("01")
             assert pool.available_count == 0
-            # Simulate cooldown expiry by manipulating last_failure_time
             pool._keys[0].last_failure_time = time.time() - COOLDOWN_SECONDS - 1
             assert pool.available_count == 1
 
@@ -271,12 +272,9 @@ class TestOpenRouterKeyPool:
             ]
             pool = OpenRouterKeyPool()
             assert pool.available_count == 3
-
             pool.mark_failure("01")
             pool.mark_failure("02")
             assert pool.available_count == 1
-
-            # Expire both cooldowns
             pool._keys[0].last_failure_time = time.time() - COOLDOWN_SECONDS - 1
             pool._keys[1].last_failure_time = time.time() - COOLDOWN_SECONDS - 1
             assert pool.available_count == 3
@@ -287,103 +285,91 @@ class TestOpenRouterKeyPool:
 # ============================================
 
 class TestModelRegistry:
-    def test_get_model_agent_specific(self):
-        """Returns agent-specific model when configured."""
+    def _make_registry(self, **model_overrides):
+        """Create a ModelRegistry with a mocked Settings, bypassing lru_cache."""
         from app.ai.model_registry import ModelRegistry
 
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "default-model"
-            mock_settings.return_value.MODEL_MARKET_ANALYST = "custom-market-model"
-            registry = ModelRegistry()
-            model = registry.get_model("MarketAnalyst")
-            assert model == "custom-market-model"
+        # Build a mock settings with all required attrs
+        ms = MagicMock()
+        ms.OPENROUTER_MODEL = model_overrides.get("OPENROUTER_MODEL", "default-model")
+        ms.MODEL_MARKET_ANALYST = model_overrides.get("MODEL_MARKET_ANALYST", "")
+        ms.MODEL_COMPETITOR_ANALYST = model_overrides.get("MODEL_COMPETITOR_ANALYST", "")
+        ms.MODEL_IDEA_GENERATOR = model_overrides.get("MODEL_IDEA_GENERATOR", "")
+        ms.MODEL_TECHNICAL_ANALYST = model_overrides.get("MODEL_TECHNICAL_ANALYST", "")
+        ms.MODEL_VALIDATION_PLANNER = model_overrides.get("MODEL_VALIDATION_PLANNER", "")
+
+        with patch("app.ai.model_registry.get_settings", return_value=ms):
+            # Clear the lru_cache so our patch is used
+            from app.core.config import get_settings
+            get_settings.cache_clear()
+            try:
+                registry = ModelRegistry()
+            finally:
+                get_settings.cache_clear()
+        return registry
+
+    def test_get_model_agent_specific(self):
+        """Returns agent-specific model when configured."""
+        registry = self._make_registry(
+            OPENROUTER_MODEL="default-model",
+            MODEL_MARKET_ANALYST="custom-market-model",
+        )
+        model = registry.get_model("MarketAnalyst")
+        assert model == "custom-market-model"
 
     def test_get_model_falls_back_to_default(self):
         """Falls back to OPENROUTER_MODEL when no agent-specific model."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "fallback-model"
-            # No agent-specific model set
-            mock_settings.return_value.MODEL_MARKET_ANALYST = ""
-            registry = ModelRegistry()
-            model = registry.get_model("MarketAnalyst")
-            assert model == "fallback-model"
+        registry = self._make_registry(
+            OPENROUTER_MODEL="fallback-model",
+            MODEL_MARKET_ANALYST="",
+        )
+        model = registry.get_model("MarketAnalyst")
+        assert model == "fallback-model"
 
     def test_get_model_no_model_raises(self):
         """Raises ValueError when no model configured at all."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = ""
-            registry = ModelRegistry()
-            with pytest.raises(ValueError, match="No model configured"):
-                registry.get_model("MarketAnalyst")
+        registry = self._make_registry(OPENROUTER_MODEL="")
+        with pytest.raises(ValueError, match="No model configured"):
+            registry.get_model("MarketAnalyst")
 
     def test_get_model_default_key(self):
         """get_model('default') returns OPENROUTER_MODEL."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "the-default"
-            registry = ModelRegistry()
-            model = registry.get_model("default")
-            assert model == "the-default"
+        registry = self._make_registry(OPENROUTER_MODEL="the-default")
+        model = registry.get_model("default")
+        assert model == "the-default"
 
     def test_get_model_config(self):
         """get_model_config returns full ModelConfig."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "test-model"
-            registry = ModelRegistry()
-            config = registry.get_model_config("MarketAnalyst")
-            assert config.model_id == "test-model"
-            assert config.agent_name == "MarketAnalyst"
+        registry = self._make_registry(OPENROUTER_MODEL="test-model")
+        config = registry.get_model_config("MarketAnalyst")
+        assert config.model_id == "test-model"
+        assert config.agent_name == "MarketAnalyst"
 
     def test_is_configured_true(self):
         """is_configured returns True when model is set."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "some-model"
-            registry = ModelRegistry()
-            assert registry.is_configured() is True
+        registry = self._make_registry(OPENROUTER_MODEL="some-model")
+        assert registry.is_configured() is True
 
     def test_is_configured_false(self):
         """is_configured returns False when no model set."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = ""
-            registry = ModelRegistry()
-            assert registry.is_configured() is False
+        registry = self._make_registry(OPENROUTER_MODEL="")
+        assert registry.is_configured() is False
 
     def test_get_all_configured_models(self):
         """Returns dict of all agent names to models."""
-        from app.ai.model_registry import ModelRegistry
-
-        with patch("app.ai.model_registry.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock()
-            mock_settings.return_value.OPENROUTER_MODEL = "default-model"
-            mock_settings.return_value.MODEL_MARKET_ANALYST = "market-model"
-            mock_settings.return_value.MODEL_COMPETITOR_ANALYST = ""
-            mock_settings.return_value.MODEL_IDEA_GENERATOR = "idea-model"
-            mock_settings.return_value.MODEL_TECHNICAL_ANALYST = ""
-            mock_settings.return_value.MODEL_VALIDATION_PLANNER = ""
-            registry = ModelRegistry()
-            models = registry.get_all_configured_models()
-            assert models["MarketAnalyst"] == "market-model"
-            assert models["IdeaGenerator"] == "idea-model"
-            # Falls back to default
-            assert models["CompetitorAnalyst"] == "default-model"
+        registry = self._make_registry(
+            OPENROUTER_MODEL="default-model",
+            MODEL_MARKET_ANALYST="market-model",
+            MODEL_COMPETITOR_ANALYST="",
+            MODEL_IDEA_GENERATOR="idea-model",
+            MODEL_TECHNICAL_ANALYST="",
+            MODEL_VALIDATION_PLANNER="",
+        )
+        models = registry.get_all_configured_models()
+        assert models["MarketAnalyst"] == "market-model"
+        assert models["IdeaGenerator"] == "idea-model"
+        # Falls back to default when agent-specific is empty
+        assert models["CompetitorAnalyst"] == "default-model"
 
 
 # ============================================
@@ -393,9 +379,7 @@ class TestModelRegistry:
 class TestConfig:
     def test_get_api_keys_filters_empty(self):
         """get_api_keys filters out empty keys."""
-        from app.core.config import Settings
-
-        s = Settings(
+        s = _make_settings(
             OPENROUTER_API_KEY_01="key-01",
             OPENROUTER_API_KEY_02="",
             OPENROUTER_API_KEY_03="key-03",
@@ -405,24 +389,15 @@ class TestConfig:
         assert keys[0] == ("01", "key-01")
         assert keys[1] == ("03", "key-03")
 
-    def test_get_api_keys_filters_placeholders(self):
-        """get_api_keys filters out placeholder values."""
-        from app.core.config import Settings
-
-        s = Settings(
-            OPENROUTER_API_KEY_01="YOUR_KEY_HERE",
-            OPENROUTER_API_KEY_02="xxxxxxxxxxxx",
-        )
-        # These pass get_api_keys since it only checks strip()
-        # but openrouter_api_keys checks for placeholders
+    def test_get_api_keys_all_empty(self):
+        """get_api_keys returns empty list when no keys set."""
+        s = _make_settings()
         keys = s.get_api_keys()
-        assert len(keys) == 2  # get_api_keys doesn't filter placeholders
+        assert len(keys) == 0
 
     def test_openrouter_api_keys_filters_placeholders(self):
         """openrouter_api_keys filters placeholder values."""
-        from app.core.config import Settings
-
-        s = Settings(
+        s = _make_settings(
             OPENROUTER_API_KEY_01="real-key-123",
             OPENROUTER_API_KEY_02="YOUR_KEY_HERE",
             OPENROUTER_API_KEY_03="xxxxxxxxxxxx",
@@ -433,9 +408,7 @@ class TestConfig:
 
     def test_get_agent_model(self):
         """get_agent_model returns correct agent-specific model."""
-        from app.core.config import Settings
-
-        s = Settings(
+        s = _make_settings(
             MODEL_MARKET_ANALYST="market-m",
             MODEL_COMPETITOR_ANALYST="comp-m",
             MODEL_IDEA_GENERATOR="idea-m",
@@ -452,14 +425,12 @@ class TestConfig:
 
     def test_reports_dir_default(self):
         """REPORTS_DIR has a default value."""
-        from app.core.config import Settings
-        s = Settings()
+        s = _make_settings()
         assert s.REPORTS_DIR == "./reports"
 
     def test_github_config_defaults(self):
         """GitHub config has expected defaults."""
-        from app.core.config import Settings
-        s = Settings()
+        s = _make_settings()
         assert s.GITHUB_DEFAULT_BRANCH == "main"
         assert s.GITHUB_RESEARCH_BRANCH_PREFIX == "research/"
         assert s.GITHUB_TOKEN == ""
@@ -468,8 +439,7 @@ class TestConfig:
 
     def test_cors_origin_list(self):
         """cors_origin_list parses comma-separated origins."""
-        from app.core.config import Settings
-        s = Settings(CORS_ORIGINS="http://a.com,http://b.com")
+        s = _make_settings(CORS_ORIGINS="http://a.com,http://b.com")
         assert s.cors_origin_list == ["http://a.com", "http://b.com"]
 
 
@@ -512,7 +482,9 @@ class TestReportGenerator:
         assert "2026-01-01" in md
         assert "model-a" in md
         assert "MarketAnalyst" in md
-        assert "key_slot" in md
+        # Table header is "Key Slot", data row has "00"
+        assert "Key Slot" in md
+        assert "00" in md
         assert "This is a summary" in md
         assert "[S1]" in md
         assert "Do not treat this as guaranteed business advice" in md
@@ -533,14 +505,12 @@ class TestReportGenerator:
         )
         md = gen.render_markdown(content)
         assert "# AI IDEA RESEARCHER REPORT" in md
-        # Empty sections should not appear
         assert "## Executive Summary" not in md
         assert "## Market Analysis" not in md
 
     def test_build_sources_section_with_sources(self):
         """_build_sources_section formats sources correctly."""
         from app.reports.generator import ReportGenerator
-        from unittest.mock import MagicMock
 
         gen = ReportGenerator()
         src = MagicMock()
@@ -588,11 +558,15 @@ class TestReportService:
         from app.reports.service import ReportService
         from app.reports.errors import ReportNotFoundError
 
-        service = ReportService()
-        with patch("app.reports.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(REPORTS_DIR="./reports")
+        mock_settings = MagicMock()
+        mock_settings.REPORTS_DIR = "./reports"
+        with patch("app.reports.service.get_settings", return_value=mock_settings):
+            service = ReportService()
+            # Mock db returns None for non-existent run
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.first.return_value = None
             with pytest.raises(ReportNotFoundError):
-                service.generate_report(99999, MagicMock())
+                service.generate_report(99999, mock_db)
 
     def test_generate_report_idempotent(self):
         """generate_report returns existing if already completed."""
@@ -604,13 +578,13 @@ class TestReportService:
         run.report_path = "/some/path/report.md"
         run.report_generated_at = datetime.now(timezone.utc)
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = run
-
-        with patch("app.reports.service.get_settings") as mock_settings, \
+        mock_settings = MagicMock()
+        mock_settings.REPORTS_DIR = "./reports"
+        with patch("app.reports.service.get_settings", return_value=mock_settings), \
              patch("app.reports.service.os.path.exists", return_value=True):
-            mock_settings.return_value = MagicMock(REPORTS_DIR="./reports")
             service = ReportService()
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.first.return_value = run
             result = service.generate_report(1, mock_db)
             assert result["report_status"] == "completed"
 
@@ -618,8 +592,9 @@ class TestReportService:
         """_build_report_path creates correct directory structure."""
         from app.reports.service import ReportService
 
-        with patch("app.reports.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(REPORTS_DIR="/tmp/test-reports")
+        mock_settings = MagicMock()
+        mock_settings.REPORTS_DIR = os.path.join("tmp", "test-reports")
+        with patch("app.reports.service.get_settings", return_value=mock_settings):
             service = ReportService()
             path = service._build_report_path(42, "2026-01-15")
             assert "research-42.md" in path
@@ -632,11 +607,15 @@ class TestReportService:
         from app.reports.service import ReportService
         from app.reports.errors import ReportGenerationError
 
-        with patch("app.reports.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(REPORTS_DIR="/tmp/test-reports")
+        mock_settings = MagicMock()
+        mock_settings.REPORTS_DIR = os.path.join("tmp", "test-reports")
+        with patch("app.reports.service.get_settings", return_value=mock_settings):
             service = ReportService()
+            # Path structure is {REPORTS_DIR}/{year}/{month}/{date}/research-{id}.md
+            # That's 3 levels deep, so we need 3+ ".." to escape above REPORTS_DIR
+            traversal = os.path.join("..", "..", "..", "etc", "passwd")
             with pytest.raises(ReportGenerationError, match="path escape"):
-                service._build_report_path(1, "../../etc/passwd")
+                service._build_report_path(1, traversal)
 
 
 # ============================================
@@ -644,70 +623,51 @@ class TestReportService:
 # ============================================
 
 class TestGitHubService:
-    def test_is_configured_true(self):
-        """is_configured returns True when all GitHub env vars set."""
+    def _make_service(self, **cfg_overrides):
+        """Create a GitHubService with mocked settings."""
         from app.github.service import GitHubService
 
-        with patch("app.github.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="ghp_test",
-                GITHUB_OWNER="test-owner",
-                GITHUB_REPO="test-repo",
-            )
-            service = GitHubService()
-            assert service.is_configured() is True
+        ms = MagicMock()
+        ms.GITHUB_TOKEN = cfg_overrides.get("GITHUB_TOKEN", "ghp_test")
+        ms.GITHUB_OWNER = cfg_overrides.get("GITHUB_OWNER", "test-owner")
+        ms.GITHUB_REPO = cfg_overrides.get("GITHUB_REPO", "test-repo")
+        with patch("app.github.service.get_settings", return_value=ms):
+            return GitHubService()
+
+    def test_is_configured_true(self):
+        """is_configured returns True when all GitHub env vars set."""
+        service = self._make_service()
+        assert service.is_configured() is True
 
     def test_is_configured_false_missing_token(self):
         """is_configured returns False when token missing."""
-        from app.github.service import GitHubService
-
-        with patch("app.github.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="",
-                GITHUB_OWNER="test-owner",
-                GITHUB_REPO="test-repo",
-            )
-            service = GitHubService()
-            assert service.is_configured() is False
+        service = self._make_service(GITHUB_TOKEN="")
+        assert service.is_configured() is False
 
     def test_is_configured_false_missing_owner(self):
         """is_configured returns False when owner missing."""
-        from app.github.service import GitHubService
+        service = self._make_service(GITHUB_OWNER="")
+        assert service.is_configured() is False
 
-        with patch("app.github.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="ghp_test",
-                GITHUB_OWNER="",
-                GITHUB_REPO="test-repo",
-            )
-            service = GitHubService()
-            assert service.is_configured() is False
-
-    def test_publish_not_configured_raises(self):
+    @pytest.mark.asyncio
+    async def test_publish_not_configured_raises(self):
         """publish_report raises GitHubConfigurationError when not configured."""
-        from app.github.service import GitHubService
         from app.github.errors import GitHubConfigurationError
-        import pytest
 
-        with patch("app.github.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="",
-                GITHUB_OWNER="",
-                GITHUB_REPO="",
-            )
+        ms = MagicMock()
+        ms.GITHUB_TOKEN = ""
+        ms.GITHUB_OWNER = ""
+        ms.GITHUB_REPO = ""
+        with patch("app.github.service.get_settings", return_value=ms):
+            from app.github.service import GitHubService
             service = GitHubService()
             with pytest.raises(GitHubConfigurationError):
-                import asyncio
-                asyncio.get_event_loop().run_until_complete(
-                    service.publish_report(1, MagicMock())
-                )
+                await service.publish_report(1, MagicMock())
 
-    def test_publish_no_report_raises(self):
+    @pytest.mark.asyncio
+    async def test_publish_no_report_raises(self):
         """publish_report raises when no report file exists."""
-        from app.github.service import GitHubService
         from app.github.errors import GitHubPublicationError
-        from app.database.models.research import ResearchRun, ResearchStatus
-        import pytest
 
         run = MagicMock()
         run.report_path = None
@@ -715,24 +675,13 @@ class TestGitHubService:
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.first.return_value = run
 
-        with patch("app.github.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="ghp_test",
-                GITHUB_OWNER="owner",
-                GITHUB_REPO="repo",
-            )
-            service = GitHubService()
-            with pytest.raises(GitHubPublicationError):
-                import asyncio
-                asyncio.get_event_loop().run_until_complete(
-                    service.publish_report(1, mock_db)
-                )
+        service = self._make_service()
+        with pytest.raises(GitHubPublicationError):
+            await service.publish_report(1, mock_db)
 
-    def test_publish_idempotent(self):
+    @pytest.mark.asyncio
+    async def test_publish_idempotent(self):
         """publish_report returns existing publication if already completed."""
-        from app.github.service import GitHubService
-        from app.database.models.github import GitHubPublishStatus, ResearchGitHub
-
         mock_entry = MagicMock()
         mock_entry.branch = "research/2026-01-01"
         mock_entry.file_path = "reports/report.md"
@@ -744,43 +693,32 @@ class TestGitHubService:
         run.report_status = "completed"
 
         mock_db = MagicMock()
-        # First query: find run
-        # Second query: find existing publication
         mock_db.query.return_value.filter.return_value.first.return_value = mock_entry
 
-        with patch("app.github.service.get_settings") as mock_settings, \
-             patch("app.github.service.os.path.exists", return_value=True):
-            mock_settings.return_value = MagicMock(
-                GITHUB_TOKEN="ghp_test",
-                GITHUB_OWNER="owner",
-                GITHUB_REPO="repo",
-            )
-            service = GitHubService()
-            import asyncio
-            result = asyncio.get_event_loop().run_until_complete(
-                service.publish_report(1, mock_db)
-            )
+        service = self._make_service()
+        with patch("app.github.service.os.path.exists", return_value=True), \
+             patch("builtins.open", create=True) as mock_open:
+            mock_open.return_value.__enter__ = lambda s: s
+            mock_open.return_value.__exit__ = MagicMock(return_value=False)
+            mock_open.return_value.read.return_value = "x" * 100
+            mock_open.return_value.__len__ = lambda self: 100
+            result = await service.publish_report(1, mock_db)
             assert result["status"] == "completed"
             assert result["commit_sha"] == "abc123"
 
-    def test_get_publication_status_none(self):
+    @pytest.mark.asyncio
+    async def test_get_publication_status_none(self):
         """get_publication_status returns None when not published."""
-        from app.github.service import GitHubService
-
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.order_by.return_value.first.return_value = None
 
-        service = GitHubService()
-        import asyncio
-        result = asyncio.get_event_loop().run_until_complete(
-            service.get_publication_status(1, mock_db)
-        )
+        service = self._make_service()
+        result = await service.get_publication_status(1, mock_db)
         assert result is None
 
-    def test_get_publication_status_found(self):
+    @pytest.mark.asyncio
+    async def test_get_publication_status_found(self):
         """get_publication_status returns metadata when published."""
-        from app.github.service import GitHubService
-
         mock_entry = MagicMock()
         mock_entry.status.value = "completed"
         mock_entry.branch = "research/2026-01-01"
@@ -793,11 +731,8 @@ class TestGitHubService:
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.order_by.return_value.first.return_value = mock_entry
 
-        service = GitHubService()
-        import asyncio
-        result = asyncio.get_event_loop().run_until_complete(
-            service.get_publication_status(1, mock_db)
-        )
+        service = self._make_service()
+        result = await service.get_publication_status(1, mock_db)
         assert result is not None
         assert result["status"] == "completed"
         assert result["branch"] == "research/2026-01-01"
@@ -941,7 +876,7 @@ class TestReportGenerationE2E:
             mock_svc.generate_report.return_value = {
                 "research_id": run.id,
                 "report_status": "completed",
-                "report_path": "/tmp/test-report.md",
+                "report_path": os.path.join("tmp", "test-report.md"),
                 "report_generated_at": datetime.now(timezone.utc).isoformat(),
             }
             MockService.return_value = mock_svc
@@ -950,7 +885,7 @@ class TestReportGenerationE2E:
             assert r.status_code == 200
             d = r.json()
             assert d["report_status"] == "completed"
-            assert d["report_path"] == "/tmp/test-report.md"
+            assert "test-report.md" in d["report_path"]
 
     def test_get_report_content_e2e(self, client, db):
         """End-to-end report content retrieval from API."""
@@ -962,7 +897,7 @@ class TestReportGenerationE2E:
                 "research_id": run.id,
                 "report_status": "completed",
                 "content": "# Report Content\n\nTest report.",
-                "report_path": "/tmp/test-report.md",
+                "report_path": os.path.join("tmp", "test-report.md"),
             }
             MockService.return_value = mock_svc
 
@@ -1215,12 +1150,10 @@ class TestKeyPoolProviderIntegration:
     def test_provider_uses_key_pool(self):
         """OpenRouterProvider uses key pool for key selection."""
         from app.ai.provider import OpenRouterProvider
-        from app.ai.key_pool import OpenRouterKeyPool
-        from app.ai.model_registry import ModelRegistry
 
         with patch("app.ai.key_pool.get_settings") as mock_kp_settings, \
              patch("app.ai.model_registry.get_settings") as mock_mr_settings, \
-             patch("app.ai.client.get_settings") as mock_client_settings:
+             patch("app.ai.client.OpenRouterClient") as MockClient:
 
             mock_kp_settings.return_value.get_api_keys.return_value = [
                 ("01", "key-01"),
@@ -1228,11 +1161,7 @@ class TestKeyPoolProviderIntegration:
             ]
             mock_mr_settings.return_value = MagicMock()
             mock_mr_settings.return_value.OPENROUTER_MODEL = "test-model"
-            mock_client_settings.return_value = MagicMock(
-                OPENROUTER_BASE_URL="https://test.com",
-                OPENROUTER_MAX_RETRIES=1,
-                OPENROUTER_API_KEY="",
-            )
+            MockClient.return_value = MagicMock()
 
             provider = OpenRouterProvider()
             assert provider._key_pool.configured_count == 2
@@ -1240,22 +1169,16 @@ class TestKeyPoolProviderIntegration:
     def test_provider_resolve_model_with_agent(self):
         """_resolve_model returns agent-specific model."""
         from app.ai.provider import OpenRouterProvider
-        from app.ai.key_pool import OpenRouterKeyPool
-        from app.ai.model_registry import ModelRegistry
 
         with patch("app.ai.key_pool.get_settings") as mock_kp_settings, \
              patch("app.ai.model_registry.get_settings") as mock_mr_settings, \
-             patch("app.ai.client.get_settings") as mock_client_settings:
+             patch("app.ai.client.OpenRouterClient") as MockClient:
 
             mock_kp_settings.return_value.get_api_keys.return_value = [("01", "k")]
             mock_mr_settings.return_value = MagicMock()
             mock_mr_settings.return_value.OPENROUTER_MODEL = "default-m"
             mock_mr_settings.return_value.MODEL_MARKET_ANALYST = "market-m"
-            mock_client_settings.return_value = MagicMock(
-                OPENROUTER_BASE_URL="https://test.com",
-                OPENROUTER_MAX_RETRIES=1,
-                OPENROUTER_API_KEY="",
-            )
+            MockClient.return_value = MagicMock()
 
             provider = OpenRouterProvider()
             model = provider._resolve_model(None, "MarketAnalyst")
@@ -1264,21 +1187,15 @@ class TestKeyPoolProviderIntegration:
     def test_provider_resolve_model_override(self):
         """_resolve_model returns explicit model when provided."""
         from app.ai.provider import OpenRouterProvider
-        from app.ai.key_pool import OpenRouterKeyPool
-        from app.ai.model_registry import ModelRegistry
 
         with patch("app.ai.key_pool.get_settings") as mock_kp_settings, \
              patch("app.ai.model_registry.get_settings") as mock_mr_settings, \
-             patch("app.ai.client.get_settings") as mock_client_settings:
+             patch("app.ai.client.OpenRouterClient") as MockClient:
 
             mock_kp_settings.return_value.get_api_keys.return_value = [("01", "k")]
             mock_mr_settings.return_value = MagicMock()
             mock_mr_settings.return_value.OPENROUTER_MODEL = "default-m"
-            mock_client_settings.return_value = MagicMock(
-                OPENROUTER_BASE_URL="https://test.com",
-                OPENROUTER_MAX_RETRIES=1,
-                OPENROUTER_API_KEY="",
-            )
+            MockClient.return_value = MagicMock()
 
             provider = OpenRouterProvider()
             model = provider._resolve_model("explicit-model", "MarketAnalyst")
@@ -1290,16 +1207,12 @@ class TestKeyPoolProviderIntegration:
 
         with patch("app.ai.key_pool.get_settings") as mock_kp_settings, \
              patch("app.ai.model_registry.get_settings") as mock_mr_settings, \
-             patch("app.ai.client.get_settings") as mock_client_settings:
+             patch("app.ai.client.OpenRouterClient") as MockClient:
 
             mock_kp_settings.return_value.get_api_keys.return_value = [("01", "k")]
             mock_mr_settings.return_value = MagicMock()
             mock_mr_settings.return_value.OPENROUTER_MODEL = "the-model"
-            mock_client_settings.return_value = MagicMock(
-                OPENROUTER_BASE_URL="https://test.com",
-                OPENROUTER_MAX_RETRIES=1,
-                OPENROUTER_API_KEY="",
-            )
+            MockClient.return_value = MagicMock()
 
             provider = OpenRouterProvider()
             assert provider.model == "the-model"
@@ -1315,17 +1228,22 @@ class TestReportPathSecurity:
         from app.reports.service import ReportService
         from app.reports.errors import ReportGenerationError
 
-        with patch("app.reports.service.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(REPORTS_DIR="/safe/reports")
+        reports_dir = os.path.join("safe", "reports")
+        mock_settings = MagicMock()
+        mock_settings.REPORTS_DIR = reports_dir
+        with patch("app.reports.service.get_settings", return_value=mock_settings):
             service = ReportService()
 
-            # Normal path should work
+            # Normal path should work and stay within reports_dir
             path = service._build_report_path(1, "2026-01-01")
-            assert path.startswith("/safe/reports")
+            normalized = os.path.normpath(path)
+            reports_normalized = os.path.normpath(reports_dir)
+            assert normalized.startswith(reports_normalized)
 
-            # Path traversal attempt
+            # Path traversal attempt — 3 levels: year/month/date_str
+            traversal = os.path.join("..", "..", "..", "etc", "passwd")
             with pytest.raises(ReportGenerationError, match="path escape"):
-                service._build_report_path(1, "../../etc/passwd")
+                service._build_report_path(1, traversal)
 
     def test_get_status_never_leaks_keys(self):
         """get_status dict never contains actual API key values."""
@@ -1353,7 +1271,7 @@ class TestKeyArchitecture:
         """Settings has 12 key slot attributes (01-12)."""
         from app.core.config import Settings
 
-        s = Settings()
+        s = Settings(_env_file=None)
         for i in range(1, 13):
             slot = f"{i:02d}"
             attr = f"OPENROUTER_API_KEY_{slot}"
@@ -1361,9 +1279,7 @@ class TestKeyArchitecture:
 
     def test_get_api_keys_returns_tuple_format(self):
         """get_api_keys returns list of (slot, key) tuples."""
-        from app.core.config import Settings
-
-        s = Settings(
+        s = _make_settings(
             OPENROUTER_API_KEY_01="k1",
             OPENROUTER_API_KEY_05="k5",
             OPENROUTER_API_KEY_12="k12",

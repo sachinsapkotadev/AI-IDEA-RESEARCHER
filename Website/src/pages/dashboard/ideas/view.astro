@@ -65,25 +65,18 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 
       {/* Tab: Overview */}
       <div id="tab-overview" class="tab-content space-y-6">
-        {/* Problem */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Problem</h2>
           <p id="idea-problem" class="text-sm text-body leading-relaxed"></p>
         </div>
-
-        {/* Target Users */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Target Users</h2>
           <p id="idea-target-users" class="text-sm text-body leading-relaxed"></p>
         </div>
-
-        {/* Solution */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Solution</h2>
           <p id="idea-solution" class="text-sm text-body leading-relaxed"></p>
         </div>
-
-        {/* MVP */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">MVP</h2>
           <p id="idea-mvp" class="text-sm text-body leading-relaxed"></p>
@@ -92,13 +85,10 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 
       {/* Tab: Market Analysis */}
       <div id="tab-market" class="tab-content hidden space-y-6">
-        {/* Monetization */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Monetization</h2>
           <p id="idea-monetization" class="text-sm text-body leading-relaxed"></p>
         </div>
-
-        {/* Differentiation */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Differentiation</h2>
           <p id="idea-differentiation" class="text-sm text-body leading-relaxed"></p>
@@ -107,13 +97,10 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 
       {/* Tab: Technical */}
       <div id="tab-technical" class="tab-content hidden space-y-6">
-        {/* Technical Complexity */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Technical Complexity</h2>
           <p id="idea-complexity" class="text-sm text-body leading-relaxed"></p>
         </div>
-
-        {/* Risks */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Risks</h2>
           <p id="idea-risks" class="text-sm text-body leading-relaxed"></p>
@@ -122,7 +109,6 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 
       {/* Tab: Validation */}
       <div id="tab-validation" class="tab-content hidden space-y-6">
-        {/* Validation Plan */}
         <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
           <h2 class="text-base font-semibold text-ink mb-3">Validation Plan</h2>
           <p id="idea-validation" class="text-sm text-body leading-relaxed"></p>
@@ -164,16 +150,9 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
       return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
-    function escapeHtml(str: string) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
-        // Update tab buttons
         document.querySelectorAll('.tab-btn').forEach((b) => {
           b.classList.remove('border-link', 'text-ink');
           b.classList.add('border-transparent', 'text-mute');
@@ -183,7 +162,6 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
         btn.classList.remove('border-transparent', 'text-mute');
         btn.setAttribute('aria-selected', 'true');
 
-        // Show/hide tab content
         const tabId = btn.getAttribute('data-tab');
         document.querySelectorAll('.tab-content').forEach((tc) => tc.classList.add('hidden'));
         document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
@@ -210,7 +188,6 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 
         const idea = await res.json();
 
-        // Fill header
         document.getElementById('idea-title')!.textContent = idea.title;
 
         const badge = document.getElementById('status-badge')!;
@@ -221,7 +198,6 @@ import Breadcrumbs from '../../../components/Breadcrumbs.astro';
         document.getElementById('idea-date')!.textContent = idea.created_at ? formatDate(idea.created_at) : '';
         document.getElementById('idea-research')!.textContent = idea.research_run_id ? `Research #${idea.research_run_id}` : '';
 
-        // Fill content sections
         const setField = (id: string, value: string | null | undefined) => {
           const el = document.getElementById(id);
           if (el) el.textContent = value || 'Not specified.';
