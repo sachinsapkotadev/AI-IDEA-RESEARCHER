@@ -1,11 +1,17 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Card from '../../components/Card.astro';
-import Badge from '../../components/Badge.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
 ---
 
 <DashboardLayout title="Automation — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Automation' },
+    ]} />
+
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">Automation</h1>
@@ -13,12 +19,12 @@ import Badge from '../../components/Badge.astro';
     </div>
 
     {/* Status Banner */}
-    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
+    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800" role="status">
       <span class="font-medium">Not configured.</span> Automation requires the backend scheduler to be implemented.
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      {/* Daily Research Toggle */}
+      {/* Daily Research */}
       <Card padding="md">
         <div class="space-y-4">
           <div class="flex items-center justify-between">
@@ -26,7 +32,7 @@ import Badge from '../../components/Badge.astro';
               <h3 class="text-sm font-semibold text-ink">Daily Research</h3>
               <p class="mt-0.5 text-xs text-body">Automatically run research on configured topics.</p>
             </div>
-            <Badge variant="default">Not configured</Badge>
+            <StatusBadge status="not-connected" />
           </div>
           <div class="border-t border-hairline-soft pt-3">
             <p class="text-xs text-mute">Schedule</p>
@@ -41,7 +47,7 @@ import Badge from '../../components/Badge.astro';
           <div>
             <h3 class="text-sm font-semibold text-ink mb-3">Status</h3>
             <div class="flex items-center gap-3">
-              <Badge variant="default">Not configured</Badge>
+              <StatusBadge status="not-connected" />
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4 border-t border-hairline-soft pt-3">
@@ -61,7 +67,10 @@ import Badge from '../../components/Badge.astro';
       <Card padding="md">
         <div class="space-y-3">
           <h3 class="text-sm font-semibold text-ink">Research Topics</h3>
-          <p class="text-sm text-mute py-4 text-center">No topics configured. Add topics to start automated research.</p>
+          <div class="rounded-md border border-dashed border-hairline py-6 text-center">
+            <p class="text-sm text-mute">No topics configured.</p>
+            <p class="mt-1 text-xs text-faint">Add topics to start automated research.</p>
+          </div>
         </div>
       </Card>
 
@@ -73,7 +82,7 @@ import Badge from '../../components/Badge.astro';
               <h3 class="text-sm font-semibold text-ink">Notifications</h3>
               <p class="mt-0.5 text-xs text-body">Get notified when research runs complete.</p>
             </div>
-            <Badge variant="default">Not configured</Badge>
+            <StatusBadge status="not-connected" />
           </div>
           <p class="text-xs text-mute">Enable notifications to receive alerts when automation tasks finish.</p>
         </div>

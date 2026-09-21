@@ -1,20 +1,19 @@
 ---
 import DashboardLayout from '../../../layouts/DashboardLayout.astro';
-
-export function getStaticPaths() {
-  return [
-    { params: { id: '1' } },
-    { params: { id: '2' } },
-    { params: { id: '3' } },
-  ];
-}
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 ---
 
 <DashboardLayout title="Research Detail — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Research', href: '/dashboard/research' },
+      { label: 'Detail' },
+    ]} />
+
     {/* Back link */}
     <a href="/dashboard/research" class="inline-flex items-center gap-1.5 text-sm text-body no-underline hover:text-ink">
-      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M15 19l-7-7 7-7" />
       </svg>
       Back to Research
@@ -50,16 +49,16 @@ export function getStaticPaths() {
         <div class="min-w-0 flex-1">
           <h1 id="topic" class="text-2xl font-semibold text-ink"></h1>
           <div class="mt-2 flex flex-wrap items-center gap-3">
-            <span id="status-badge" class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium"></span>
+            <span id="status-badge" class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"></span>
             <span id="date" class="text-sm text-mute"></span>
           </div>
         </div>
         <a
           id="sources-link"
-          href="#"
+          href="#sources-section"
           class="inline-flex items-center gap-2 rounded-sm border border-hairline bg-canvas-elevated px-4 py-2 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft"
         >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.813a4.5 4.5 0 00-6.364 0l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
           </svg>
           <span id="sources-count">0 sources</span>
@@ -119,15 +118,32 @@ export function getStaticPaths() {
       {/* Sources Section */}
       <div id="sources-section" class="hidden rounded-md border border-hairline bg-canvas-elevated p-6">
         <h2 class="text-base font-semibold text-ink mb-4">Sources</h2>
-        <div id="sources-loading" class="flex items-center justify-center py-8">
-          <div class="h-6 w-6 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+
+        {/* Source loading skeleton */}
+        <div id="sources-loading" class="animate-pulse space-y-3">
+          {Array.from({ length: 3 }).map(() => (
+            <div class="flex items-start gap-3 rounded-sm border border-hairline-soft p-3">
+              <div class="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-hairline-soft"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-3 w-2/3 rounded bg-hairline-soft"></div>
+                <div class="h-2 w-1/3 rounded bg-hairline-soft"></div>
+              </div>
+            </div>
+          ))}
         </div>
+
         <div id="sources-list" class="hidden space-y-3"></div>
         <div id="sources-empty" class="hidden text-center py-8">
-          <p class="text-sm text-mute">No sources collected for this research run.</p>
+          <p class="text-sm text-mute">No sources were collected for this research.</p>
         </div>
         <div id="sources-error" class="hidden text-center py-8">
           <p class="text-sm text-body">Unable to load sources.</p>
+          <button
+            id="retry-sources-btn"
+            class="mt-3 text-sm text-link font-medium no-underline hover:underline"
+          >
+            Retry
+          </button>
         </div>
       </div>
     </div>
@@ -136,23 +152,23 @@ export function getStaticPaths() {
   <script>
     const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
 
-    const statusColors: Record<string, string> = {
-      completed: 'bg-green-50 text-green-800 border-green-200',
-      running: 'bg-link-soft text-blue-800 border-blue-200',
-      pending: 'bg-warning-soft text-amber-800 border-amber-200',
-      failed: 'bg-red-50 text-red-800 border-red-200',
+    const statusConfig: Record<string, { classes: string; label: string }> = {
+      completed: { classes: 'bg-success-soft text-green-800 border-green-200', label: 'Completed' },
+      running:   { classes: 'bg-link-soft text-blue-800 border-blue-200',     label: 'Running' },
+      pending:   { classes: 'bg-warning-soft text-amber-800 border-amber-200', label: 'Pending' },
+      failed:    { classes: 'bg-red-50 text-red-800 border-red-200',          label: 'Failed' },
     };
 
-    const statusLabels: Record<string, string> = {
-      completed: 'Completed',
-      running: 'Running',
-      pending: 'Pending',
-      failed: 'Failed',
+    const sourceTypeLabels: Record<string, string> = {
+      web: 'Official',
+      news: 'News',
+      academic: 'Academic',
+      other: 'Other',
     };
 
-    // Get research ID from URL
-    const pathParts = window.location.pathname.split('/');
-    const researchId = parseInt(pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2] || '0', 10);
+    // Get research ID from query parameter
+    const params = new URLSearchParams(window.location.search);
+    const researchId = parseInt(params.get('id') || '0', 10);
 
     const loadingEl = document.getElementById('loading-state')!;
     const errorEl = document.getElementById('error-state')!;
@@ -184,25 +200,24 @@ export function getStaticPaths() {
       return `${Math.round(seconds / 60)}m ${seconds % 60}s`;
     }
 
+    function escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
     function renderList(items: string[], containerId: string) {
       const el = document.getElementById(containerId)!;
       if (!items || items.length === 0) {
-        el.closest('.hidden, [class*="hidden"]')?.classList.remove('hidden');
         el.innerHTML = '<li class="text-sm text-mute">None reported.</li>';
         return;
       }
       el.innerHTML = items.map(item =>
         `<li class="flex items-start gap-2 text-sm text-body">
-          <span class="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-link"></span>
+          <span class="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-link" aria-hidden="true"></span>
           <span>${escapeHtml(item)}</span>
         </li>`
       ).join('');
-    }
-
-    function escapeHtml(str: string) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
     }
 
     async function loadSources(id: number) {
@@ -211,8 +226,13 @@ export function getStaticPaths() {
       const sourcesEmpty = document.getElementById('sources-empty')!;
       const sourcesError = document.getElementById('sources-error')!;
 
+      sourcesLoading.classList.remove('hidden');
+      sourcesList.classList.add('hidden');
+      sourcesEmpty.classList.add('hidden');
+      sourcesError.classList.add('hidden');
+
       try {
-        const res = await fetch(`${API_BASE}/api/research/${id}/sources`);
+        const res = await fetch(`${API_BASE}/api/research/${id}/sources`, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
@@ -227,26 +247,33 @@ export function getStaticPaths() {
 
         sourcesList.innerHTML = sources.map((s: any) => {
           const domain = s.domain || (s.url ? new URL(s.url).hostname : '—');
-          const rankBadge = s.rank ? `<span class="text-xs text-mute">#${s.rank}</span>` : '';
-          const statusDot = s.status === 'success' ? 'bg-green-500' : s.status === 'failed' ? 'bg-red-500' : 'bg-mute';
+          const typeLabel = sourceTypeLabels[s.source_type] || s.source_type || 'Unknown';
+          const statusLabel = s.status === 'success' ? 'Retrieved' : s.status === 'failed' ? 'Failed' : 'Unknown';
           const wordCount = s.word_count ? `${s.word_count.toLocaleString()} words` : '';
 
           return `
-            <div class="flex items-start gap-3 rounded-sm border border-hairline-soft p-3">
-              <div class="mt-1 h-2 w-2 flex-shrink-0 rounded-full ${statusDot}"></div>
+            <div class="flex items-start gap-3 rounded-sm border border-hairline-soft p-3 transition-colors hover:bg-hairline-soft/50">
+              <div class="mt-1 flex-shrink-0">
+                <span class="flex h-2 w-2 items-center justify-center rounded-full ${s.status === 'success' ? 'bg-green-500' : s.status === 'failed' ? 'bg-red-500' : 'bg-mute'}" aria-label="${statusLabel}"></span>
+              </div>
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <p class="text-sm font-medium text-ink truncate">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="text-sm font-medium text-ink">
                     ${s.url
                       ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="no-underline hover:underline text-link">${escapeHtml(s.title)}</a>`
                       : escapeHtml(s.title)
                     }
                   </p>
-                  ${rankBadge}
+                  ${s.url ? `
+                    <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 text-xs text-link no-underline hover:underline" aria-label="Open ${escapeHtml(s.title)} in new tab">
+                      Open ↗
+                    </a>
+                  ` : ''}
                 </div>
-                <div class="mt-1 flex items-center gap-3 text-xs text-mute">
+                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
                   <span>${escapeHtml(domain)}</span>
-                  <span class="capitalize">${escapeHtml(s.source_type || 'web')}</span>
+                  <span class="inline-flex items-center rounded-full border border-hairline bg-hairline-soft px-2 py-0.5">${escapeHtml(typeLabel)}</span>
+                  ${s.rank ? `<span>Rank #${s.rank}</span>` : ''}
                   ${wordCount ? `<span>${wordCount}</span>` : ''}
                 </div>
               </div>
@@ -263,17 +290,19 @@ export function getStaticPaths() {
 
     async function loadResearch() {
       if (!researchId || isNaN(researchId)) {
-        showError('Invalid research ID.');
+        showError('Invalid research ID. Please navigate from the research list.');
         return;
       }
+
+      // Breadcrumb shows "Detail" — enough context with back link
 
       showState('loading');
 
       try {
-        const res = await fetch(`${API_BASE}/api/research/${researchId}`);
+        const res = await fetch(`${API_BASE}/api/research/${researchId}`, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) {
           if (res.status === 404) {
-            showError('This research run was not found.');
+            showError('This research run was not found. It may have been deleted or the ID is incorrect.');
             return;
           }
           throw new Error(`HTTP ${res.status}`);
@@ -285,14 +314,13 @@ export function getStaticPaths() {
         document.getElementById('topic')!.textContent = data.topic;
 
         const badge = document.getElementById('status-badge')!;
-        badge.textContent = statusLabels[data.status] || data.status;
-        badge.className = `inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[data.status] || statusColors.pending}`;
+        const config = statusConfig[data.status] || statusConfig.pending;
+        badge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full" aria-hidden="true"></span> ${config.label}`;
+        badge.className = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${config.classes}`;
 
         document.getElementById('date')!.textContent = formatDate(data.created_at);
 
         // Sources link
-        const sourcesLink = document.getElementById('sources-link') as HTMLAnchorElement;
-        sourcesLink.href = '#sources-section';
         document.getElementById('sources-count')!.textContent = `${data.sources_found ?? 0} sources`;
 
         // Stats
@@ -330,10 +358,9 @@ export function getStaticPaths() {
             renderList(r.uncertainties, 'uncertainties-list');
           }
         } else if (data.status === 'running') {
-          // Show running state
           document.getElementById('summary-section')!.classList.remove('hidden');
           document.getElementById('summary-text')!.innerHTML =
-            '<span class="inline-flex items-center gap-2"><span class="h-2 w-2 animate-pulse rounded-full bg-link"></span> Research is currently in progress...</span>';
+            '<span class="inline-flex items-center gap-2"><span class="h-2 w-2 animate-pulse rounded-full bg-link"></span> Research is currently in progress. Results will appear here when complete.</span>';
         }
 
         // Show sources section
@@ -343,9 +370,16 @@ export function getStaticPaths() {
         showState('content');
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to load research';
-        showError(msg);
+        showError(msg.includes('fetch') || msg.includes('timeout')
+          ? 'Unable to connect to the backend. Please check if the server is running.'
+          : msg);
       }
     }
+
+    // Retry sources
+    document.getElementById('retry-sources-btn')?.addEventListener('click', () => {
+      if (researchId) loadSources(researchId);
+    });
 
     loadResearch();
   </script>

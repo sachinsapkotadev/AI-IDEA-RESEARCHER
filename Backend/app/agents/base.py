@@ -54,15 +54,17 @@ class BaseAgent(ABC):
         Returns:
             Tuple of (validated output or None if failed, agent_run record).
         """
+        resolved_model = self._provider._resolve_model(None, self.AGENT_NAME)
+
         logger.info(
             "%s started | research_run_id=%d | model=%s",
-            self.AGENT_NAME, research_run_id, self._provider.model,
+            self.AGENT_NAME, research_run_id, resolved_model,
         )
 
         agent_run = AgentRun(
             research_run_id=research_run_id,
             agent_name=self.AGENT_NAME,
-            model=self._provider.model,
+            model=resolved_model,
             status=AgentRunStatus.RUNNING,
             started_at=datetime.now(timezone.utc),
         )
@@ -74,6 +76,7 @@ class BaseAgent(ABC):
             response = await self._provider.generate(
                 prompt=prompt,
                 system_prompt=self.SYSTEM_PROMPT,
+                agent_name=self.AGENT_NAME,
             )
 
             raw_json = _extract_json_from_response(response.content)
@@ -83,12 +86,14 @@ class BaseAgent(ABC):
             agent_run.completed_at = datetime.now(timezone.utc)
             agent_run.input_tokens = response.usage.input_tokens
             agent_run.output_tokens = response.usage.output_tokens
+            agent_run.provider_key_slot = response.key_slot
 
             duration = (agent_run.completed_at - agent_run.started_at).total_seconds()
             logger.info(
-                "%s completed | research_run_id=%d | duration=%.1fs | "
-                "input_tokens=%s | output_tokens=%s",
-                self.AGENT_NAME, research_run_id, duration,
+                "%s completed | research_run_id=%d | model=%s | key_slot=%s | "
+                "duration=%.1fs | input_tokens=%s | output_tokens=%s",
+                self.AGENT_NAME, research_run_id, resolved_model,
+                response.key_slot, duration,
                 response.usage.input_tokens, response.usage.output_tokens,
             )
 

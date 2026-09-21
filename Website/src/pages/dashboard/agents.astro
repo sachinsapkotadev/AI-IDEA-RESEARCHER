@@ -1,10 +1,17 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Card from '../../components/Card.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
 ---
 
 <DashboardLayout title="AI Agents — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Agents' },
+    ]} />
+
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">AI Agents</h1>
@@ -12,31 +19,28 @@ import Card from '../../components/Card.astro';
     </div>
 
     {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800">
-      <span class="font-medium">Not connected yet.</span> Agent management will be available when the multi-agent backend is implemented.
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
+      <span class="font-medium">Agent monitoring will be available after the multi-agent backend is implemented.</span> The backend currently handles research without individual agent tracking.
     </div>
 
     {/* Agent Grid — planned agents */}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {[
-        { name: 'Research Agent', type: 'researcher', desc: 'Searches the web for relevant information' },
-        { name: 'Market Analyst', type: 'analyst', desc: 'Analyzes market size and competition' },
-        { name: 'Competitor Analyst', type: 'analyst', desc: 'Deep-dives into existing solutions' },
-        { name: 'Idea Generator', type: 'generator', desc: 'Synthesizes findings into ideas' },
-        { name: 'Technical Analyst', type: 'analyst', desc: 'Evaluates technical feasibility' },
-        { name: 'Report Writer', type: 'writer', desc: 'Generates research reports' },
+        { name: 'Research Agent', type: 'Researcher', desc: 'Searches the web for relevant information on a given topic' },
+        { name: 'Market Analyst', type: 'Analyst', desc: 'Analyzes market size, trends, and competition dynamics' },
+        { name: 'Competitor Analyst', type: 'Analyst', desc: 'Deep-dives into existing solutions and their positioning' },
+        { name: 'Idea Generator', type: 'Generator', desc: 'Synthesizes research findings into actionable startup ideas' },
+        { name: 'Technical Analyst', type: 'Analyst', desc: 'Evaluates technical feasibility and implementation complexity' },
+        { name: 'Report Writer', type: 'Writer', desc: 'Generates structured research reports from collected data' },
       ].map((agent) => (
         <Card padding="md">
           <div class="space-y-3">
             <div class="flex items-start justify-between">
               <div>
                 <h3 class="text-sm font-semibold text-ink">{agent.name}</h3>
-                <p class="mt-0.5 text-xs text-mute capitalize">{agent.type}</p>
+                <p class="mt-0.5 text-xs text-mute">{agent.type}</p>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="h-2 w-2 rounded-full bg-hairline"></div>
-                <span class="text-xs font-medium text-mute">Planned</span>
-              </div>
+              <StatusBadge status="coming-soon" label="Planned" />
             </div>
             <p class="text-xs text-body">{agent.desc}</p>
             <div class="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-hairline-soft pt-3">
@@ -45,12 +49,16 @@ import Card from '../../components/Card.astro';
                 <p class="text-sm font-medium text-mute">—</p>
               </div>
               <div>
-                <p class="text-xs text-mute">Tokens Used</p>
-                <p class="text-sm font-medium text-mute">—</p>
+                <p class="text-xs text-mute">Status</p>
+                <p class="text-sm font-medium text-mute">Not active</p>
               </div>
-              <div class="col-span-2">
+              <div>
                 <p class="text-xs text-mute">Last Run</p>
                 <p class="text-sm text-mute">Never</p>
+              </div>
+              <div>
+                <p class="text-xs text-mute">Tokens Used</p>
+                <p class="text-sm text-mute">—</p>
               </div>
             </div>
           </div>

@@ -55,17 +55,18 @@ class ResearchAgent:
             AIError: On any AI-related failure.
         """
         topic = research_run.topic
+        resolved_model = self._provider._resolve_model(None, self.AGENT_NAME)
         logger.info(
             "ResearchAgent started | topic=%s | model=%s",
             topic[:80],
-            self._provider.model,
+            resolved_model,
         )
 
         # Create agent run record
         agent_run = AgentRun(
             research_run_id=research_run.id,
             agent_name=self.AGENT_NAME,
-            model=self._provider.model,
+            model=resolved_model,
             status=AgentRunStatus.RUNNING,
             started_at=datetime.now(timezone.utc),
         )
@@ -85,6 +86,7 @@ class ResearchAgent:
             response = await self._provider.generate(
                 prompt=prompt,
                 system_prompt=SYSTEM_PROMPT,
+                agent_name=self.AGENT_NAME,
             )
 
             # Parse JSON from response
@@ -98,14 +100,17 @@ class ResearchAgent:
             agent_run.completed_at = datetime.now(timezone.utc)
             agent_run.input_tokens = response.usage.input_tokens
             agent_run.output_tokens = response.usage.output_tokens
+            agent_run.provider_key_slot = response.key_slot
 
             # Update research run
             research_run.status = ResearchStatus.COMPLETED
             research_run.completed_at = datetime.now(timezone.utc)
 
             logger.info(
-                "ResearchAgent completed | topic=%s | duration=%.1fs",
+                "ResearchAgent completed | topic=%s | model=%s | key_slot=%s | duration=%.1fs",
                 topic[:80],
+                resolved_model,
+                response.key_slot,
                 (agent_run.completed_at - agent_run.started_at).total_seconds(),
             )
 

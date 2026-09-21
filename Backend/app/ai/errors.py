@@ -31,3 +31,7 @@ class AIResponseParsingError(AIError):
 
 class AIResponseValidationError(AIError):
     """Raised when the AI response fails Pydantic validation."""
+
+
+class AIAllKeysExhausted(AIError):
+    """Raised when all API keys are unavailable."""

@@ -32,6 +32,7 @@ class AgentRun(Base):
         nullable=False,
     )
     model: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    provider_key_slot: Mapped[str | None] = mapped_column(String(10), nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)

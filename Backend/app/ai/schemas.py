@@ -36,3 +36,4 @@ class AIResponse(BaseModel):
     content: str
     model: str | None = None
     usage: AIUsage = Field(default_factory=AIUsage)
+    key_slot: str | None = None

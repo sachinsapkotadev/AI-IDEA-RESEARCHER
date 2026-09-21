@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 
 from app.ai.client import OpenRouterClient
 from app.ai.errors import AIResponseParsingError, AIResponseValidationError
+from app.ai.key_pool import OpenRouterKeyPool
+from app.ai.model_registry import ModelRegistry
 from app.ai.schemas import AIResponse, AIUsage
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,8 @@ class AIProvider(ABC):
         system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
+        model: str | None = None,
+        agent_name: str | None = None,
     ) -> AIResponse:
         """Generate a response from the AI provider.
 
@@ -30,6 +34,8 @@ class AIProvider(ABC):
             system_prompt: Optional system prompt.
             temperature: Sampling temperature.
             max_tokens: Maximum tokens.
+            model: Optional explicit model override.
+            agent_name: Optional agent name for model registry lookup.
 
         Returns:
             AIResponse with content and usage info.
@@ -79,10 +85,35 @@ def _extract_json_from_response(content: str) -> dict:
 
 
 class OpenRouterProvider(AIProvider):
-    """OpenRouter AI provider implementation."""
+    """OpenRouter AI provider implementation with key pool and model registry."""
 
-    def __init__(self) -> None:
-        self._client = OpenRouterClient()
+    def __init__(
+        self,
+        key_pool: OpenRouterKeyPool | None = None,
+        model_registry: ModelRegistry | None = None,
+    ) -> None:
+        self._key_pool = key_pool or OpenRouterKeyPool()
+        self._model_registry = model_registry or ModelRegistry()
+        self._client = OpenRouterClient(key_pool=self._key_pool)
+
+    def _resolve_model(self, model: str | None, agent_name: str | None) -> str:
+        """Resolve which model to use for this request."""
+        if model:
+            return model
+        if agent_name:
+            try:
+                return self._model_registry.get_model(agent_name)
+            except ValueError:
+                pass
+        return self._model_registry.get_model("default")
+
+    @property
+    def model(self) -> str:
+        """Return the default configured model ID."""
+        try:
+            return self._model_registry.get_model("default")
+        except ValueError:
+            return "unknown"
 
     async def generate(
         self,
@@ -90,6 +121,8 @@ class OpenRouterProvider(AIProvider):
         system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
+        model: str | None = None,
+        agent_name: str | None = None,
     ) -> AIResponse:
         """Generate a response via OpenRouter.
 
@@ -98,10 +131,14 @@ class OpenRouterProvider(AIProvider):
             system_prompt: Optional system prompt.
             temperature: Sampling temperature.
             max_tokens: Maximum tokens.
+            model: Optional explicit model override.
+            agent_name: Optional agent name for model registry.
 
         Returns:
             AIResponse with parsed content and usage.
         """
+        resolved_model = self._resolve_model(model, agent_name)
+
         messages: list[dict[str, str]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -109,9 +146,13 @@ class OpenRouterProvider(AIProvider):
 
         raw = await self._client.chat_completion(
             messages=messages,
+            model=resolved_model,
             temperature=temperature,
             max_tokens=max_tokens,
         )
+
+        # Extract key slot from client response
+        key_slot = raw.pop("_key_slot", None)
 
         # Extract content
         try:
@@ -132,9 +173,5 @@ class OpenRouterProvider(AIProvider):
             content=content,
             model=raw.get("model"),
             usage=usage,
+            key_slot=key_slot,
         )
-
-    @property
-    def model(self) -> str:
-        """Return the configured model ID."""
-        return self._client.model

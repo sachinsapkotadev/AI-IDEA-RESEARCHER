@@ -1,10 +1,16 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import EmptyState from '../../components/EmptyState.astro';
 ---
 
 <DashboardLayout title="Reports — AI Idea Researcher">
   <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <Breadcrumbs items={[
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Reports' },
+    ]} />
+
     {/* Header */}
     <div>
       <h1 class="text-2xl font-semibold text-ink">Reports</h1>
@@ -12,15 +18,15 @@ import EmptyState from '../../components/EmptyState.astro';
     </div>
 
     {/* Status Banner */}
-    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800">
-      <span class="font-medium">Coming soon.</span> Reports will become available when the report-generation backend is implemented.
+    <div class="rounded-md border border-blue-200 bg-link-soft px-4 py-3 text-sm text-blue-800" role="status">
+      <span class="font-medium">No reports available yet.</span> Reports will be generated automatically when research runs complete and the report backend is connected.
     </div>
 
     {/* Empty State */}
     <EmptyState
       icon='<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
       title="No reports yet"
-      description="Reports will be generated automatically when research runs complete and the report backend is connected."
+      description="Reports will be generated from completed research runs when the report-generation backend is connected."
     />
 
     {/* Future features preview */}
