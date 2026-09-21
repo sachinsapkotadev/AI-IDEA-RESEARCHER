@@ -1,0 +1,262 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import FAQ from '../components/FAQ.astro';
+---
+
+<PublicLayout
+  title="Contact — AI Idea Researcher"
+  description="Get in touch with the AI Idea Researcher team. Questions, feedback, or partnership inquiries — we'd love to hear from you."
+>
+
+  <!-- Hero -->
+  <section class="container-page pt-20 pb-12 md:pt-28 md:pb-16">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
+        Contact
+      </span>
+      <h1 class="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+        Get in touch
+      </h1>
+      <p class="mx-auto mt-6 max-w-xl text-lg text-body">
+        Have a question, need help, or want to explore a partnership? We'd love to hear from you.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contact form + info -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="mx-auto grid max-w-4xl gap-12 lg:grid-cols-5">
+      <!-- Form -->
+      <div class="lg:col-span-3">
+        <form id="contact-form" class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper" novalidate>
+          <h2 class="mb-6 text-lg font-semibold text-ink">Send us a message</h2>
+          <div class="space-y-4">
+            <div>
+              <label for="name" class="mb-1.5 block text-sm font-medium text-ink">
+                Name <span class="text-error">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                placeholder="Your name"
+                class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+              />
+              <p id="name-error" class="mt-1 hidden text-xs text-error"></p>
+            </div>
+            <div>
+              <label for="email" class="mb-1.5 block text-sm font-medium text-ink">
+                Email <span class="text-error">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="you@example.com"
+                class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+              />
+              <p id="email-error" class="mt-1 hidden text-xs text-error"></p>
+            </div>
+            <div>
+              <label for="subject" class="mb-1.5 block text-sm font-medium text-ink">
+                Subject <span class="text-error">*</span>
+              </label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                required
+                placeholder="What's this about?"
+                class="w-full rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+              />
+              <p id="subject-error" class="mt-1 hidden text-xs text-error"></p>
+            </div>
+            <div>
+              <label for="message" class="mb-1.5 block text-sm font-medium text-ink">
+                Message <span class="text-error">*</span>
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows="5"
+                placeholder="Tell us what you're looking for..."
+                class="w-full resize-y rounded-sm border border-hairline bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors focus:border-link focus:outline-none focus:ring-1 focus:ring-link"
+              ></textarea>
+              <p id="message-error" class="mt-1 hidden text-xs text-error"></p>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="mt-6 w-full rounded-sm bg-primary px-4 py-2.5 text-sm font-medium text-on-primary transition-opacity hover:opacity-90"
+          >
+            Send message
+          </button>
+          <div id="form-success" class="mt-4 hidden rounded-sm border border-green-200 bg-success-soft p-3 text-sm text-green-800">
+            Thanks! Your message has been noted. We'll get back to you soon.
+          </div>
+          <div id="form-error" class="mt-4 hidden rounded-sm border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            Something went wrong. Please check your inputs and try again.
+          </div>
+        </form>
+      </div>
+
+      <!-- Contact info -->
+      <div class="lg:col-span-2">
+        <div class="space-y-6">
+          <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+            <h3 class="text-sm font-semibold text-ink">Email</h3>
+            <p class="mt-2 text-sm text-body">
+              <a href="mailto:hello@aiidearesearcher.com" class="text-link no-underline transition-colors hover:text-link-deep">
+                hello@aiidearesearcher.com
+              </a>
+            </p>
+            <p class="mt-1 text-xs text-mute">We typically respond within 24 hours on business days.</p>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+            <h3 class="text-sm font-semibold text-ink">Social</h3>
+            <div class="mt-3 flex flex-col gap-2">
+              <a href="#" class="flex items-center gap-2 text-sm text-body no-underline transition-colors hover:text-ink">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                Twitter / X
+              </a>
+              <a href="#" class="flex items-center gap-2 text-sm text-body no-underline transition-colors hover:text-ink">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
+                GitHub
+              </a>
+              <a href="#" class="flex items-center gap-2 text-sm text-body no-underline transition-colors hover:text-ink">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                LinkedIn
+              </a>
+            </div>
+            <p class="mt-3 text-xs text-mute">Social links are placeholders and will be updated.</p>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas-elevated p-6">
+            <h3 class="text-sm font-semibold text-ink">Office hours</h3>
+            <p class="mt-2 text-sm text-body">
+              We're a remote team. You'll usually hear back from us within one business day.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Help / FAQ -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Common questions"
+      description="Quick answers before you reach out."
+    />
+    <div class="mx-auto mt-12 max-w-2xl">
+      <FAQ
+        question="I found a bug. How do I report it?"
+        answer="Email us at hello@aiidearesearcher.com with a description of what happened, what you expected, and steps to reproduce. Screenshots are helpful. We aim to acknowledge bug reports within 4 hours during business hours."
+      />
+      <FAQ
+        question="Can I request a feature?"
+        answer="Absolutely. Send us a message using the form above or email us directly. We review every feature request and prioritize based on impact and feasibility. If we build what you suggested, we'll let you know."
+      />
+      <FAQ
+        question="I need help setting up my account"
+        answer="Check our documentation at docs.aiidearesearcher.com for step-by-step guides. If you're stuck, email us your account email and a description of where you're getting stuck — we'll help you get sorted."
+      />
+      <FAQ
+        question="Do you offer demos for teams?"
+        answer="Yes. If you're evaluating AI Idea Researcher for your team, we offer a 30-minute walkthrough tailored to your use case. Contact us to schedule a time."
+      />
+      <FAQ
+        question="How do I cancel my subscription?"
+        answer="You can cancel anytime from your account settings under Billing. There are no cancellation fees. If you cancel a paid plan, you'll retain access until the end of your current billing period, then automatically downgrade to the Free plan."
+      />
+    </div>
+  </section>
+
+</PublicLayout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const nameInput = document.getElementById('name') as HTMLInputElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement;
+  const subjectInput = document.getElementById('subject') as HTMLInputElement;
+  const messageInput = document.getElementById('message') as HTMLTextAreaElement;
+
+  const nameError = document.getElementById('name-error')!;
+  const emailError = document.getElementById('email-error')!;
+  const subjectError = document.getElementById('subject-error')!;
+  const messageError = document.getElementById('message-error')!;
+  const formSuccess = document.getElementById('form-success')!;
+  const formError = document.getElementById('form-error')!;
+
+  function showError(el: HTMLElement, input: HTMLInputElement | HTMLTextAreaElement, msg: string) {
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    input.classList.add('border-error');
+    input.classList.remove('border-hairline');
+  }
+
+  function clearError(el: HTMLElement, input: HTMLInputElement | HTMLTextAreaElement) {
+    el.classList.add('hidden');
+    input.classList.remove('border-error');
+    input.classList.add('border-hairline');
+  }
+
+  function validateEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    // Reset
+    formSuccess.classList.add('hidden');
+    formError.classList.add('hidden');
+    clearError(nameError, nameInput);
+    clearError(emailError, emailInput);
+    clearError(subjectError, subjectInput);
+    clearError(messageError, messageInput);
+
+    if (!nameInput.value.trim()) {
+      showError(nameError, nameInput, 'Please enter your name.');
+      valid = false;
+    }
+
+    if (!emailInput.value.trim()) {
+      showError(emailError, emailInput, 'Please enter your email address.');
+      valid = false;
+    } else if (!validateEmail(emailInput.value.trim())) {
+      showError(emailError, emailInput, 'Please enter a valid email address.');
+      valid = false;
+    }
+
+    if (!subjectInput.value.trim()) {
+      showError(subjectError, subjectInput, 'Please enter a subject.');
+      valid = false;
+    }
+
+    if (!messageInput.value.trim()) {
+      showError(messageError, messageInput, 'Please enter a message.');
+      valid = false;
+    } else if (messageInput.value.trim().length < 10) {
+      showError(messageError, messageInput, 'Please write at least 10 characters.');
+      valid = false;
+    }
+
+    if (valid) {
+      formSuccess.classList.remove('hidden');
+      form.reset();
+    }
+  });
+
+  // Clear errors on input
+  [nameInput, emailInput, subjectInput, messageInput].forEach((input) => {
+    input?.addEventListener('input', () => {
+      const errorEl = document.getElementById(input.name + '-error');
+      if (errorEl) clearError(errorEl, input);
+    });
+  });
+</script>

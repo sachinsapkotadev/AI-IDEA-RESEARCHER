@@ -1,0 +1,27 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  change?: string;
+  changeType?: 'up' | 'down' | 'neutral';
+  class?: string;
+}
+
+const { label, value, change, changeType = 'neutral', class: className = '' } = Astro.props;
+
+const changeColors: Record<string, string> = {
+  up: 'text-success',
+  down: 'text-error',
+  neutral: 'text-mute',
+};
+---
+
+<div class:list={['rounded-md border border-hairline bg-canvas-elevated p-5', className]}>
+  <p class="text-sm text-mute">{label}</p>
+  <p class="mt-1 text-2xl font-semibold text-ink">{value}</p>
+  {change && (
+    <p class:list={['mt-1 text-xs font-medium', changeColors[changeType]]}>
+      {change}
+    </p>
+  )}
+</div>

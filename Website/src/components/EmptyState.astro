@@ -1,0 +1,30 @@
+---
+interface Props {
+  icon?: string;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  actionHref?: string;
+  class?: string;
+}
+
+const { icon, title, description, actionLabel, actionHref, class: className = '' } = Astro.props;
+---
+
+<div class:list={['flex flex-col items-center justify-center py-16 text-center', className]}>
+  {icon && (
+    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-hairline-soft text-mute">
+      <Fragment set:html={icon} />
+    </div>
+  )}
+  <h3 class="text-lg font-semibold text-ink">{title}</h3>
+  <p class="mt-2 max-w-sm text-sm text-body">{description}</p>
+  {actionLabel && actionHref && (
+    <a
+      href={actionHref}
+      class="mt-6 inline-flex items-center rounded-sm bg-primary px-4 py-2 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90"
+    >
+      {actionLabel}
+    </a>
+  )}
+</div>

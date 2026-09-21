@@ -1,0 +1,159 @@
+---
+import BaseHead from './BaseHead.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const sidebarLinks = [
+  { href: '/dashboard', label: 'Dashboard', icon: 'grid' },
+  { href: '/dashboard/research', label: 'Research', icon: 'search' },
+  { href: '/dashboard/ideas', label: 'Ideas', icon: 'lightbulb' },
+  { href: '/dashboard/agents', label: 'Agents', icon: 'cpu' },
+  { href: '/dashboard/reports', label: 'Reports', icon: 'file-text' },
+  { href: '/dashboard/models', label: 'Models', icon: 'layers' },
+  { href: '/dashboard/github', label: 'GitHub', icon: 'github' },
+  { href: '/dashboard/automation', label: 'Automation', icon: 'clock' },
+  { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<BaseHead title={title} description={description}>
+  <div class="flex min-h-screen bg-canvas">
+    {/* Sidebar - desktop */}
+    <aside class="hidden w-60 flex-shrink-0 border-r border-hairline bg-canvas-elevated lg:flex lg:flex-col">
+      <div class="flex h-16 items-center gap-2 border-b border-hairline px-5">
+        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          AI Idea Researcher
+        </a>
+      </div>
+      <nav class="flex-1 overflow-y-auto px-3 py-4">
+        <ul class="flex flex-col gap-0.5">
+          {sidebarLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  'flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-body no-underline transition-colors hover:bg-hairline-soft hover:text-ink',
+                  currentPath === link.href || (link.href !== '/dashboard' && currentPath.startsWith(link.href))
+                    ? 'bg-hairline-soft font-medium text-ink'
+                    : '',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="border-t border-hairline p-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-on-primary">
+            U
+          </div>
+          <div class="flex-1 truncate">
+            <p class="truncate text-sm font-medium text-ink">User</p>
+            <p class="truncate text-xs text-mute">Free Plan</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    {/* Main area */}
+    <div class="flex flex-1 flex-col">
+      {/* Mobile header */}
+      <header class="flex h-14 items-center justify-between border-b border-hairline bg-canvas-elevated px-4 lg:hidden">
+        <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          AI Idea Researcher
+        </a>
+        <button
+          id="mobile-sidebar-toggle"
+          class="flex items-center justify-center rounded-sm p-2 text-ink"
+          aria-label="Toggle navigation"
+        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </header>
+
+      {/* Mobile sidebar overlay */}
+      <div id="mobile-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/40 lg:hidden"></div>
+      {/* Mobile sidebar panel */}
+      <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 z-50 hidden w-64 bg-canvas-elevated shadow-lg lg:hidden">
+        <div class="flex h-16 items-center justify-between border-b border-hairline px-5">
+          <a href="/" class="flex items-center gap-2 text-sm font-semibold text-ink no-underline">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            AI Idea Researcher
+          </a>
+          <button id="mobile-sidebar-close" class="rounded-sm p-1 text-ink" aria-label="Close menu">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav class="overflow-y-auto px-3 py-4">
+          <ul class="flex flex-col gap-0.5">
+            {sidebarLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class:list={[
+                    'flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-body no-underline transition-colors hover:bg-hairline-soft hover:text-ink',
+                    currentPath === link.href || (link.href !== '/dashboard' && currentPath.startsWith(link.href))
+                      ? 'bg-hairline-soft font-medium text-ink'
+                      : '',
+                  ]}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Page content */}
+      <main class="flex-1 overflow-y-auto">
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+    const closeBtn = document.getElementById('mobile-sidebar-close');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    const sidebar = document.getElementById('mobile-sidebar');
+
+    function openSidebar() {
+      overlay?.classList.remove('hidden');
+      sidebar?.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+      overlay?.classList.add('hidden');
+      sidebar?.classList.add('hidden');
+    }
+
+    toggleBtn?.addEventListener('click', openSidebar);
+    closeBtn?.addEventListener('click', closeSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+  </script>
+</BaseHead>

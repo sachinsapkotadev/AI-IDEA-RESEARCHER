@@ -1,0 +1,511 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+---
+
+<PublicLayout
+  title="Features — AI Idea Researcher"
+  description="Explore every feature of AI Idea Researcher: AI research agents, market analysis, competitor tracking, GitHub integration, and automated daily reports."
+>
+
+  <!-- Hero -->
+  <section class="container-page pt-20 pb-12 md:pt-28 md:pb-16">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
+        Features
+      </span>
+      <h1 class="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+        Research that works while you sleep
+      </h1>
+      <p class="mx-auto mt-6 max-w-xl text-lg text-body">
+        Every feature is designed to cut the time from "I wonder what's trending" to "here's my next product" — from hours to minutes.
+      </p>
+    </div>
+  </section>
+
+  <!-- AI Research Agents -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Core Feature</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">AI Research Agents</h2>
+        <p class="mt-4 text-body">
+          Autonomous agents that work on your behalf every day. They scan hundreds of sources, identify patterns, and compile structured reports — so you can focus on building instead of reading.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Multi-source web scraping with deduplication
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Natural language summarization of raw findings
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Configurable scan schedules and topic filters
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Confidence scoring with transparent methodology
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+        <div class="mb-4 flex items-center gap-2">
+          <div class="h-3 w-3 rounded-full bg-error"></div>
+          <div class="h-3 w-3 rounded-full bg-warning"></div>
+          <div class="h-3 w-3 rounded-full bg-success"></div>
+          <span class="ml-2 text-xs text-mute">agent-scan.log</span>
+        </div>
+        <div class="font-mono text-xs leading-relaxed text-body">
+          <p class="text-mute">[08:00] Starting daily research scan...</p>
+          <p class="text-mute">[08:01] GitHub: scanned 2,340 trending repos</p>
+          <p class="text-mute">[08:02] Product Hunt: fetched 47 new products</p>
+          <p class="text-mute">[08:03] Reddit: analyzed 189 relevant threads</p>
+          <p class="text-mute">[08:04] Hacker News: processed 62 front-page items</p>
+          <p class="mt-2 text-success">[08:05] Scan complete. 12 new signals found.</p>
+          <p class="text-success">[08:05] 3 high-potential opportunities identified.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SaaS Idea Discovery -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div class="order-2 lg:order-1">
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <h4 class="mb-3 text-sm font-semibold text-ink">Opportunity Map</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-md border border-hairline p-3 text-center">
+              <p class="text-xs text-mute">Market size</p>
+              <p class="mt-1 text-lg font-semibold text-ink">$2.4B</p>
+            </div>
+            <div class="rounded-md border border-hairline p-3 text-center">
+              <p class="text-xs text-mute">Competition</p>
+              <p class="mt-1 text-lg font-semibold text-success">Low</p>
+            </div>
+            <div class="rounded-md border border-hairline p-3 text-center">
+              <p class="text-xs text-mute">Trend</p>
+              <p class="mt-1 text-lg font-semibold text-success">↑ 34%</p>
+            </div>
+          </div>
+          <div class="mt-4 rounded-md border border-hairline bg-canvas p-3">
+            <p class="text-xs font-medium text-ink">Recommended: Build a lightweight alternative</p>
+            <p class="mt-1 text-xs text-body">Current solutions are enterprise-focused. Clear gap for a simpler tool at $15–29/mo.</p>
+          </div>
+        </div>
+      </div>
+      <div class="order-1 lg:order-2">
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Discovery</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">SaaS Idea Discovery</h2>
+        <p class="mt-4 text-body">
+          Stop scrolling through Product Hunt hoping for inspiration. AI Idea Researcher maps out market opportunities by analyzing supply gaps, unmet needs, and emerging demand — then presents concrete ideas with supporting data.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Gap analysis across existing product categories
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Demand signal tracking from forums and social
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Idea scoring based on feasibility and market fit
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Related opportunity suggestions for each finding
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Market Research -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Analysis</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">Market Research</h2>
+        <p class="mt-4 text-body">
+          Get a snapshot of any market without hiring an analyst. AI Idea Researcher compiles data from public sources into clear market profiles — size estimates, growth trajectories, key players, and emerging shifts.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Market size and growth rate estimates
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Buyer persona signals from online behavior
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Technology adoption curve placement
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Regulatory and compliance landscape notes
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+        <h4 class="mb-4 text-sm font-semibold text-ink">Market Snapshot: Developer CLI Tools</h4>
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-xs"><span class="text-body">Market size</span><span class="font-medium text-ink">$1.8B (2026)</span></div>
+            <div class="mt-1 h-2 overflow-hidden rounded-full bg-hairline-soft"><div class="h-full w-3/5 rounded-full bg-ink"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs"><span class="text-body">Growth rate</span><span class="font-medium text-ink">+22% YoY</span></div>
+            <div class="mt-1 h-2 overflow-hidden rounded-full bg-hairline-soft"><div class="h-full w-2/5 rounded-full bg-success"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs"><span class="text-body">Competition</span><span class="font-medium text-ink">Moderate</span></div>
+            <div class="mt-1 h-2 overflow-hidden rounded-full bg-hairline-soft"><div class="h-full w-1/2 rounded-full bg-warning"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs"><span class="text-body">Opportunity score</span><span class="font-medium text-ink">7.2 / 10</span></div>
+            <div class="mt-1 h-2 overflow-hidden rounded-full bg-hairline-soft"><div class="h-full w-[72%] rounded-full bg-link"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Competitor Research -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div class="order-2 lg:order-1">
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <h4 class="mb-4 text-sm font-semibold text-ink">Competitor Watchlist</h4>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+              <div>
+                <p class="text-sm font-medium text-ink">DataLens</p>
+                <p class="text-xs text-mute">Analytics SaaS</p>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center rounded-full border border-amber-200 bg-warning-soft px-2 py-0.5 text-xs text-amber-800">Price change</span>
+                <p class="mt-1 text-xs text-mute">2 days ago</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+              <div>
+                <p class="text-sm font-medium text-ink">QueryHub</p>
+                <p class="text-xs text-mute">Developer Tools</p>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center rounded-full border border-blue-200 bg-link-soft px-2 py-0.5 text-xs text-blue-800">New feature</span>
+                <p class="mt-1 text-xs text-mute">5 days ago</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+              <div>
+                <p class="text-sm font-medium text-ink">BuildStack</p>
+                <p class="text-xs text-mute">Infrastructure</p>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center rounded-full border border-green-200 bg-success-soft px-2 py-0.5 text-xs text-green-800">New launch</span>
+                <p class="mt-1 text-xs text-mute">1 week ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="order-1 lg:order-2">
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Monitoring</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">Competitor Research</h2>
+        <p class="mt-4 text-body">
+          Never be surprised by a competitor move again. Track their pricing pages, feature launches, hiring patterns, and public sentiment — all surfaced automatically in your daily briefing.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Pricing page change detection
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Feature launch and changelog monitoring
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Job posting analysis for strategic insights
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Social sentiment and review tracking
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Agents -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Automation</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">Custom AI Agents</h2>
+        <p class="mt-4 text-body">
+          Go beyond default scans. Create custom research agents that focus on your specific market, track the sources you care about, and deliver insights in the format you need. Configure once, run forever.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Agent builder with natural language config
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Scheduled and on-demand execution
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Output format: summary, report, or structured data
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Agent performance tracking and refinement
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+        <h4 class="mb-3 text-sm font-semibold text-ink">Agent Builder</h4>
+        <div class="space-y-3">
+          <div class="rounded-md border border-hairline bg-canvas p-3">
+            <p class="text-xs text-mute">Topic</p>
+            <p class="text-sm font-medium text-ink">AI coding assistants</p>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas p-3">
+            <p class="text-xs text-mute">Sources</p>
+            <div class="mt-1 flex flex-wrap gap-1">
+              <span class="rounded-full bg-hairline-soft px-2 py-0.5 text-xs text-body">GitHub</span>
+              <span class="rounded-full bg-hairline-soft px-2 py-0.5 text-xs text-body">Hacker News</span>
+              <span class="rounded-full bg-hairline-soft px-2 py-0.5 text-xs text-body">Reddit</span>
+              <span class="rounded-full bg-hairline-soft px-2 py-0.5 text-xs text-body">Twitter</span>
+            </div>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas p-3">
+            <p class="text-xs text-mute">Schedule</p>
+            <p class="text-sm font-medium text-ink">Daily at 8:00 AM UTC</p>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas p-3">
+            <p class="text-xs text-mute">Last run</p>
+            <p class="text-sm font-medium text-success">14 signals found, 2 high-potential</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Research Reports -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div class="order-2 lg:order-1">
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <div class="mb-4 flex items-center justify-between">
+            <h4 class="text-sm font-semibold text-ink">Research Report</h4>
+            <span class="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-medium text-green-800">Score: 8.4</span>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div>
+              <p class="font-medium text-ink">Executive Summary</p>
+              <p class="mt-1 text-body">The AI-powered code review market is growing 40% YoY with only 3 established players. Open-source alternatives have significant UX gaps.</p>
+            </div>
+            <div>
+              <p class="font-medium text-ink">Market Data</p>
+              <p class="mt-1 text-body">TAM: $890M. SAM: $120M. Key buyer persona: engineering teams at 10-100 person startups.</p>
+            </div>
+            <div>
+              <p class="font-medium text-ink">Recommendation</p>
+              <p class="mt-1 text-body">Build a lightweight, developer-first code review tool. Position at $19/mo per seat. Focus on CI/CD integration.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="order-1 lg:order-2">
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Output</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">Research Reports</h2>
+        <p class="mt-4 text-body">
+          Every scan produces a structured report — not just raw data. Each report includes an executive summary, supporting evidence, opportunity scoring, and recommended next steps. Ready to share, export, or act on immediately.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Executive summary with key takeaways
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Evidence links to source materials
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Export to PDF, Markdown, Notion, or CSV
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Team sharing and commenting (Business plan)
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- GitHub Integration -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Integration</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">GitHub Integration</h2>
+        <p class="mt-4 text-body">
+          Open-source projects are the best leading indicators of market demand. Our GitHub integration tracks star velocity, contributor activity, issue patterns, and fork networks to surface projects gaining real traction.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Trending repo tracking with star velocity
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Issue sentiment and feature request analysis
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Contributor network and activity patterns
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            License and ecosystem compatibility checks
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+        <h4 class="mb-4 text-sm font-semibold text-ink">Trending: +1,240 stars this week</h4>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-hairline-soft text-xs font-medium text-ink">⚡</div>
+              <div>
+                <p class="text-sm font-medium text-ink">turbo-ui/cli</p>
+                <p class="text-xs text-mute">TypeScript · MIT</p>
+              </div>
+            </div>
+            <span class="text-sm font-medium text-ink">3,240 ★</span>
+          </div>
+          <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-hairline-soft text-xs font-medium text-ink">📦</div>
+              <div>
+                <p class="text-sm font-medium text-ink">db-migrate-go</p>
+                <p class="text-xs text-mute">Go · Apache-2.0</p>
+              </div>
+            </div>
+            <span class="text-sm font-medium text-ink">1,890 ★</span>
+          </div>
+          <div class="flex items-center justify-between rounded-md border border-hairline p-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-hairline-soft text-xs font-medium text-ink">🔧</div>
+              <div>
+                <p class="text-sm font-medium text-ink">api-forge-rs</p>
+                <p class="text-xs text-mute">Rust · MIT</p>
+              </div>
+            </div>
+            <span class="text-sm font-medium text-ink">987 ★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Automation -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div class="order-2 lg:order-1">
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <h4 class="mb-4 text-sm font-semibold text-ink">This week's research activity</h4>
+          <div class="flex items-end gap-2" style="height: 120px;">
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-hairline-soft" style="height: 40%"></div>
+              <span class="text-[10px] text-mute">Mon</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-ink" style="height: 85%"></div>
+              <span class="text-[10px] text-mute">Tue</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-hairline-soft" style="height: 60%"></div>
+              <span class="text-[10px] text-mute">Wed</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-ink" style="height: 95%"></div>
+              <span class="text-[10px] text-mute">Thu</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-hairline-soft" style="height: 70%"></div>
+              <span class="text-[10px] text-mute">Fri</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-hairline-soft" style="height: 30%"></div>
+              <span class="text-[10px] text-mute">Sat</span>
+            </div>
+            <div class="flex flex-1 flex-col items-center gap-1">
+              <div class="w-full rounded-t bg-hairline-soft" style="height: 20%"></div>
+              <span class="text-[10px] text-mute">Sun</span>
+            </div>
+          </div>
+          <p class="mt-4 text-center text-xs text-mute">Signals collected per day</p>
+        </div>
+      </div>
+      <div class="order-1 lg:order-2">
+        <span class="mb-3 inline-block rounded-full bg-hairline-soft px-3 py-1 text-xs font-medium text-body">Automation</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-ink">Daily Automation</h2>
+        <p class="mt-4 text-body">
+          Set it up once, and research runs automatically. Every morning you open your dashboard to fresh signals, updated scores, and new opportunities — no manual work required. Focus your energy on building, not browsing.
+        </p>
+        <ul class="mt-6 flex flex-col gap-3">
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Configurable scan schedule (daily, weekly, custom)
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Email digest with top findings each morning
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Slack and webhook notifications for critical signals
+          </li>
+          <li class="flex items-start gap-3 text-sm text-body">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            Auto-archive old signals, surface fresh ones
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="rounded-lg border border-hairline bg-canvas-elevated px-8 py-16 text-center shadow-whisper">
+      <h2 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        Ready to see it in action?
+      </h2>
+      <p class="mx-auto mt-4 max-w-lg text-lg text-body">
+        Start with the free plan. No credit card, no commitments — just better research.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+          Get started for free
+        </a>
+        <a href="/pricing" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
+          View pricing
+        </a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>

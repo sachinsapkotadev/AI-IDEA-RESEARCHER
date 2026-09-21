@@ -1,0 +1,41 @@
+---
+interface Props {
+  question: string;
+  answer: string;
+  class?: string;
+}
+
+const { question, answer, class: className = '' } = Astro.props;
+const id = `faq-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class:list={['border-b border-hairline', className]}>
+  <button
+    class="flex w-full items-center justify-between py-5 text-left"
+    aria-expanded="false"
+    aria-controls={id}
+  >
+    <span class="text-base font-medium text-ink">{question}</span>
+    <svg class="h-5 w-5 flex-shrink-0 text-mute transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path class="faq-icon" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div id={id} class="hidden pb-5">
+    <p class="text-sm leading-relaxed text-body">{answer}</p>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[aria-controls]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', (!expanded).toString());
+      const target = document.getElementById(btn.getAttribute('aria-controls') || '');
+      target?.classList.toggle('hidden');
+      const icon = btn.querySelector('.faq-icon');
+      if (icon) {
+        icon.style.transform = expanded ? '' : 'rotate(180deg)';
+      }
+    });
+  });
+</script>

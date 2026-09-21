@@ -1,0 +1,113 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/Card.astro';
+import Badge from '../../components/Badge.astro';
+import { DEMO_AUTOMATION } from '../../lib/api/demo';
+
+const statusColors: Record<string, 'success' | 'warning' | 'error'> = {
+  active: 'success',
+  paused: 'warning',
+  error: 'error',
+};
+---
+
+<DashboardLayout title="Automation — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    {/* Header */}
+    <div>
+      <h1 class="text-2xl font-semibold text-ink">Automation</h1>
+      <p class="mt-1 text-sm text-body">Configure scheduled research runs and notifications.</p>
+    </div>
+
+    {/* Demo Banner */}
+    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
+      <span class="font-medium">Automation requires backend scheduler.</span> Connect your backend to enable automated research.
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      {/* Daily Research Toggle */}
+      <Card padding="md">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-ink">Daily Research</h3>
+              <p class="mt-0.5 text-xs text-body">Automatically run research on configured topics.</p>
+            </div>
+            <div class="relative">
+              <input type="checkbox" disabled class="sr-only peer" id="daily-research" />
+              <label for="daily-research" class="flex h-6 w-11 cursor-not-allowed items-center rounded-full bg-hairline transition-colors peer-checked:bg-link">
+                <span class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform"></span>
+              </label>
+            </div>
+          </div>
+          <div class="border-t border-hairline-soft pt-3">
+            <p class="text-xs text-mute">Schedule</p>
+            <p class="text-sm text-ink font-mono">{DEMO_AUTOMATION.schedule} <span class="text-mute font-sans">(daily at 9:00 AM)</span></p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Status */}
+      <Card padding="md">
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-semibold text-ink mb-3">Status</h3>
+            <div class="flex items-center gap-3">
+              <Badge variant={statusColors[DEMO_AUTOMATION.status]}>{DEMO_AUTOMATION.status}</Badge>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 border-t border-hairline-soft pt-3">
+            <div>
+              <p class="text-xs text-mute">Last Run</p>
+              <p class="text-sm text-body">{DEMO_AUTOMATION.last_run ? new Date(DEMO_AUTOMATION.last_run).toLocaleString() : 'Never'}</p>
+            </div>
+            <div>
+              <p class="text-xs text-mute">Next Run</p>
+              <p class="text-sm text-body">{DEMO_AUTOMATION.next_run ? new Date(DEMO_AUTOMATION.next_run).toLocaleString() : 'Not scheduled'}</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Topics */}
+      <Card padding="md">
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-ink">Research Topics</h3>
+          {DEMO_AUTOMATION.topics.length === 0 ? (
+            <p class="text-sm text-mute py-4 text-center">No topics configured. Add topics to start automated research.</p>
+          ) : (
+            <ul class="space-y-2">
+              {DEMO_AUTOMATION.topics.map((topic) => (
+                <li class="flex items-center gap-2 text-sm text-ink">
+                  <svg class="h-4 w-4 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                  {topic}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </Card>
+
+      {/* Notifications */}
+      <Card padding="md">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-ink">Notifications</h3>
+              <p class="mt-0.5 text-xs text-body">Get notified when research runs complete.</p>
+            </div>
+            <div class="relative">
+              <input type="checkbox" disabled class="sr-only peer" id="notifications" />
+              <label for="notifications" class="flex h-6 w-11 cursor-not-allowed items-center rounded-full bg-hairline transition-colors peer-checked:bg-link">
+                <span class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform"></span>
+              </label>
+            </div>
+          </div>
+          <p class="text-xs text-mute">Enable notifications to receive alerts when automation tasks finish.</p>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>

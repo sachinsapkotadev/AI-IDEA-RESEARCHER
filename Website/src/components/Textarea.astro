@@ -1,0 +1,35 @@
+---
+interface Props {
+  label?: string;
+  name?: string;
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+  error?: string;
+  class?: string;
+}
+
+const { label, name, placeholder, required = false, rows = 4, error, class: className = '' } = Astro.props;
+---
+
+<div class:list={['flex flex-col gap-1.5', className]}>
+  {label && (
+    <label for={name} class="text-sm font-medium text-ink">
+      {label}
+      {required && <span class="text-error">*</span>}
+    </label>
+  )}
+  <textarea
+    id={name}
+    name={name}
+    placeholder={placeholder}
+    required={required}
+    rows={rows}
+    class:list={[
+      'rounded-sm border bg-canvas-elevated px-3 py-2 text-sm text-ink placeholder-faint transition-colors resize-y',
+      'focus:border-link focus:outline-none focus:ring-1 focus:ring-link',
+      error ? 'border-error' : 'border-hairline',
+    ]}
+  />
+  {error && <p class="text-xs text-error">{error}</p>}
+</div>

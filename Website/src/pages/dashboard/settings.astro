@@ -1,0 +1,184 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/Card.astro';
+import Badge from '../../components/Badge.astro';
+import Button from '../../components/Button.astro';
+---
+
+<DashboardLayout title="Settings — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-8">
+    {/* Header */}
+    <div>
+      <h1 class="text-2xl font-semibold text-ink">Settings</h1>
+      <p class="mt-1 text-sm text-body">Manage your account and application preferences.</p>
+    </div>
+
+    {/* Profile */}
+    <Card padding="lg">
+      <div class="space-y-6">
+        <h2 class="text-base font-semibold text-ink">Profile</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Name</label>
+            <input
+              type="text"
+              value="User"
+              disabled
+              class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Email</label>
+            <input
+              type="email"
+              value="user@example.com"
+              disabled
+              class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed"
+            />
+          </div>
+        </div>
+        <p class="text-xs text-mute">Edit profile settings after connecting your backend.</p>
+      </div>
+    </Card>
+
+    {/* API Connection */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">API Connection</h2>
+        <div class="flex items-center gap-3">
+          <div class="h-3 w-3 rounded-full bg-error"></div>
+          <div>
+            <p class="text-sm font-medium text-ink">Not Connected</p>
+            <p class="text-xs text-body">Connect to your backend API to enable live data and full functionality.</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink">API URL</label>
+          <input
+            type="url"
+            value="http://localhost:8000"
+            disabled
+            class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm font-mono text-mute cursor-not-allowed"
+          />
+        </div>
+        <Button variant="secondary" size="sm" disabled>Test Connection</Button>
+      </div>
+    </Card>
+
+    {/* Notification Preferences */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">Notification Preferences</h2>
+        <div class="space-y-3">
+          {[
+            { label: 'Research completed', desc: 'Notify when a research run finishes' },
+            { label: 'Report generated', desc: 'Notify when a new report is ready' },
+            { label: 'Agent errors', desc: 'Notify when an agent encounters an error' },
+            { label: 'Weekly summary', desc: 'Receive a weekly digest of activity' },
+          ].map((item) => (
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <p class="text-sm font-medium text-ink">{item.label}</p>
+                <p class="text-xs text-body">{item.desc}</p>
+              </div>
+              <div class="relative">
+                <input type="checkbox" disabled class="sr-only peer" />
+                <label class="flex h-6 w-11 cursor-not-allowed items-center rounded-full bg-hairline transition-colors">
+                  <span class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm"></span>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p class="text-xs text-mute">Enable after connecting your backend.</p>
+      </div>
+    </Card>
+
+    {/* Research Preferences */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">Research Preferences</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Default Model</label>
+            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
+              <option>Claude 3.5 Sonnet</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Research Depth</label>
+            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
+              <option>Standard</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Auto-generate Reports</label>
+            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
+              <option>Yes</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink">Idea Categories</label>
+            <select disabled class="rounded-sm border border-hairline bg-hairline-soft px-3 py-2 text-sm text-mute cursor-not-allowed">
+              <option>All</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </Card>
+
+    {/* Theme */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">Theme</h2>
+        <div class="flex items-center gap-3">
+          <div class="flex gap-2">
+            <div class="flex items-center gap-2 rounded-md border-2 border-ink bg-canvas-elevated px-4 py-2">
+              <div class="h-4 w-4 rounded-full bg-ink"></div>
+              <span class="text-sm font-medium text-ink">Light</span>
+            </div>
+            <div class="flex items-center gap-2 rounded-md border border-hairline bg-canvas-elevated px-4 py-2 opacity-50 cursor-not-allowed">
+              <div class="h-4 w-4 rounded-full bg-ink"></div>
+              <span class="text-sm text-mute">Dark</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-mute">Dark theme coming soon.</p>
+      </div>
+    </Card>
+
+    {/* Security */}
+    <Card padding="lg">
+      <div class="space-y-4">
+        <h2 class="text-base font-semibold text-ink">Security</h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="text-sm font-medium text-ink">Change Password</p>
+              <p class="text-xs text-body">Update your account password.</p>
+            </div>
+            <Button variant="secondary" size="sm" disabled>Change</Button>
+          </div>
+          <div class="border-t border-hairline-soft pt-3">
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <p class="text-sm font-medium text-ink">Two-Factor Authentication</p>
+                <p class="text-xs text-body">Add an extra layer of security to your account.</p>
+              </div>
+              <Badge variant="default">Coming Soon</Badge>
+            </div>
+          </div>
+          <div class="border-t border-hairline-soft pt-3">
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <p class="text-sm font-medium text-ink">API Keys</p>
+                <p class="text-xs text-body">Manage your API keys for external integrations.</p>
+              </div>
+              <Button variant="secondary" size="sm" disabled>Manage</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  </div>
+</DashboardLayout>

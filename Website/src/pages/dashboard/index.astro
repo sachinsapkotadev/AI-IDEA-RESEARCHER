@@ -1,0 +1,123 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import StatCard from '../../components/StatCard.astro';
+import Card from '../../components/Card.astro';
+import Badge from '../../components/Badge.astro';
+import { DEMO_RESEARCH, DEMO_IDEAS, DEMO_AGENTS } from '../../lib/api/demo';
+
+const hour = new Date().getHours();
+const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+const recentIdeas = DEMO_IDEAS.slice(0, 3);
+const recentResearch = DEMO_RESEARCH.slice(0, 3);
+
+const statusColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
+  completed: 'success',
+  running: 'info',
+  pending: 'warning',
+  failed: 'error',
+  validated: 'success',
+  draft: 'default',
+  in_progress: 'info',
+  idle: 'default',
+};
+
+const runningAgents = DEMO_AGENTS.filter(a => a.status === 'running').length;
+const idleAgents = DEMO_AGENTS.filter(a => a.status === 'idle').length;
+---
+
+<DashboardLayout title="Dashboard — AI Idea Researcher">
+  <div class="p-6 lg:p-8 max-w-6xl mx-auto space-y-8">
+    {/* Demo Banner */}
+    <div class="rounded-md border border-amber-200 bg-warning-soft px-4 py-3 text-sm text-amber-800">
+      <span class="font-medium">Demo mode</span> — connect your backend for live data.
+    </div>
+
+    {/* Greeting */}
+    <div>
+      <h1 class="text-2xl font-semibold text-ink">{greeting}, User</h1>
+      <p class="mt-1 text-sm text-body">Here's what's happening with your research today.</p>
+    </div>
+
+    {/* Stats Grid */}
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <StatCard label="Research Runs" value="4" change="+1 this week" changeType="up" />
+      <StatCard label="Ideas Discovered" value="4" change="+3 this week" changeType="up" />
+      <StatCard label="Active Agents" value="7" change={`${runningAgents} running`} changeType="neutral" />
+      <StatCard label="Reports Generated" value="2" change="+1 this week" changeType="up" />
+    </div>
+
+    {/* Recent Ideas */}
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-ink">Recent Ideas</h2>
+        <a href="/dashboard/ideas" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3">
+        {recentIdeas.map((idea) => (
+          <Card padding="sm">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-medium text-ink truncate">{idea.title}</h3>
+              </div>
+              <p class="text-xs text-body line-clamp-2">{idea.problem}</p>
+              <div class="flex items-center gap-2 pt-1">
+                <Badge variant="info">{idea.category}</Badge>
+                <Badge variant={statusColors[idea.status]}>{idea.status}</Badge>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </section>
+
+    {/* Recent Research */}
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-ink">Recent Research</h2>
+        <a href="/dashboard/research" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3">
+        {recentResearch.map((r) => (
+          <Card padding="sm">
+            <div class="space-y-2">
+              <h3 class="text-sm font-medium text-ink line-clamp-1">{r.topic}</h3>
+              <div class="flex items-center gap-2">
+                <Badge variant={statusColors[r.status]}>{r.status}</Badge>
+                <span class="text-xs text-mute">{r.ideas_count} ideas</span>
+              </div>
+              <p class="text-xs text-mute">
+                {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {r.duration ? ` · ${Math.round(r.duration / 60)}m` : ''}
+              </p>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </section>
+
+    {/* Agent Status Summary */}
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-ink">Agent Status</h2>
+        <a href="/dashboard/agents" class="text-sm text-link font-medium no-underline hover:underline">View all →</a>
+      </div>
+      <Card>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {DEMO_AGENTS.map((agent) => (
+            <div class="flex items-center gap-3">
+              <div class:list={[
+                'h-2 w-2 rounded-full flex-shrink-0',
+                agent.status === 'running' ? 'bg-link' : agent.status === 'error' ? 'bg-error' : 'bg-mute',
+              ]}></div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-ink truncate">{agent.name}</p>
+                <p class="text-xs text-mute capitalize">{agent.status}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </section>
+  </div>
+</DashboardLayout>

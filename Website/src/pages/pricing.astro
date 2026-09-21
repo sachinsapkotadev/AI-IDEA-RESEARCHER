@@ -1,0 +1,234 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import PricingCard from '../components/PricingCard.astro';
+import FAQ from '../components/FAQ.astro';
+---
+
+<PublicLayout
+  title="Pricing — AI Idea Researcher"
+  description="Simple, transparent pricing. Start free, upgrade when you need more research power and deeper analysis."
+>
+
+  <!-- Hero -->
+  <section class="container-page pt-20 pb-12 md:pt-28 md:pb-16">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
+        Pricing
+      </span>
+      <h1 class="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+        Simple pricing.<br />No surprises.
+      </h1>
+      <p class="mx-auto mt-6 max-w-xl text-lg text-body">
+        Start with the free plan — it's free forever. Upgrade when you need more topics, deeper analysis, or team collaboration.
+      </p>
+    </div>
+  </section>
+
+  <!-- Pricing cards -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="mx-auto grid max-w-4xl gap-6 lg:grid-cols-3">
+      <PricingCard
+        tier="Free"
+        price="$0"
+        period="/month"
+        description="For individual makers exploring product ideas."
+        features={[
+          '3 research topics',
+          'Daily research summaries',
+          'Basic opportunity scoring',
+          'Save up to 10 reports',
+          'Community support',
+          'CSV export',
+        ]}
+        ctaLabel="Start for free"
+        ctaHref="/dashboard"
+      />
+      <PricingCard
+        tier="Pro"
+        price="$29"
+        period="/month"
+        description="For indie hackers and small teams who ship regularly."
+        features={[
+          'Unlimited research topics',
+          'Competitor tracking',
+          'GitHub integration',
+          'Unlimited saved reports',
+          'Notion & Markdown export',
+          'Custom AI agents',
+          'Priority email support',
+        ]}
+        highlighted={true}
+        ctaLabel="Start 14-day trial"
+        ctaHref="/dashboard"
+      />
+      <PricingCard
+        tier="Business"
+        price="$79"
+        period="/month"
+        description="For teams and agencies running multiple products."
+        features={[
+          'Everything in Pro',
+          'Team collaboration (5 seats)',
+          'Advanced custom agents',
+          'API access',
+          'White-label reports',
+          'Slack & webhook notifications',
+          'Dedicated account manager',
+        ]}
+        ctaLabel="Contact us"
+        ctaHref="/contact"
+      />
+    </div>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Compare plans"
+      description="See exactly what's included in each plan."
+    />
+    <div class="mx-auto mt-12 max-w-4xl overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-hairline">
+            <th class="py-4 pr-4 font-medium text-ink">Feature</th>
+            <th class="px-4 py-4 text-center font-medium text-ink">Free</th>
+            <th class="px-4 py-4 text-center font-medium text-ink">Pro</th>
+            <th class="px-4 py-4 text-center font-medium text-ink">Business</th>
+          </tr>
+        </thead>
+        <tbody class="text-body">
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Research topics</td>
+            <td class="px-4 py-3 text-center">3</td>
+            <td class="px-4 py-3 text-center">Unlimited</td>
+            <td class="px-4 py-3 text-center">Unlimited</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Saved reports</td>
+            <td class="px-4 py-3 text-center">10</td>
+            <td class="px-4 py-3 text-center">Unlimited</td>
+            <td class="px-4 py-3 text-center">Unlimited</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Opportunity scoring</td>
+            <td class="px-4 py-3 text-center">Basic</td>
+            <td class="px-4 py-3 text-center">Advanced</td>
+            <td class="px-4 py-3 text-center">Advanced</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Competitor tracking</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">GitHub integration</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Custom AI agents</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">3 agents</td>
+            <td class="px-4 py-3 text-center">Unlimited</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Export formats</td>
+            <td class="px-4 py-3 text-center">CSV</td>
+            <td class="px-4 py-3 text-center">CSV, Notion, Markdown</td>
+            <td class="px-4 py-3 text-center">CSV, Notion, Markdown, PDF</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">Team seats</td>
+            <td class="px-4 py-3 text-center">1</td>
+            <td class="px-4 py-3 text-center">1</td>
+            <td class="px-4 py-3 text-center">5</td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">API access</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+          </tr>
+          <tr class="border-b border-hairline-soft">
+            <td class="py-3 pr-4">White-label reports</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">—</td>
+            <td class="px-4 py-3 text-center">
+              <svg class="mx-auto h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7" /></svg>
+            </td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-4">Support</td>
+            <td class="px-4 py-3 text-center">Community</td>
+            <td class="px-4 py-3 text-center">Priority email</td>
+            <td class="px-4 py-3 text-center">Dedicated manager</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Pricing FAQ"
+    />
+    <div class="mx-auto mt-12 max-w-2xl">
+      <FAQ
+        question="Can I switch plans at any time?"
+        answer="Yes. You can upgrade or downgrade at any time from your account settings. When you upgrade, you'll be charged the prorated difference for the remainder of your billing cycle. When you downgrade, the change takes effect at the start of your next billing cycle."
+      />
+      <FAQ
+        question="What happens when my free plan reaches 10 saved reports?"
+        answer="You won't be able to save new reports until you delete some existing ones, or upgrade to a paid plan. Your research agents will still run and you'll still see daily findings in your dashboard — you just won't be able to save more than 10."
+      />
+      <FAQ
+        question="Do you offer annual billing?"
+        answer="Not yet, but it's on our roadmap. If you're interested in annual billing with a discount, reach out to us at hello@aiidearesearcher.com and we'll set something up for you."
+      />
+      <FAQ
+        question="Is there a discount for startups or students?"
+        answer="Yes. We offer 50% off the Pro plan for verified students and early-stage startups (pre-seed or seed). Contact us with your verification and we'll apply the discount."
+      />
+      <FAQ
+        question="What payment methods do you accept?"
+        answer="We accept all major credit cards (Visa, Mastercard, American Express) through Stripe. All payments are securely processed — we never store your card details."
+      />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="rounded-lg border border-hairline bg-canvas-elevated px-8 py-16 text-center shadow-whisper">
+      <h2 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        Start building with data, not guesswork
+      </h2>
+      <p class="mx-auto mt-4 max-w-lg text-lg text-body">
+        Free forever. No credit card. Upgrade when you're ready.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+          Get started for free
+        </a>
+        <a href="/contact" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
+          Talk to sales
+        </a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>

@@ -1,0 +1,100 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import Badge from '../../components/Badge.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const featuredPost = posts.find((post) => post.data.featured);
+const regularPosts = posts.filter((post) => !post.data.featured);
+
+const categories = [...new Set(posts.map((post) => post.data.category))];
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+---
+
+<PublicLayout title="Blog — AI Idea Researcher" description="Insights on AI-powered market research, product validation, and competitor analysis.">
+  <section class="section-padding container-page">
+    {/* Page header */}
+    <div class="mx-auto mb-12 max-w-2xl text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Blog</h1>
+      <p class="mt-4 text-lg text-body">Insights on AI-powered research, product strategy, and market intelligence.</p>
+    </div>
+
+    {/* Category filter (visual) */}
+    <div class="mb-10 flex flex-wrap items-center justify-center gap-2">
+      <span class="rounded-full bg-ink px-3 py-1 text-xs font-medium text-on-primary">All</span>
+      {categories.map((cat) => (
+        <span class="rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body transition-colors hover:text-ink">
+          {cat}
+        </span>
+      ))}
+    </div>
+
+    {/* Featured post */}
+    {featuredPost && (
+      <a
+        href={`/blog/${featuredPost.id}`}
+        class="mb-12 block rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] sm:p-10 no-underline"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Badge variant="info">Featured</Badge>
+          <Badge>{featuredPost.data.category}</Badge>
+        </div>
+        <h2 class="mt-4 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          {featuredPost.data.title}
+        </h2>
+        <p class="mt-3 max-w-3xl text-body">{featuredPost.data.description}</p>
+        <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-mute">
+          <time datetime={featuredPost.data.pubDate.toISOString()}>
+            {formatDate(featuredPost.data.pubDate)}
+          </time>
+          <span>·</span>
+          <span>{featuredPost.data.readingTime} read</span>
+          <span>·</span>
+          <span>{featuredPost.data.author}</span>
+        </div>
+      </a>
+    )}
+
+    {/* Post grid */}
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {regularPosts.map((post) => (
+        <a
+          href={`/blog/${post.id}`}
+          class="group flex flex-col rounded-lg border border-hairline bg-canvas-elevated p-6 transition-shadow hover:shadow-[var(--shadow-floating)] no-underline"
+        >
+          <div class="mb-3">
+            <Badge>{post.data.category}</Badge>
+          </div>
+          <h3 class="text-lg font-semibold text-ink transition-colors group-hover:text-link">
+            {post.data.title}
+          </h3>
+          <p class="mt-2 flex-1 text-sm text-body line-clamp-3">{post.data.description}</p>
+          <div class="mt-4 flex items-center gap-2 text-xs text-mute">
+            <time datetime={post.data.pubDate.toISOString()}>
+              {formatDate(post.data.pubDate)}
+            </time>
+            <span>·</span>
+            <span>{post.data.readingTime} read</span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {/* Empty state */}
+    {regularPosts.length === 0 && !featuredPost && (
+      <div class="py-16 text-center text-mute">
+        <p class="text-lg">No blog posts yet. Check back soon.</p>
+      </div>
+    )}
+  </section>
+</PublicLayout>

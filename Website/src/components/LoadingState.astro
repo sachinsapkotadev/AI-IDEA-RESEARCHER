@@ -1,0 +1,13 @@
+---
+interface Props {
+  message?: string;
+  class?: string;
+}
+
+const { message = 'Loading...', class: className = '' } = Astro.props;
+---
+
+<div class:list={['flex flex-col items-center justify-center py-16 text-center', className]}>
+  <div class="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-hairline border-t-link"></div>
+  <p class="text-sm text-body">{message}</p>
+</div>

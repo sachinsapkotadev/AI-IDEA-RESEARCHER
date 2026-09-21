@@ -1,0 +1,165 @@
+---
+import BaseHead from './BaseHead.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+}
+
+const {
+  title,
+  description,
+  showHeader = true,
+  showFooter = true,
+} = Astro.props;
+
+const navLinks = [
+  { href: '/features', label: 'Features' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/about', label: 'About' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<BaseHead title={title} description={description}>
+  {showHeader && (
+    <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-md">
+      <nav class="container-page flex h-16 items-center justify-between">
+        <a href="/" class="flex items-center gap-2 text-lg font-semibold text-ink no-underline">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <span>AI Idea Researcher</span>
+        </a>
+
+        {/* Desktop nav */}
+        <div class="hidden items-center gap-1 md:flex">
+          {navLinks.map((link) => (
+            <a
+              href={link.href}
+              class:list={[
+                'rounded-full px-3 py-1.5 text-sm text-body no-underline transition-colors hover:text-ink',
+                currentPath.startsWith(link.href) && 'font-medium text-ink',
+              ]}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <div class="hidden items-center gap-2 md:flex">
+          <a href="/dashboard" class="rounded-sm px-3 py-1.5 text-sm text-body no-underline transition-colors hover:text-ink">
+            Log In
+          </a>
+          <a href="/dashboard" class="rounded-sm bg-primary px-3 py-1.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+            Get Started
+          </a>
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          id="mobile-menu-toggle"
+          class="flex items-center justify-center rounded-sm p-2 text-ink md:hidden"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path id="menu-icon-open" d="M4 6h16M4 12h16M4 18h16" />
+            <path id="menu-icon-close" class="hidden" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      <div id="mobile-menu" class="hidden border-t border-hairline bg-canvas md:hidden">
+        <div class="container-page flex flex-col gap-1 py-4">
+          {navLinks.map((link) => (
+            <a
+              href={link.href}
+              class:list={[
+                'rounded-sm px-3 py-2 text-sm text-body no-underline transition-colors hover:text-ink',
+                currentPath.startsWith(link.href) && 'font-medium text-ink',
+              ]}
+            >
+              {link.label}
+            </a>
+          ))}
+          <hr class="my-2 border-hairline" />
+          <a href="/dashboard" class="rounded-sm px-3 py-2 text-sm text-body no-underline">Log In</a>
+          <a href="/dashboard" class="rounded-sm bg-primary px-3 py-2 text-center text-sm font-medium text-on-primary no-underline">Get Started</a>
+        </div>
+      </div>
+    </header>
+  )}
+
+  <main>
+    <slot />
+  </main>
+
+  {showFooter && (
+    <footer class="border-t border-hairline bg-canvas">
+      <div class="container-page section-padding">
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <a href="/" class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink no-underline">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              AI Idea Researcher
+            </a>
+            <p class="mt-3 text-sm text-body">
+              Turn daily research into actionable product ideas.
+            </p>
+          </div>
+          <div>
+            <h4 class="mb-3 text-sm font-semibold text-ink">Product</h4>
+            <ul class="flex flex-col gap-2">
+              <li><a href="/features" class="text-sm text-body no-underline transition-colors hover:text-ink">Features</a></li>
+              <li><a href="/pricing" class="text-sm text-body no-underline transition-colors hover:text-ink">Pricing</a></li>
+              <li><a href="/blog" class="text-sm text-body no-underline transition-colors hover:text-ink">Blog</a></li>
+              <li><a href="/dashboard" class="text-sm text-body no-underline transition-colors hover:text-ink">Dashboard</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mb-3 text-sm font-semibold text-ink">Company</h4>
+            <ul class="flex flex-col gap-2">
+              <li><a href="/about" class="text-sm text-body no-underline transition-colors hover:text-ink">About</a></li>
+              <li><a href="/contact" class="text-sm text-body no-underline transition-colors hover:text-ink">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mb-3 text-sm font-semibold text-ink">Legal</h4>
+            <ul class="flex flex-col gap-2">
+              <li><a href="#" class="text-sm text-body no-underline transition-colors hover:text-ink">Privacy Policy</a></li>
+              <li><a href="#" class="text-sm text-body no-underline transition-colors hover:text-ink">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-12 border-t border-hairline pt-8 text-center text-sm text-mute">
+          &copy; {new Date().getFullYear()} AI Idea Researcher. All rights reserved.
+        </div>
+      </div>
+    </footer>
+  )}
+
+  <script>
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
+
+    toggle?.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', (!expanded).toString());
+      menu?.classList.toggle('hidden');
+      iconOpen?.classList.toggle('hidden');
+      iconClose?.classList.toggle('hidden');
+    });
+  </script>
+</BaseHead>

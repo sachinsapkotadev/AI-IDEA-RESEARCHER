@@ -1,0 +1,309 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import FeatureCard from '../components/FeatureCard.astro';
+import PricingCard from '../components/PricingCard.astro';
+import Testimonial from '../components/Testimonial.astro';
+import FAQ from '../components/FAQ.astro';
+---
+
+<PublicLayout
+  title="AI Idea Researcher — Turn Research into Product Ideas"
+  description="Discover SaaS opportunities from real market signals. AI Idea Researcher analyzes trends, competitors, and daily research to surface actionable product ideas."
+>
+
+  <!-- Hero -->
+  <section class="container-page pt-20 pb-16 md:pt-28 md:pb-24">
+    <div class="mx-auto max-w-4xl text-center">
+      <span class="mb-4 inline-block rounded-full border border-hairline bg-canvas-elevated px-3 py-1 text-xs font-medium text-body">
+        Early access — free to start
+      </span>
+      <h1 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+        Stop guessing what to build. Start with the research.
+      </h1>
+      <p class="mx-auto mt-6 max-w-2xl text-lg text-body">
+        AI Idea Researcher scans industry trends, competitor moves, and market signals every day — then surfaces concrete product ideas backed by real data.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+          Start for free
+        </a>
+        <a href="/features" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
+          See how it works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product explanation -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="mx-auto max-w-3xl text-center">
+      <SectionHeader
+        title="Built for people who ship products"
+        description="You already spend hours reading articles, browsing GitHub, and scanning trend reports. AI Idea Researcher turns that scattered research into a structured pipeline of validated product opportunities."
+      />
+    </div>
+    <div class="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-3xl font-semibold text-ink">15 min</p>
+        <p class="mt-2 text-sm text-body">Daily research, summarized and scored for you</p>
+      </div>
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-3xl font-semibold text-ink">50+</p>
+        <p class="mt-2 text-sm text-body">Signal sources: GitHub, Product Hunt, news, forums</p>
+      </div>
+      <div class="rounded-md border border-hairline bg-canvas-elevated p-6 text-center">
+        <p class="text-3xl font-semibold text-ink">3 clicks</p>
+        <p class="mt-2 text-sm text-body">From discovery to a saved, tagged research report</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main capabilities -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Everything you need to find your next product"
+      description="From daily research automation to deep competitive analysis — one tool, no spreadsheets."
+    />
+    <div class="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>'
+        title="AI Research Agents"
+        description="Autonomous agents scan the web daily, pull from multiple sources, and compile findings into structured reports."
+      />
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>'
+        title="SaaS Idea Discovery"
+        description="Identify gaps in existing markets, spot underserved niches, and find product opportunities others miss."
+      />
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'
+        title="Market Research"
+        description="Get data on market size, growth trends, and demand signals — no analyst needed. All compiled from public sources."
+      />
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'
+        title="Competitor Tracking"
+        description="Monitor competitors' launches, pricing changes, and feature updates. Get notified when the market shifts."
+      />
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>'
+        title="GitHub Integration"
+        description="Track trending repos, watch star growth, and discover open-source projects gaining traction in your niche."
+      />
+      <FeatureCard
+        icon='<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+        title="Research Reports"
+        description="Auto-generated reports with market data, opportunity scores, and actionable next steps — ready to share with your team."
+      />
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Three steps to your next product idea"
+    />
+    <div class="mx-auto mt-12 grid max-w-4xl gap-8 md:grid-cols-3">
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">1</div>
+        <h3 class="text-base font-semibold text-ink">Connect your sources</h3>
+        <p class="mt-2 text-sm text-body">Link GitHub, set your research topics, and define the industries you care about. Takes about two minutes.</p>
+      </div>
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">2</div>
+        <h3 class="text-base font-semibold text-ink">AI scans daily</h3>
+        <p class="mt-2 text-sm text-body">Our agents run every morning — pulling signals from dozens of sources and compiling findings into your dashboard.</p>
+      </div>
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-lg font-semibold text-ink">3</div>
+        <h3 class="text-base font-semibold text-ink">Review and act</h3>
+        <p class="mt-2 text-sm text-body">Browse scored opportunities, save the ones that fit, and start building with confidence backed by data.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Example research result mockup -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="See what a research report looks like"
+      description="Each day, AI Idea Researcher delivers structured findings — scored, tagged, and ready to explore."
+    />
+    <div class="mx-auto mt-12 max-w-3xl overflow-hidden rounded-lg border border-hairline bg-canvas-elevated shadow-floating">
+      <!-- Mockup header -->
+      <div class="border-b border-hairline px-6 py-4">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center rounded-full border border-green-200 bg-success-soft px-2.5 py-0.5 text-xs font-medium text-green-800">New</span>
+          <h3 class="text-sm font-semibold text-ink">Developer Tools — Trending Signal</h3>
+          <span class="ml-auto text-xs text-mute">Sep 19, 2026</span>
+        </div>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-4">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-ink">CLI-based database GUI for SQLite</p>
+            <p class="mt-1 text-sm text-body">Three GitHub repos in this space gained 800+ stars in the past 30 days. Reddit and Hacker News threads show recurring complaints about existing tools. Market gap identified in cross-platform terminal UIs with visual query builders.</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span class="rounded-full bg-hairline-soft px-2.5 py-0.5 text-xs text-body">SQLite</span>
+              <span class="rounded-full bg-hairline-soft px-2.5 py-0.5 text-xs text-body">Developer Tools</span>
+              <span class="rounded-full bg-hairline-soft px-2.5 py-0.5 text-xs text-body">CLI</span>
+              <span class="rounded-full border border-green-200 bg-success-soft px-2.5 py-0.5 text-xs text-green-800">High potential</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-1 text-right">
+            <span class="text-xs text-mute">Opportunity score</span>
+            <span class="text-2xl font-semibold text-ink">8.4</span>
+            <span class="text-xs text-success">+1.2 this week</span>
+          </div>
+        </div>
+      </div>
+      <!-- Mockup footer -->
+      <div class="border-t border-hairline px-6 py-3">
+        <div class="flex items-center justify-between text-xs text-mute">
+          <span>Source: GitHub trending, Reddit r/programming, Hacker News</span>
+          <div class="flex gap-3">
+            <span class="cursor-pointer text-body transition-colors hover:text-ink">Save</span>
+            <span class="cursor-pointer text-body transition-colors hover:text-ink">Dismiss</span>
+            <span class="cursor-pointer text-body transition-colors hover:text-ink">View full report</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing preview -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Simple pricing that scales with you"
+      description="Start free. Upgrade when you're ready for more signals and deeper analysis."
+    />
+    <div class="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-3">
+      <PricingCard
+        tier="Free"
+        price="$0"
+        description="For individual makers exploring their first ideas."
+        features={[
+          '3 research topics',
+          'Daily research summaries',
+          'Basic opportunity scoring',
+          'Save up to 10 reports',
+        ]}
+        ctaLabel="Start for free"
+        ctaHref="/dashboard"
+      />
+      <PricingCard
+        tier="Pro"
+        price="$29"
+        description="For indie hackers and small teams who ship regularly."
+        features={[
+          'Unlimited research topics',
+          'Competitor tracking',
+          'GitHub integration',
+          'Unlimited saved reports',
+          'Export to Notion / CSV',
+          'Priority support',
+        ]}
+        highlighted={true}
+        ctaLabel="Start 14-day trial"
+        ctaHref="/dashboard"
+      />
+      <PricingCard
+        tier="Business"
+        price="$79"
+        description="For teams and agencies running multiple product lines."
+        features={[
+          'Everything in Pro',
+          'Team collaboration (5 seats)',
+          'Custom research agents',
+          'API access',
+          'White-label reports',
+          'Dedicated support',
+        ]}
+        ctaLabel="Contact us"
+        ctaHref="/contact"
+      />
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="What makers are saying"
+      description="Real feedback from people who use AI Idea Researcher to find product opportunities."
+    />
+    <div class="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-3">
+      <Testimonial
+        quote="I used to spend Sunday afternoons scrolling through Product Hunt and Reddit trying to spot trends. Now I get a daily briefing that's more thorough than anything I could do manually."
+        author="Sarah Chen"
+        role="Founder"
+        company="LaunchKit"
+      />
+      <Testimonial
+        quote="The competitor tracking alone is worth it. Last month it caught a pricing change in a competitor that gave me a 48-hour head start on repositioning our product."
+        author="Marcus Johnson"
+        role="Product Lead"
+        company="DevStack"
+      />
+      <Testimonial
+        quote="We validated three product ideas in two weeks using the research reports. The opportunity scoring is surprisingly accurate — it caught a niche we'd completely overlooked."
+        author="Elena Rodriguez"
+        role="Co-founder"
+        company="BuildCraft"
+      />
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container-page pb-20 md:pb-28">
+    <SectionHeader
+      title="Frequently asked questions"
+    />
+    <div class="mx-auto mt-12 max-w-2xl">
+      <FAQ
+        question="What research sources does AI Idea Researcher use?"
+        answer="We pull from GitHub (trending repos, star history, issues), Product Hunt, Hacker News, Reddit, industry news sites, and public market data. Pro and Business plans unlock additional sources including patent databases, job board trends, and forum discussions."
+      />
+      <FAQ
+        question="How often is research updated?"
+        answer="Research agents run daily by default. Your dashboard refreshes each morning with new signals, updated scores, and any changes to tracked competitors. You can also trigger a manual scan at any time."
+      />
+      <FAQ
+        question="Can I export my research data?"
+        answer="Yes. Free plans can export to CSV. Pro and Business plans add Notion integration, markdown export, and API access for building custom workflows."
+      />
+      <FAQ
+        question="Is there a free trial for paid plans?"
+        answer="The Free plan is free forever with no credit card required. Paid plans include a 14-day trial with full feature access. Cancel anytime during the trial period."
+      />
+      <FAQ
+        question="How does opportunity scoring work?"
+        answer="Our scoring algorithm considers market size signals, competition density, trend velocity, community engagement, and unmet need indicators. It's not a black box — each score comes with a breakdown of contributing factors."
+      />
+      <FAQ
+        question="Can I share reports with my team?"
+        answer="Business plans include team collaboration with up to 5 seats. Each team member gets their own dashboard with shared access to saved reports. Pro plan users can export and share individual reports manually."
+      />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="container-page pb-20 md:pb-28">
+    <div class="rounded-lg border border-hairline bg-canvas-elevated px-8 py-16 text-center shadow-whisper">
+      <h2 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        Find your next product idea today
+      </h2>
+      <p class="mx-auto mt-4 max-w-lg text-lg text-body">
+        Join thousands of makers who start their day with AI-powered research. Free to start — no credit card required.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="/dashboard" class="rounded-sm bg-primary px-5 py-2.5 text-sm font-medium text-on-primary no-underline transition-opacity hover:opacity-90">
+          Get started for free
+        </a>
+        <a href="/contact" class="rounded-sm border border-hairline bg-canvas-elevated px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:bg-hairline-soft">
+          Talk to us
+        </a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>
