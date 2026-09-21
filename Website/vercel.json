@@ -15,6 +15,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+    { "source": "/dashboard/research/:id", "destination": "/dashboard/research/view" },
+    { "source": "/dashboard/ideas/:id", "destination": "/dashboard/ideas/view" }
   ]
 }
